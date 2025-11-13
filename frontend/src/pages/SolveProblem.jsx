@@ -1,10 +1,9 @@
 // src/pages/SolveProblem.jsx
-// Updated: blinking caret for console input, prevent duplicate output, ensure question number shows
+// Updated: Restored original content style with proper problem statement display
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import * as feather from 'feather-icons';
-// FIX: Update imported functions to include fetchProblemTestCases
 import { fetchProblemById, submitSolution, runTestCases, sendInputToProgram, fetchProblemTestCases } from '../api/problemApi.js'; 
 import Loader from '../components/common/Loader.jsx';
 import CodeEditorForSolvePage from '../components/problems/CodeEditorForSolvePage.jsx';
@@ -171,8 +170,6 @@ const SolveProblem = () => {
       if (remaining <= 0) {
         setTimeState('00:00');
         ProblemManager.stopTimer?.(problemId);
-        // FIX: The ProblemManager does not have a markReveal method, but the progress logic relies on timeRemaining <= 0
-        // We ensure the logic is consistent with isSolutionAvailable check.
         clearInterval(timerIntervalRef.current);
       }
     }, 1000);
@@ -203,7 +200,7 @@ const SolveProblem = () => {
         // Fetch problem details and ALL test cases concurrently
         const [fetched, rawTestCases] = await Promise.all([
           fetchProblemById(problemId),
-          fetchProblemTestCases(problemId) // NEW API CALL
+          fetchProblemTestCases(problemId)
         ]);
         
         // Use fetched examples to determine which raw test cases are visible
@@ -275,9 +272,9 @@ const SolveProblem = () => {
       canceled = true;
       const progress = ProblemManager.getProblemProgress(problemId) || {};
       if (!progress.solved && progress.timeRemaining > 0 && !progress.solved) {
-        ProblemManager.setGraceStart?.(problemId, Date.now()); // Assuming this helper exists
+        ProblemManager.setGraceStart?.(problemId, Date.now());
       }
-      ProblemManager.pauseTimer?.(problemId); // Assuming this helper exists
+      ProblemManager.pauseTimer?.(problemId);
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
@@ -287,7 +284,6 @@ const SolveProblem = () => {
 
   // register console ref with editor
   useEffect(() => {
-    // FIX: Pass the console DOM node reference to the editor component
     if (consoleRef.current && editorRef.current?.setTerminalRef) editorRef.current.setTerminalRef(consoleRef.current);
   }, [consoleRef.current, editorRef.current, problem]);
 
@@ -304,7 +300,6 @@ const SolveProblem = () => {
 
   // Add caret blink CSS to page (once)
   useEffect(() => {
-    // ... (Caret CSS injection remains the same) ...
     if (document.getElementById('solve-console-blink-style')) return;
     const style = document.createElement('style');
     style.id = 'solve-console-blink-style';
@@ -659,7 +654,6 @@ const SolveProblem = () => {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="flex items-center justify-between p-4">
           <button 
-             // FIX: For solved problem, scroll to problem card on the problems page
              onClick={() => navigate('/problems', { state: { scrollToId: `problem-${displayId}` } })} 
              className="flex items-center text-gray-600 dark:text-gray-300">
             <i data-feather="arrow-left" className="w-5 h-5 mr-2"></i>
@@ -682,7 +676,6 @@ const SolveProblem = () => {
       <div className="max-w-screen-2xl mx-auto px-0 lg:px-8 pt-0 lg:pt-8">
         <div className="hidden lg:flex justify-between items-center mb-6 text-left">
           <button 
-             // FIX: For solved problem, scroll to problem card on the problems page
              onClick={() => navigate('/problems', { state: { scrollToId: `problem-${displayId}` } })} 
              className={`inline-flex items-center px-4 py-2 border ${borderClass} rounded-lg text-sm font-medium ${isDark ? 'text-gray-200 bg-gray-700' : 'text-gray-700 bg-white'} ${linkHover} transition-colors duration-300`}>
             <i data-feather="arrow-left" className="w-4 h-4 mr-2"></i> Back to Problems
@@ -836,17 +829,14 @@ const SolveProblem = () => {
                 />
               </div>
 
-              {/* ACTION BUTTONS (Run, Submit, Run All) */}
+              {/* ACTION BUTTONS (Run, Submit) */}
               <div className={`px-4 py-3 border-t ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-100'} flex flex-row gap-2 lg:gap-3 justify-between transition-colors duration-500 action-buttons-mobile`}>
                 
-                {/* Run/Stop Button (1/3 width) */}
-                <button onClick={isRunning ? handleStopCode : handleRunCode} className={`inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md transition-colors justify-center w-1/3 ${isRunning ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-blue-600 text-white hover:bg-blue-700'}`}><i data-feather={isRunning ? 'stop-circle' : 'play'} className="w-4 h-4 mr-1"></i>{isRunning ? 'Stop' : 'Run'}</button>
+                {/* Run/Stop Button (left side) */}
+                <button onClick={isRunning ? handleStopCode : handleRunCode} className={`inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md transition-colors justify-center w-1/2 ${isRunning ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-blue-600 text-white hover:bg-blue-700'}`}><i data-feather={isRunning ? 'stop-circle' : 'play'} className="w-4 h-4 mr-1"></i>{isRunning ? 'Stop' : 'Run'}</button>
                 
-                {/* Submit Button (1/3 width) */}
-                <button onClick={handleSubmitCode} disabled={!ProblemManager.getProblemProgress(problemId)?.solved && !allTestsPassed} className="inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md bg-green-600 text-white hover:bg-green-700 transition-colors justify-center w-1/3 disabled:opacity-50"><i data-feather="send" className="w-4 h-4 mr-1"></i>Submit</button>
-                
-                {/* Run All Button (1/3 width) */}
-                <button onClick={runAllTestCases} disabled={isRunningTestCases} className="inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors justify-center w-1/3"><i data-feather="check-square" className="w-4 h-4 mr-1"></i>{isRunningTestCases ? 'Testing...' : 'Run All'}</button>
+                {/* Submit Button (right side) */}
+                <button onClick={handleSubmitCode} disabled={!ProblemManager.getProblemProgress(problemId)?.solved && !allTestsPassed} className="inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md bg-green-600 text-white hover:bg-green-700 transition-colors justify-center w-1/2 disabled:opacity-50"><i data-feather="send" className="w-4 h-4 mr-1"></i>Submit</button>
               </div>
             </div>
 
@@ -854,7 +844,6 @@ const SolveProblem = () => {
             <div className={`${cardBg} rounded-none lg:rounded-xl shadow-none lg:shadow-2xl overflow-hidden transition-colors duration-500`}>
               <div className={`flex border-b ${borderClass} output-tabs`}>
                 <button onClick={() => setOutputTab('console')} className={`flex-1 py-3 px-2 lg:px-4 font-medium text-xs lg:text-sm transition-colors ${outputTab === 'console' ? `${textPrimary} border-b-2 border-green-500` : `${textSecondary} ${linkHover}`} text-center`}><i data-feather="terminal" className="w-3 h-3 lg:w-4 lg:h-4 inline-block mr-1"></i> Console</button>
-                {/* FIX: Updated tab text to include test case count */}
                 <button onClick={() => setOutputTab('tests')} className={`flex-1 py-3 px-2 lg:px-4 font-medium text-xs lg:text-sm transition-colors ${outputTab === 'tests' ? `${textPrimary} border-b-2 border-green-500` : `${textSecondary} ${linkHover}`} text-center`}><i data-feather="clipboard" className="w-3 h-3 lg:w-4 lg:h-4 inline-block mr-1"></i> Tests ({testCases.length})</button>
                 <button onClick={() => setOutputTab('history')} className={`flex-1 py-3 px-2 lg:px-4 font-medium text-xs lg:text-sm transition-colors ${outputTab === 'history' ? `${textPrimary} border-b-2 border-green-500` : `${textSecondary} ${linkHover}`} text-center`}><i data-feather="clock" className="w-3 h-3 lg:w-4 lg:h-4 inline-block mr-1"></i> History</button>
               </div>
@@ -869,13 +858,11 @@ const SolveProblem = () => {
                     <div 
                       ref={consoleRef} 
                       tabIndex={0} 
-                      // FIX: Added onKeyDown to prevent browser shortcuts on console input
                       onKeyDown={handleConsoleKeyPress}
                       className={`terminal-output font-mono text-xs whitespace-pre-wrap h-24 lg:h-32 overflow-y-auto p-2 rounded-lg cursor-text text-left terminal-output-mobile ${isDark ? 'bg-black text-gray-300' : 'bg-gray-800 text-gray-100'} border ${editorWaitingForInput ? 'border-green-500 ring-2 ring-green-500/50' : borderClass} ${outputError ? 'text-red-400' : 'text-gray-300'}`}
                     >
-                      {/* Render output text with inline caret at the end */}
                       <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                        {output.replace(/█$/, '')} {/* Remove cursor if present for clean re-render */}
+                        {output.replace(/█$/, '')}
                         {editorWaitingForInput && (
                           <span className="console-caret" style={{ 
                             background: isDark ? 'white' : 'black',
@@ -892,7 +879,6 @@ const SolveProblem = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 lg:gap-3">
                       <h4 className={`text-base lg:text-lg font-bold ${textPrimary}`}>
                         Test Cases ({testCases.length}) 
-                        {/* FIX: Display accuracy from testResultSummary */}
                         {testResultSummary && (
                           <span className={`ml-2 text-sm font-semibold ${allTestsPassed ? 'text-green-500' : 'text-red-500'}`}>
                             (Passed {testResultSummary.passedCount}/{testResultSummary.totalTests})
@@ -909,20 +895,17 @@ const SolveProblem = () => {
                             <div className="flex items-center space-x-2 lg:space-x-3">
                               <span className={`font-semibold ${textPrimary} text-sm`}>Test {index + 1}</span>
                               <span className={`px-2 py-1 rounded text-xs font-medium ${tc.status === 'Accepted' ? (isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-600/30 text-green-700') : tc.status === 'Wrong Answer' || tc.status === 'Error' ? (isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-600/30 text-red-700') : (isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-600/30 text-gray-700')}`}>{tc.status || 'Not Run'}</span>
-                              {/* FIX: Show "Hidden" label if not visible */}
                               {!tc.isVisible && <span className={`px-2 py-1 rounded text-xs font-medium ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-300 text-gray-700'}`}>Hidden</span>}
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 text-xs lg:text-sm">
-                            {/* Input Display - Show "Hidden" if not visible */}
                             <div>
                               <div className={`font-medium ${textPrimary} mb-1`}>Input</div>
                               <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-white text-gray-800'} p-2 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap border ${borderClass}`}>
                                 {tc.isVisible ? (tc.input || 'N/A') : 'Input Hidden'}
                               </pre>
                             </div>
-                            {/* Expected Output Display - Show "Hidden" if not visible */}
                             <div>
                               <div className={`font-medium ${textPrimary} mb-1`}>Expected</div>
                               <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-white text-gray-800'} p-2 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap border ${borderClass}`}>
@@ -931,7 +914,6 @@ const SolveProblem = () => {
                             </div>
                           </div>
                           
-                          {/* User Output Display (Always shown if test was run, content depends on visibility) */}
                           {tc.userOutput && (
                             <div className="mt-2 lg:mt-3">
                               <div className={`font-medium ${textPrimary} mb-1`}>Your Output</div>
@@ -961,9 +943,7 @@ const SolveProblem = () => {
                 )}
               </div>
             </div>
-
           </div>
-
         </div>
       </div>
     </div>
