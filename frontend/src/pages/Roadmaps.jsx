@@ -15,7 +15,7 @@ const useTheme = () => {
 };
 // -----------------------------------------------------------------
 
-// Simplified roadmap data
+// Updated roadmap data with all parts for each roadmap
 const ROADMAP_DATA = {
   "roadmaps": [
     {
@@ -50,43 +50,232 @@ const ROADMAP_DATA = {
       "id": "fullstack",
       "title": "Full Stack Web Development",
       "description": "Build complete web applications: frontend UI, backend APIs, databases, and deployment.",
-      "prerequisites": ["HTML basics", "Basic JavaScript recommended"],
-      "estimated_hours": 220
+      "children": [
+        {
+          "id": "frontend-dev",
+          "title": "Frontend",
+          "short_description": "HTML, CSS, JavaScript, React/Vue.js, responsive design - Weeks 1–6",
+          "prerequisites": ["HTML basics", "Basic JavaScript recommended"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "backend-dev",
+          "title": "Backend", 
+          "short_description": "Node.js/Python, Express/Django, REST APIs, authentication - Weeks 6–12",
+          "prerequisites": ["Basic programming", "Understanding of web concepts"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "database-dev",
+          "title": "Database & Data Modeling",
+          "short_description": "SQL, MongoDB, database design, ORM/ODM - Weeks 8–14",
+          "prerequisites": ["Backend basics"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "deployment-dev",
+          "title": "Deployment & DevOps Essentials",
+          "short_description": "Docker, AWS, CI/CD, performance optimization - Weeks 12–16",
+          "prerequisites": ["Frontend & Backend knowledge"],
+          "estimated_hours": 80
+        },
+        {
+          "id": "fullstack-dev",
+          "title": "Full Stack Putting It Together",
+          "short_description": "Capstone project, testing, best practices - Weeks 16–20",
+          "prerequisites": ["All previous modules"],
+          "estimated_hours": 80
+        }
+      ]
     },
     {
       "id": "mobile",
       "title": "Mobile App Development",
       "description": "Design and build cross-platform mobile apps (Android & iOS) using modern frameworks.",
-      "prerequisites": ["JavaScript or Dart knowledge recommended"],
-      "estimated_hours": 160
+      "children": [
+        {
+          "id": "android-dev",
+          "title": "Native Android",
+          "short_description": "Kotlin, Android Studio, Material Design, Jetpack - Weeks 1–8",
+          "prerequisites": ["Basic programming concepts"],
+          "estimated_hours": 160
+        },
+        {
+          "id": "ios-dev",
+          "title": "Native iOS",
+          "short_description": "Swift, Xcode, UIKit, SwiftUI - Weeks 1–8",
+          "prerequisites": ["Basic programming concepts"],
+          "estimated_hours": 160
+        },
+        {
+          "id": "crossplatform-dev",
+          "title": "Cross-Platform",
+          "short_description": "React Native/Flutter, shared codebase, platform APIs - Weeks 6–12",
+          "prerequisites": ["JavaScript or Dart knowledge recommended"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "backend-mobile",
+          "title": "Backend & APIs for Mobile",
+          "short_description": "REST APIs, GraphQL, offline sync, push notifications - Weeks 10–14",
+          "prerequisites": ["Mobile development basics"],
+          "estimated_hours": 80
+        },
+        {
+          "id": "publishing-mobile",
+          "title": "Publishing & Maintenance",
+          "short_description": "App Store/Play Store, updates, analytics, monitoring - Weeks 14–18",
+          "prerequisites": ["Complete mobile app development"],
+          "estimated_hours": 80
+        }
+      ]
     },
     {
       "id": "cybersec",
       "title": "Cyber Security",
       "description": "Learn defensive and offensive security fundamentals for protecting systems and networks.",
-      "prerequisites": ["Basic networking knowledge recommended"],
-      "estimated_hours": 180
+      "children": [
+        {
+          "id": "foundations-sec",
+          "title": "Foundations & Networking",
+          "short_description": "Security concepts, TCP/IP, network protocols, tools - Weeks 1–6",
+          "prerequisites": ["Basic networking knowledge"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "defensive-sec",
+          "title": "Defensive Security",
+          "short_description": "Firewalls, IDS/IPS, access control, security policies - Weeks 6–12",
+          "prerequisites": ["Networking fundamentals"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "webapp-sec",
+          "title": "Web & App Security",
+          "short_description": "OWASP Top 10, penetration testing, secure coding - Weeks 8–14",
+          "prerequisites": ["System administration basics"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "offensive-sec",
+          "title": "Offensive Security & Red Teaming",
+          "short_description": "Ethical hacking, vulnerability assessment, exploitation - Weeks 12–20",
+          "prerequisites": ["Security fundamentals"],
+          "estimated_hours": 160
+        },
+        {
+          "id": "forensics-sec",
+          "title": "Forensics & Incident Response",
+          "short_description": "Digital forensics, malware analysis, incident handling - Weeks 16–22",
+          "prerequisites": ["All security modules"],
+          "estimated_hours": 120
+        }
+      ]
     },
     {
       "id": "devops",
       "title": "DevOps",
       "description": "Automation, CI/CD, containerization and cloud operations to deliver software faster and more reliably.",
-      "prerequisites": ["Comfort with command line", "Basic programming knowledge"],
-      "estimated_hours": 200
+      "children": [
+        {
+          "id": "fundamentals-devops",
+          "title": "DevOps Fundamentals & CI/CD",
+          "short_description": "Version control, Jenkins/GitLab CI, automation basics - Weeks 1–6",
+          "prerequisites": ["Comfort with command line"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "container-devops",
+          "title": "Containerization",
+          "short_description": "Docker, container orchestration, best practices - Weeks 4–10",
+          "prerequisites": ["Basic system administration"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "orchestration-devops",
+          "title": "Orchestration & Infrastructure",
+          "short_description": "Kubernetes, Terraform, cloud platforms, IaC - Weeks 8–16",
+          "prerequisites": ["Networking basics"],
+          "estimated_hours": 160
+        },
+        {
+          "id": "observability-devops",
+          "title": "Observability & Reliability",
+          "short_description": "Monitoring, logging, alerting, SRE practices - Weeks 12–20",
+          "prerequisites": ["Infrastructure knowledge"],
+          "estimated_hours": 120
+        }
+      ]
     },
     {
       "id": "ai-ml",
-      "title": "AI / Machine Learning",
+      "title": "AI / Machine Learning", 
       "description": "From math foundations to building ML models and deploying them.",
-      "prerequisites": ["Python basics", "High-school level math recommended"],
-      "estimated_hours": 240
+      "children": [
+        {
+          "id": "math-ai",
+          "title": "Math & Fundamentals",
+          "short_description": "Linear algebra, calculus, statistics, Python for ML - Weeks 1–6",
+          "prerequisites": ["Python basics", "High-school level math"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "coreml-ai",
+          "title": "Core ML Algorithms",
+          "short_description": "Supervised/unsupervised learning, model evaluation - Weeks 6–12",
+          "prerequisites": ["Machine learning fundamentals"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "deeplearning-ai",
+          "title": "Deep Learning",
+          "short_description": "Neural networks, TensorFlow/PyTorch, CNN, RNN - Weeks 10–18",
+          "prerequisites": ["ML/DL fundamentals"],
+          "estimated_hours": 160
+        },
+        {
+          "id": "production-ai",
+          "title": "Production & MLOps",
+          "short_description": "Model deployment, monitoring, pipelines, scaling - Weeks 16–24",
+          "prerequisites": ["Deep learning knowledge"],
+          "estimated_hours": 160
+        }
+      ]
     },
     {
       "id": "data-science",
       "title": "Data Science",
       "description": "Turn raw data into insights using analysis, visualization, and predictive modeling.",
-      "prerequisites": ["Python basics", "Basic statistics"],
-      "estimated_hours": 200
+      "children": [
+        {
+          "id": "python-ds",
+          "title": "Python & Statistics",
+          "short_description": "Pandas, NumPy, statistical analysis, probability - Weeks 1–6",
+          "prerequisites": ["Python basics", "Basic statistics"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "wrangling-ds",
+          "title": "Data Wrangling & Visualization",
+          "short_description": "Data cleaning, Matplotlib/Seaborn, EDA techniques - Weeks 4–10",
+          "prerequisites": ["Data analytics fundamentals"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "modeling-ds",
+          "title": "Modeling & Evaluation",
+          "short_description": "Machine learning models, feature engineering, validation - Weeks 8–14",
+          "prerequisites": ["Data modeling experience"],
+          "estimated_hours": 120
+        },
+        {
+          "id": "bigdata-ds",
+          "title": "Big Data & Pipelines",
+          "short_description": "Spark, data pipelines, cloud platforms, deployment - Weeks 12–20",
+          "prerequisites": ["Data science fundamentals"],
+          "estimated_hours": 160
+        }
+      ]
     }
   ]
 };
@@ -187,38 +376,114 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
   const handleViewRoadmap = (e, roadmap, child = null) => {
     e.stopPropagation();
     
-      if (child) {
-    switch(child.id) {
-      case 'c-lang':
-        navigate('/roadmaps/c-programming');
-        break;
-      case 'python-lang':
-        navigate('/roadmaps/python-programming');
-        break;
-      case 'java-lang':
-        navigate('/roadmaps/java-programming'); 
-        break;
-      default:
-        // For other roadmaps, show a message or navigate to general roadmap page
-        const roadmapName = child.title;
-        alert(`Viewing roadmap for: ${roadmapName}`);
+    if (child) {
+      switch(child.id) {
+        case 'c-lang':
+          navigate('/roadmaps/c-programming');
+          break;
+        case 'python-lang':
+          navigate('/roadmaps/python-programming');
+          break;
+        case 'java-lang':
+          navigate('/roadmaps/java-programming'); 
+          break;
+        case 'frontend-dev':
+          navigate('/roadmaps/frontend-development');
+          break;
+        case 'backend-dev':
+          navigate('/roadmaps/backend-development');
+          break;
+        case 'database-dev':
+          navigate('/roadmaps/database-development');
+          break;
+        case 'deployment-dev':
+          navigate('/roadmaps/deployment-development');
+          break;
+        case 'fullstack-dev':
+          navigate('/roadmaps/fullstack-development');
+          break;
+        case 'android-dev':
+          navigate('/roadmaps/android-development');
+          break;
+        case 'ios-dev':
+          navigate('/roadmaps/ios-development');
+          break;
+        case 'crossplatform-dev':
+          navigate('/roadmaps/cross-development');
+          break;
+        case 'backend-mobile':
+          navigate('/roadmaps/backend-apis-mobile-development');
+          break;
+        case 'publishing-mobile':
+          navigate('/roadmaps/publishing-mobile-development');
+          break;
+        case 'foundations-sec':
+          navigate('/roadmaps/cyber-security-foundations');
+          break;
+        case 'defensive-sec':
+          navigate('/roadmaps/cyber-security-defensive');
+          break;
+        case 'webapp-sec':
+          navigate('/roadmaps/cyber-security-webapp');
+          break;
+        case 'offensive-sec':
+          navigate('/roadmaps/cyber-security-offensive');
+          break;
+        case 'forensics-sec':
+          navigate('/roadmaps/cyber-security-forensics');
+          break;
+        case 'fundamentals-devops':
+          navigate('/roadmaps/devops-fundamentals');
+          break;
+        case 'container-devops':
+          navigate('/roadmaps/devops-container');
+          break;
+        case 'orchestration-devops':
+          navigate('/roadmaps/devops-orchestration');
+          break;
+        case 'observability-devops':
+          navigate('/roadmaps/devops-observability');
+          break;
+        case 'math-ai':
+          navigate('/roadmaps/ai-ml-math');
+          break;
+        case 'coreml-ai':
+          navigate('/roadmaps/ai-ml-core');
+          break;
+        case 'deeplearning-ai':
+          navigate('/roadmaps/ai-ml-deeplearning');
+          break;
+        case 'production-ai':
+          navigate('/roadmaps/ai-ml-production');
+          break;
+        case 'python-ds':
+          navigate('/roadmaps/data-science-python');
+          break;
+        case 'wrangling-ds':
+          navigate('/roadmaps/data-science-wrangling');
+          break;
+        case 'modeling-ds':
+          navigate('/roadmaps/data-science-modeling');
+          break;
+        case 'bigdata-ds':
+          navigate('/roadmaps/data-science-bigdata');
+          break;
+        default:
+          const roadmapName = child.title;
+          alert(`Viewing roadmap for: ${roadmapName}`);
+      }
+    } else {
+      const roadmapName = roadmap.title;
+      alert(`Viewing roadmap for: ${roadmapName}`);
     }
-  } else {
-    // For parent roadmap categories without children
-    const roadmapName = roadmap.title;
-    alert(`Viewing roadmap for: ${roadmapName}`);
-  }
-};
+  };
 
   const handleCardClick = (e) => {
-    // Only toggle if the click is not on a button or link
     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
       return;
     }
     onToggleExpand(roadmap.id);
   };
-
-  const estimatedWeeks = Math.ceil(roadmap.estimated_hours / 20);
 
   return (
     <div className={`my-4 rounded-xl overflow-hidden border transition-all duration-300 ${
@@ -247,15 +512,8 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className={`flex items-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   <i data-feather="clock" className="w-4 h-4 mr-1 text-primary-400"></i>
-                  <span>{estimatedWeeks} weeks • {roadmap.estimated_hours} hours</span>
+                  <span>NaN weeks + hours</span>
                 </div>
-                
-                {roadmap.prerequisites && (
-                  <div className={`flex items-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    <i data-feather="book-open" className="w-4 h-4 mr-1 text-primary-400"></i>
-                    <span>{roadmap.prerequisites.length} prerequisites</span>
-                  </div>
-                )}
                 
                 {roadmap.children && (
                   <div className={`flex items-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -281,34 +539,11 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
       {/* Expanded Content */}
       {isExpanded && (
         <div className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-          {/* Prerequisites */}
-          {roadmap.prerequisites && (
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Prerequisites
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {roadmap.prerequisites.map((prereq, index) => (
-                  <span 
-                    key={index}
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      isDark 
-                        ? 'bg-gray-800 text-gray-300 border border-gray-700' 
-                        : 'bg-gray-100 text-gray-700 border border-gray-300'
-                    }`}
-                  >
-                    {prereq}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Children Roadmaps (Specializations) */}
-          {roadmap.children ? (
+          {roadmap.children && (
             <div className="p-6">
               <h4 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Choose Your Specialization
+                Change Your Specialization
               </h4>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {roadmap.children.map((child) => (
@@ -340,16 +575,6 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
                   </div>
                 ))}
               </div>
-            </div>
-          ) : (
-            /* Regular roadmap CTA */
-            <div className="p-6 text-center">
-              <button 
-                onClick={(e) => handleViewRoadmap(e, roadmap)}
-                className="px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200 text-lg"
-              >
-                View Full Roadmap
-              </button>
             </div>
           )}
         </div>
