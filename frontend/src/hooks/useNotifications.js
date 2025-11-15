@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notificationService } from '../services/notificationService.js';
+import socketService from '../services/socketService.js';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -102,18 +103,82 @@ export const useNotifications = () => {
     await Promise.all([fetchNotifications(), fetchUnreadCount()]);
   }, [fetchNotifications, fetchUnreadCount]);
 
+  // Handle real-time notifications
   useEffect(() => {
-    refreshNotifications();
+    const handleNewNotification = (newNotification) => {
+      console.log('📢 New real-time notification:', newNotification);
+      
+      // Add new notification to the top of the list
+      setNotifications(prev => [newNotification, ...prev]);
+      
+      // Increment unread count
+      setUnreadCount(prev => prev + 1);
+      
+      // Show browser notification if permitted
+      if (Notification.permission === 'granted' && document.hidden) {
+        new Notification(newNotification.title, {
+          body: newNotification.message,
+          icon: '/favicon.ico',
+          tag: 'cs-studio'
+        });
+      }
+    };
+
+    socketService.onNotification(handleNewNotification);
+
+    return () => {
+      socketService.offNotification(handleNewNotification);
+    };
+  }, []);
+
+  // Initialize socket connection and fetch notifications
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('userData');
+    
+    if (token && userData) {
+      try {
+        socketService.connect(token);
+        refreshNotifications();
+      } catch (error) {
+        console.error('Socket connection failed:', error);
+      }
+    }
+
+    return () => {
+      // Don't disconnect here - let App.jsx handle it
+    };
   }, [refreshNotifications]);
 
+  // Request browser notification permission
   useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('Notification permission:', permission);
+      });
+    }
+  }, []);
+
+  // Poll for updates when tab is visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchUnreadCount();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchUnreadCount();
       }
-    }, 30000);
+    }, 60000); // Check every minute
 
-    return () => clearInterval(interval);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
+    };
   }, [fetchUnreadCount]);
 
   return {

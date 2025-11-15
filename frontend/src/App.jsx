@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext.jsx';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext.jsx'; // Correct import
-import { useAuth } from './hooks/useAuth.jsx';
+import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 import Navbar from './components/common/Navbar.jsx';
 import Footer from './components/common/Footer.jsx';
@@ -79,7 +78,11 @@ function App() {
 // Separate component to use hooks
 function AppContent() {
   const { isDark } = useTheme();
+  const { isLoggedIn } = useAuth();
   
+  // Socket connection is now handled in useNotifications hook
+  // No need for duplicate connection management here
+
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
       <Navbar />
@@ -127,41 +130,10 @@ function AppContent() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/community" element={<Community />} />
           <Route path="/settings" element={<Settings />} />
-          <Route 
-            path="/solve" 
-            element={
-              <ProtectedRoute>
-                <SolveProblem />
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route
-            path="/code"
-            element={
-              <ProtectedRoute>
-                <Code />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/my-courses"
-            element={
-              <ProtectedRoute>
-                <MyCourses />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/my-progress"
-            element={
-              <ProtectedRoute>
-                <MyProgress />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/solve" element={<ProtectedRoute><SolveProblem /></ProtectedRoute>} />
+          <Route path="/code" element={<ProtectedRoute><Code /></ProtectedRoute>} />
+          <Route path="/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
+          <Route path="/my-progress" element={<ProtectedRoute><MyProgress /></ProtectedRoute>} />
 
           {/* Catch-all route - 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />

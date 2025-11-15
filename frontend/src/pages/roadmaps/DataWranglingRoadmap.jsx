@@ -563,6 +563,67 @@ const OutcomeSection = ({ isDark }) => {
         </p>
       </div>
 
+      {/* Tools Section */}
+      <div>
+        <h3 className={`text-xl font-semibold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          ⚙️ Tools You'll Master
+        </h3>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {DATA_WRANGLING_ROADMAP.tools.map((tool, index) => (
+            <div 
+              key={index}
+              className={`p-3 rounded-lg border text-center ${
+                isDark ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-white'
+              }`}
+            >
+              <span className={`font-medium text-sm ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{tool}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Mini Projects Section */}
+      <div>
+        <h3 className={`text-xl font-semibold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          🛠️ Mini Projects
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {DATA_WRANGLING_ROADMAP.mini_projects.map((project, index) => (
+            <div 
+              key={index}
+              className={`p-4 rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
+                isDark ? 'border-gray-600 bg-gray-800 hover:bg-gray-750' : 'border-gray-200 bg-white hover:bg-gray-50'
+              }`}
+            >
+              <h4 className={`font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{project.name}</h4>
+              <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{project.description}</p>
+              <div className="flex flex-wrap gap-1">
+                {project.technologies.map((tech, techIndex) => (
+                  <span 
+                    key={techIndex}
+                    className={`px-2 py-1 rounded text-xs ${
+                      isDark 
+                        ? 'bg-primary-900/50 text-primary-300' 
+                        : 'bg-primary-100 text-primary-700'
+                    }`}
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+              <div className={`mt-3 text-xs font-medium ${
+                project.difficulty === 'Expert' ? 'text-red-500' :
+                project.difficulty === 'Advanced' ? 'text-orange-500' :
+                project.difficulty === 'Intermediate' ? 'text-yellow-500' :
+                'text-green-500'
+              }`}>
+                Difficulty: {project.difficulty}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Career Paths */}
       <div>
         <h3 className={`text-xl font-semibold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>

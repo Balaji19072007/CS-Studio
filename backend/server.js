@@ -20,6 +20,7 @@ const server = http.createServer(app);
 // --- Model Imports ---
 const User = require('./models/User');
 const Problem = require('./models/Problem');
+const Notification = require('./models/Notification');
 
 // --- Controller & Route Imports ---
 const authRoutes = require('./routes/authRoutes');
@@ -136,7 +137,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ===================================================================
-// --- Socket.IO: MULTI-LANGUAGE EXECUTION WITH INPUT SUPPORT ---
+// --- Socket.IO: REAL-TIME NOTIFICATIONS & CODE EXECUTION ---
 // ===================================================================
 
 const io = new Server(server, {
@@ -145,30 +146,32 @@ const io = new Server(server, {
 
 // Store execution sessions
 const executionSessions = new Map();
+// Store user socket mappings for notifications
+const userSockets = new Map();
 
-// Helper function to clean up temp files
-function cleanupTempFile(tempFile) {
+// Function to emit notifications to specific users
+function emitNotification(userId, notification) {
+  io.to(`user_${userId}`).emit('new-notification', notification);
+  console.log(`📢 Real-time notification sent to user ${userId}`);
+}
+
+// Update NotificationService to use real-time emissions
+const NotificationService = require('./util/notificationService');
+// Override the sendNotification method to include real-time emission
+const originalSendNotification = NotificationService.sendNotification;
+NotificationService.sendNotification = async function(userId, notificationData) {
   try {
-    if (tempFile && fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
-    }
-  } catch (e) {
-    console.error('Error cleaning temp file:', e.message);
+    const notification = await originalSendNotification.call(this, userId, notificationData);
+    
+    // Emit real-time notification
+    emitNotification(userId, notification);
+    
+    return notification;
+  } catch (error) {
+    console.error('Error sending real-time notification:', error);
+    throw error;
   }
-}
-
-// Helper function to clean up multiple files
-function cleanupFiles(files) {
-  files.forEach(file => {
-    if (file && fs.existsSync(file)) {
-      try {
-        fs.unlinkSync(file);
-      } catch (e) {
-        console.error('Error cleaning file:', file, e.message);
-      }
-    }
-  });
-}
+};
 
 // Test GCC and G++ availability on server start
 function testCompilers() {
@@ -210,6 +213,25 @@ testCompilers();
 
 io.on('connection', (socket) => {
   console.log(`🔌 Socket connected: ${socket.id}`);
+
+  // Join user to their personal room for notifications
+  socket.on('join-notifications', (userId) => {
+    socket.join(`user_${userId}`);
+    userSockets.set(userId, socket.id);
+    console.log(`👤 User ${userId} joined notification room`);
+  });
+
+  // Handle disconnect
+  socket.on('disconnect', () => {
+    // Remove from userSockets mapping
+    for (const [userId, socketId] of userSockets.entries()) {
+      if (socketId === socket.id) {
+        userSockets.delete(userId);
+        break;
+      }
+    }
+    console.log(`🔌 Socket disconnected: ${socket.id}`);
+  });
 
   // Execute code with interactive input
   socket.on('execute-code', async (data) => {
@@ -308,24 +330,35 @@ io.on('connection', (socket) => {
       output: '\n[Execution stopped by user]'
     });
   });
-
-  // Cleanup on disconnect
-  socket.on('disconnect', () => {
-    console.log(`🔌 Socket disconnected: ${socket.id}`);
-    const session = executionSessions.get(socket.id);
-    if (session) {
-      if (session.process) {
-        session.process.kill();
-      }
-      cleanupFiles(session.tempFiles || []);
-      executionSessions.delete(socket.id);
-    }
-  });
 });
 
 // ===================================================================
 // --- LANGUAGE EXECUTION FUNCTIONS ---
 // ===================================================================
+
+// Helper function to clean up temp files
+function cleanupTempFile(tempFile) {
+  try {
+    if (tempFile && fs.existsSync(tempFile)) {
+      fs.unlinkSync(tempFile);
+    }
+  } catch (e) {
+    console.error('Error cleaning temp file:', e.message);
+  }
+}
+
+// Helper function to clean up multiple files
+function cleanupFiles(files) {
+  files.forEach(file => {
+    if (file && fs.existsSync(file)) {
+      try {
+        fs.unlinkSync(file);
+      } catch (e) {
+        console.error('Error cleaning file:', file, e.message);
+      }
+    }
+  });
+}
 
 // Python Execution
 function executePython(code, socket, sessionId, tempDir) {
@@ -886,8 +919,9 @@ server.listen(PORT, () => {
   console.log('🔥 Real-time C++ compiler running locally');
   console.log('☕ Real-time Java compiler running locally');
   console.log('📜 Real-time JavaScript compiler running locally');
+  console.log('🔔 Real-time notifications system active');
   console.log('💡 Make sure compilers are installed on your system!');
   console.log('✅ Stats routes registered: /api/stats/user-stats, /api/stats/rating-status, /api/stats/rating-eligibility');
 });
 
-module.exports = { app, server, io };
+module.exports = { app, server, io, emitNotification };
