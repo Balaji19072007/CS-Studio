@@ -22,6 +22,7 @@ import Code from './pages/Code.jsx';
 import SolveProblem from './pages/SolveProblem.jsx';
 import MyCourses from './pages/MyCourses.jsx';
 import MyProgress from './pages/MyProgress.jsx';
+import CProgramming from './pages/learningPage/CProgramming.jsx';
 import CProgrammingRoadmap from './pages/roadmaps/CProgrammingRoadmap.jsx';
 import PythonProgrammingRoadmap from './pages/roadmaps/PythonProgrammingRoadmap.jsx';
 import JavaProgrammingRoadmap from './pages/roadmaps/JavaProgrammingRoadmap.jsx';
@@ -52,7 +53,6 @@ import DataSciencePythonStatsRoadmap from "./pages/roadmaps/DataSciencePythonSta
 import DataWranglingRoadmap from "./pages/roadmaps/DataWranglingRoadmap.jsx";
 import DataScienceModelingRoadmap from "./pages/roadmaps/DataScienceModelingRoadmap.jsx";
 import DataScienceRoadmap from "./pages/roadmaps/DataScienceRoadmap.jsx";
-import ProjectPage from './pages/projects/ProjectPage.jsx';
 import RatingPopup from './components/common/RatingPopup.jsx';
 import './App.css';
 
@@ -95,6 +95,7 @@ function AppContent() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/learn/c-programming" element={<CProgramming />} />
           <Route path="/roadmaps" element={<Roadmaps />} />
           <Route path="/roadmaps/c-programming" element={<CProgrammingRoadmap />} />
           <Route path="/roadmaps/python-programming" element={<PythonProgrammingRoadmap />} />
@@ -126,7 +127,6 @@ function AppContent() {
           <Route path="/roadmaps/data-science-wrangling" element={<DataWranglingRoadmap />} />
           <Route path="/roadmaps/data-science-modeling" element={<DataScienceModelingRoadmap />} />
           <Route path="/roadmaps/data-science-bigdata" element={<DataScienceRoadmap />} />
-          <Route path="/project/:projectId" element={<ProjectPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/community" element={<Community />} />
           <Route path="/settings" element={<Settings />} />

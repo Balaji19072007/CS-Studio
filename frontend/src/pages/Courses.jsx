@@ -21,7 +21,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 12500,
         gradient: 'from-primary-500 to-primary-600',
-        iconColor: 'text-primary-400'
+        iconColor: 'text-primary-400',
+        route: '/learn/c-programming'
     },
     { 
         id: 2, 
@@ -37,7 +38,8 @@ const COURSES_DATA = [
         rating: 4.9, 
         students: 18750,
         gradient: 'from-primary-500 to-primary-600',
-        iconColor: 'text-primary-400'
+        iconColor: 'text-primary-400',
+        route: '/learn/python'
     },
     { 
         id: 3, 
@@ -53,7 +55,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 9800,
         gradient: 'from-primary-500 to-primary-600',
-        iconColor: 'text-primary-400'
+        iconColor: 'text-primary-400',
+        route: '/learn/java'
     },
 
     // Web Development
@@ -71,7 +74,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 15200,
         gradient: 'from-blue-600 to-blue-500',
-        iconColor: 'text-blue-400'
+        iconColor: 'text-blue-400',
+        route: '/learn/frontend'
     },
     { 
         id: 5, 
@@ -87,7 +91,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 11200,
         gradient: 'from-blue-600 to-blue-500',
-        iconColor: 'text-blue-400'
+        iconColor: 'text-blue-400',
+        route: '/learn/nodejs'
     },
     { 
         id: 6, 
@@ -103,7 +108,8 @@ const COURSES_DATA = [
         rating: 4.9, 
         students: 8900,
         gradient: 'from-blue-600 to-blue-500',
-        iconColor: 'text-blue-400'
+        iconColor: 'text-blue-400',
+        route: '/learn/mern'
     },
 
     // Data Science
@@ -121,7 +127,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 8900,
         gradient: 'from-purple-600 to-purple-500',
-        iconColor: 'text-purple-400'
+        iconColor: 'text-purple-400',
+        route: '/learn/data-science'
     },
     { 
         id: 8, 
@@ -137,7 +144,8 @@ const COURSES_DATA = [
         rating: 4.6, 
         students: 7600,
         gradient: 'from-purple-600 to-purple-500',
-        iconColor: 'text-purple-400'
+        iconColor: 'text-purple-400',
+        route: '/learn/data-visualization'
     },
     { 
         id: 9, 
@@ -153,7 +161,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 5400,
         gradient: 'from-purple-600 to-purple-500',
-        iconColor: 'text-purple-400'
+        iconColor: 'text-purple-400',
+        route: '/learn/statistics'
     },
 
     // Algorithms
@@ -171,7 +180,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 6200,
         gradient: 'from-green-600 to-green-500',
-        iconColor: 'text-green-400'
+        iconColor: 'text-green-400',
+        route: '/learn/dsa-c'
     },
     { 
         id: 11, 
@@ -187,7 +197,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 5800,
         gradient: 'from-green-600 to-green-500',
-        iconColor: 'text-green-400'
+        iconColor: 'text-green-400',
+        route: '/learn/dsa-java'
     },
     { 
         id: 12, 
@@ -203,7 +214,8 @@ const COURSES_DATA = [
         rating: 4.6, 
         students: 7100,
         gradient: 'from-green-600 to-green-500',
-        iconColor: 'text-green-400'
+        iconColor: 'text-green-400',
+        route: '/learn/dsa-python'
     },
 
     // Mobile Development
@@ -221,7 +233,8 @@ const COURSES_DATA = [
         rating: 4.5, 
         students: 4300,
         gradient: 'from-yellow-600 to-yellow-500',
-        iconColor: 'text-yellow-400'
+        iconColor: 'text-yellow-400',
+        route: '/learn/android'
     },
     { 
         id: 14, 
@@ -237,7 +250,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 3800,
         gradient: 'from-yellow-600 to-yellow-500',
-        iconColor: 'text-yellow-400'
+        iconColor: 'text-yellow-400',
+        route: '/learn/ios'
     },
     { 
         id: 15, 
@@ -253,7 +267,8 @@ const COURSES_DATA = [
         rating: 4.4, 
         students: 5200,
         gradient: 'from-yellow-600 to-yellow-500',
-        iconColor: 'text-yellow-400'
+        iconColor: 'text-yellow-400',
+        route: '/learn/react-native'
     },
 
     // AI/ML
@@ -271,7 +286,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 6700,
         gradient: 'from-red-600 to-red-500',
-        iconColor: 'text-red-400'
+        iconColor: 'text-red-400',
+        route: '/learn/machine-learning'
     },
     { 
         id: 17, 
@@ -287,7 +303,8 @@ const COURSES_DATA = [
         rating: 4.9, 
         students: 4900,
         gradient: 'from-red-600 to-red-500',
-        iconColor: 'text-red-400'
+        iconColor: 'text-red-400',
+        route: '/learn/neural-networks'
     },
     { 
         id: 18, 
@@ -303,7 +320,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 4100,
         gradient: 'from-red-600 to-red-500',
-        iconColor: 'text-red-400'
+        iconColor: 'text-red-400',
+        route: '/learn/nlp'
     },
 
     // Security
@@ -321,7 +339,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 3200,
         gradient: 'from-indigo-600 to-indigo-500',
-        iconColor: 'text-indigo-400'
+        iconColor: 'text-indigo-400',
+        route: '/learn/penetration-testing'
     },
     { 
         id: 20, 
@@ -337,7 +356,8 @@ const COURSES_DATA = [
         rating: 4.6, 
         students: 2800,
         gradient: 'from-indigo-600 to-indigo-500',
-        iconColor: 'text-indigo-400'
+        iconColor: 'text-indigo-400',
+        route: '/learn/network-security'
     },
     { 
         id: 21, 
@@ -353,7 +373,8 @@ const COURSES_DATA = [
         rating: 4.9, 
         students: 2100,
         gradient: 'from-indigo-600 to-indigo-500',
-        iconColor: 'text-indigo-400'
+        iconColor: 'text-indigo-400',
+        route: '/learn/cryptography'
     },
 
     // DevOps
@@ -371,7 +392,8 @@ const COURSES_DATA = [
         rating: 4.5, 
         students: 5600,
         gradient: 'from-pink-600 to-pink-500',
-        iconColor: 'text-pink-400'
+        iconColor: 'text-pink-400',
+        route: '/learn/devops'
     },
     { 
         id: 23, 
@@ -387,7 +409,8 @@ const COURSES_DATA = [
         rating: 4.7, 
         students: 4800,
         gradient: 'from-pink-600 to-pink-500',
-        iconColor: 'text-pink-400'
+        iconColor: 'text-pink-400',
+        route: '/learn/docker-kubernetes'
     },
     { 
         id: 24, 
@@ -403,7 +426,8 @@ const COURSES_DATA = [
         rating: 4.8, 
         students: 5200,
         gradient: 'from-pink-600 to-pink-500',
-        iconColor: 'text-pink-400'
+        iconColor: 'text-pink-400',
+        route: '/learn/aws'
     }
 ];
 
@@ -452,7 +476,6 @@ const CourseCard = ({ course }) => {
     // Note: The card-hover h3 selector in index.css will handle the text color based on theme
     const iconColor = categoryColors[course.category]?.iconColor || 'text-white';
 
-
     return (
         // Changed styling to use card-hover for dark theme compatibility
         <div className="card-hover rounded-2xl shadow-md overflow-hidden transition-all duration-300">
@@ -492,24 +515,29 @@ const CourseCard = ({ course }) => {
                     {course.description}
                 </p>
                 <div className="mt-4 flex items-center justify-between border-t border-gray-700 dark:border-gray-200/20 pt-4">
-                    <div className="flex items-center">
-                        <div className={`h-8 w-8 rounded-full bg-gradient-to-r ${course.gradient} flex items-center justify-center text-white text-xs font-bold shadow-md`}>
-                            {course.instructorInitials}
-                        </div>
-                        <div className="ml-3">
-                            <p className="text-sm font-medium text-white">{course.instructorName}</p>
-                            <p className="text-xs text-gray-400">Duration: {course.duration}</p>
-                        </div>
+                    {/* REMOVED: Instructor profile and name section */}
+                    <div className="text-sm text-gray-400">
+                        Duration: {course.duration}
                     </div>
                     
-                    {/* FIX: Use dark-btn-secondary for consistent secondary button style */}
-                    <button 
-                        onClick={handleStartClick}
-                        className={`dark-btn-secondary flex items-center px-3 py-1.5 text-xs font-medium rounded-lg transition duration-300`}
-                    >
-                        {isLoggedIn ? 'Start' : 'Sign Up'}
-                        <i data-feather="chevron-right" className="w-4 h-4 ml-1"></i>
-                    </button>
+                    {/* Updated button with proper routing */}
+                    {isLoggedIn ? (
+                        <Link 
+                            to={course.route || '/learn'}
+                            className="dark-btn-secondary flex items-center px-3 py-1.5 text-xs font-medium rounded-lg transition duration-300"
+                        >
+                            Start
+                            <i data-feather="chevron-right" className="w-4 h-4 ml-1"></i>
+                        </Link>
+                    ) : (
+                        <button 
+                            onClick={handleStartClick}
+                            className="dark-btn-secondary flex items-center px-3 py-1.5 text-xs font-medium rounded-lg transition duration-300"
+                        >
+                            Sign Up
+                            <i data-feather="chevron-right" className="w-4 h-4 ml-1"></i>
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -666,7 +694,6 @@ const Courses = () => {
                     </div>
                 </div>
             </div>
-
 
             {/* Course Sections (Filtered based on selection) */}
             <div className="py-16 dark-gradient-secondary">

@@ -510,60 +510,38 @@ const Navbar = () => {
                                         {renderAvatar()}
                                     </button>
                                     
-                                    <div id="profile-dropdown-menu" className={`absolute right-0 top-16 mt-2 w-56 ${isDropdownOpen ? 'block' : 'hidden'} rounded-lg shadow-xl divide-y ${isDark ? 'divide-gray-700 bg-gray-800' : 'divide-gray-200 bg-white'} z-50`}>
+                                    <div id="profile-dropdown-menu" className={`absolute right-0 top-16 mt-2 w-56 ${isDropdownOpen ? 'block' : 'hidden'} rounded-2xl shadow-xl divide-y ${isDark ? 'divide-gray-700 bg-gray-800' : 'divide-gray-200 bg-white'} z-50 border ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                                         {user && (
                                             <>
-                                                <div className={`px-4 py-3 ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                                                <div className={`px-4 py-3 rounded-t-2xl ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                                                     <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.name}</p>
                                                     <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</p>
                                                 </div>
                                                 <div className="py-1">
                                                     <Link 
                                                         to="/my-courses" 
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${
-                                                            isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                                        }`}
+                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <i data-feather="book-open" className="w-4 h-4 mr-2"></i> My Courses
                                                     </Link>
                                                     <Link 
                                                         to="/my-progress" 
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${
-                                                            isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                                        }`}
+                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <i data-feather="bar-chart-2" className="w-4 h-4 mr-2"></i> My Progress
                                                     </Link>
                                                     <Link 
-                                                        to="/notifications"
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${
-                                                            isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                                        }`}
-                                                        onClick={() => setIsDropdownOpen(false)}
-                                                    >
-                                                        <i data-feather="bell" className="w-4 h-4 mr-2"></i> Notifications
-                                                        {unreadCount > 0 && (
-                                                            <span className="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                                                                {unreadCount}
-                                                            </span>
-                                                        )}
-                                                    </Link>
-                                                    <Link 
                                                         to="/settings" 
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${
-                                                            isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                                        }`}
+                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <i data-feather="settings" className="w-4 h-4 mr-2"></i> Settings
                                                     </Link>
                                                     <button 
                                                         id="sign-out-button" 
-                                                        className={`w-full text-left flex items-center px-4 py-2 text-sm transition-colors duration-200 ${
-                                                            isDark ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-red-600 hover:bg-red-50 hover:text-red-700'
-                                                        }`}
+                                                        className={`w-full text-left flex items-center px-4 py-2 text-sm transition-colors duration-200 rounded-b-2xl ${isDark ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-red-600 hover:bg-red-50 hover:text-red-700'}`}
                                                         onClick={handleLogout}
                                                     >
                                                         <i data-feather="log-out" className="w-4 h-4 mr-2"></i> Sign Out

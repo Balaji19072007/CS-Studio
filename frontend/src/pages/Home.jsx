@@ -48,31 +48,52 @@ const InteractiveDemo = () => {
                 <div className="grid grid-cols-2 gap-4 h-[300px]">
                     
                     <div className="bg-gray-900 rounded-lg p-3 font-mono text-xs overflow-auto border border-gray-700">
-                        <p className="text-white font-semibold mb-2">Code (Python)</p>
-                        <pre className="text-gray-300">
-                            <span className="text-primary-400">def</span> mergeSort(<span className="text-white">arr</span>):
-                            <span className="text-primary-400">    if</span> len(<span className="text-white">arr</span>) &gt; <span className="text-yellow-400">1</span>:
-                            <span className="text-white">        mid</span> = len(<span className="text-white">arr</span>) // <span className="text-yellow-400">2</span>
-                            <span className="text-white">        L</span> = <span className="text-white">arr</span>[:mid]
-                            <span className="text-white">        R</span> = <span className="text-white">arr</span>[mid:]
-
-                            <span className="text-primary-400">        mergeSort</span>(<span className="text-white">L</span>)
-                            <span className="text-primary-400">        mergeSort</span>(<span className="text-white">R</span>)
-                            
-                            <span className="text-white">        i = j = k = 0</span>
-
-                            <span className="text-primary-400">    return</span> <span className="text-white">arr</span>
+                        <p className="text-white font-semibold mb-2 text-left">Code (Python)</p>
+                        <pre className="text-gray-300 text-left whitespace-pre-wrap">
+{`def mergeSort(arr):
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        L = arr[:mid]
+        R = arr[mid:]
+        
+        mergeSort(L)
+        mergeSort(R)
+        
+        i = j = k = 0
+        
+        # Merge the sorted halves
+        while i < len(L) and j < len(R):
+            if L[i] < R[j]:
+                arr[k] = L[i]
+                i += 1
+            else:
+                arr[k] = R[j]
+                j += 1
+            k += 1
+        
+        # Check for any remaining elements
+        while i < len(L):
+            arr[k] = L[i]
+            i += 1
+            k += 1
+        
+        while j < len(R):
+            arr[k] = R[j]
+            j += 1
+            k += 1
+    
+    return arr`}
                         </pre>
                     </div>
 
                     <div className="flex flex-col space-y-4">
                         
                         <div className="bg-gray-900 rounded-lg p-3 overflow-auto flex-1 border border-gray-700">
-                            <p className="text-white font-semibold mb-2">Console Output</p>
-                            <pre className="text-xs">
-                                <span className="text-green-500">Input:</span> [12, 11, 13, 5]
-                                <span className="text-green-500">Output:</span> [5, 11, 12, 13]
-                                <span className="text-primary-400">Status:</span> Accepted
+                            <p className="text-white font-semibold mb-2 text-left">Console Output</p>
+                            <pre className="text-xs text-left">
+                                <div className="text-green-500">Input: [12, 11, 13, 5]</div>
+                                <div className="text-green-500">Output: [5, 11, 12, 13]</div>
+                                <div className="text-primary-400">Status: Accepted</div>
                             </pre>
                             
                             <div className="mt-3 w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
