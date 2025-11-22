@@ -45,8 +45,12 @@ export const AuthProvider = ({ children }) => {
           const userDataToStore = {
             id: userData.userId,
             name: userData.name,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
             email: userData.email,
             photoUrl: userData.photoUrl,
+            bio: userData.bio,
+            username: userData.username,
           };
           localStorage.setItem('userData', JSON.stringify(userDataToStore));
           setUser(userDataToStore);
@@ -74,28 +78,70 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (userData) => {
     try {
       const updatedUser = { ...user, ...userData };
-      localStorage.setItem('userData', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      
+      // Ensure all required fields are present
+      const completeUserData = {
+        id: updatedUser.id || user?.id,
+        name: updatedUser.name || updatedUser.firstName + ' ' + updatedUser.lastName,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email || user?.email,
+        photoUrl: updatedUser.photoUrl,
+        bio: updatedUser.bio,
+        username: updatedUser.username || user?.username,
+      };
+      
+      // Update both state and localStorage
+      localStorage.setItem('userData', JSON.stringify(completeUserData));
+      setUser(completeUserData);
     } catch (error) {
       console.error('Error updating user:', error);
     }
   };
 
+  const updateUserProfile = async (userData) => {
+    try {
+      const updatedUser = { ...user, ...userData };
+      
+      // Ensure all fields are properly updated
+      const completeUserData = {
+        id: updatedUser.id || user?.id,
+        name: updatedUser.name || `${updatedUser.firstName || user?.firstName} ${updatedUser.lastName || user?.lastName}`.trim(),
+        firstName: updatedUser.firstName || user?.firstName,
+        lastName: updatedUser.lastName || user?.lastName,
+        email: updatedUser.email || user?.email,
+        photoUrl: updatedUser.photoUrl !== undefined ? updatedUser.photoUrl : user?.photoUrl,
+        bio: updatedUser.bio !== undefined ? updatedUser.bio : user?.bio,
+        username: updatedUser.username || user?.username,
+      };
+      
+      // Update both state and localStorage
+      localStorage.setItem('userData', JSON.stringify(completeUserData));
+      setUser(completeUserData);
+      
+      return completeUserData;
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  };
+
   const value = {
     isAuthenticated,
-    isLoggedIn: isAuthenticated, // Add alias for compatibility
+    isLoggedIn: isAuthenticated,
     user,
     loading,
     login,
     logout,
     updateUser,
+    updateUserProfile, // Add this new method
     checkAuthStatus,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use the auth context - ADD THIS
+// Custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   

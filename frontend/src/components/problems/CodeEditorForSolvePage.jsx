@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
 import { API_CONFIG } from '../../config/api.js'; 
-import { sendInputToProgram, setupCompilerSocket, sendCodeForExecution, stopCodeExecution } from '../../api/problemApi.js'; // FIX: Import utilities
+import { sendInputToProgram, setupCompilerSocket, sendCodeForExecution, stopCodeExecution } from '../../api/problemApi.js';
+import socketService from '../../services/socketService.js';
 
 // --- CONFIGURATION ---
 const MONACO_LANGUAGE_MAP = {
@@ -52,7 +53,14 @@ const CodeEditorForSolvePage = forwardRef(({
 
   // --- Socket.IO Initialization and Listeners (FIXED) ---
   useEffect(() => {
-    // FIX: Use setupCompilerSocket which now handles all listeners and disconnections
+    // Initialize socket service if not already connected
+    const token = localStorage.getItem('token');
+    if (token && !socketService.isConnected) {
+      console.log('🔌 Initializing socket service for compiler...');
+      socketService.connect(token);
+    }
+
+    // Set up compiler socket with the centralized service
     socketRef.current = setupCompilerSocket((output, isError, isRunningState, isWaitingInput) => {
         if (isWaitingInput !== undefined) {
             setIsWaitingForInput(isWaitingInput);
@@ -64,8 +72,14 @@ const CodeEditorForSolvePage = forwardRef(({
     });
 
     return () => {
+      // Don't disconnect the socket service completely as it might be used elsewhere
+      // Just remove the compiler-specific event listeners
       if (socketRef.current) {
-        socketRef.current.disconnect();
+        socketRef.current.off('execution-result');
+        socketRef.current.off('execution-output');
+        socketRef.current.off('waiting-for-input');
+        socketRef.current.off('connect_error');
+        socketRef.current.off('disconnect');
       }
     };
   }, [onOutputReceived]);
@@ -125,7 +139,7 @@ const CodeEditorForSolvePage = forwardRef(({
 
 
   const handleRunCode = useCallback((codeToRun) => {
-    if (!socketRef.current || !socketRef.current.connected) {
+    if (!socketRef.current || !socketService.isConnected) {
       if (onOutputReceived) onOutputReceived('Compiler service is disconnected. Check network.', true, false);
       return;
     }
@@ -135,13 +149,21 @@ const CodeEditorForSolvePage = forwardRef(({
     const executionLanguage = EXECUTION_LANGUAGE_MAP[language] || language.toLowerCase();
 
     // FIX: Use imported sendCodeForExecution helper
-    sendCodeForExecution(socketRef.current, codeToRun, executionLanguage);
+    try {
+      sendCodeForExecution(socketRef.current, codeToRun, executionLanguage);
+    } catch (error) {
+      if (onOutputReceived) onOutputReceived(`Execution Error: ${error.message}`, true, false);
+    }
 
   }, [language, onOutputReceived]);
 
   const handleStopExecution = useCallback(() => {
     // FIX: Use imported stopCodeExecution helper
-    stopCodeExecution(socketRef.current);
+    try {
+      stopCodeExecution(socketRef.current);
+    } catch (error) {
+      console.error('Error stopping execution:', error);
+    }
 
     setIsWaitingForInput(false);
     inputBufferRef.current = '';

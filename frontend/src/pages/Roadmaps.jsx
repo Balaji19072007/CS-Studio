@@ -302,60 +302,6 @@ const ROADMAP_GRADIENTS = {
   'data-science': 'from-indigo-700 to-indigo-600'
 };
 
-// Footer Component
-const Footer = () => {
-  const { isDark } = useTheme();
-  
-  return (
-    <footer className={`${isDark ? 'bg-gray-900' : 'bg-gray-800'} text-white py-12`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {/* LEARN */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-300">LEARN</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Courses</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Danks</a></li>
-            </ul>
-          </div>
-          
-          {/* PRACTICE */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-300">PRACTICE</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Problems</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Challenges</a></li>
-            </ul>
-          </div>
-          
-          {/* COMMUNITY */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-300">COMMUNITY</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Forums</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Leaderboard</a></li>
-            </ul>
-          </div>
-          
-          {/* COMPANY */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-300">COMPANY</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Capsers</a></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-          <p className="text-gray-400">
-            &copy; 2024 CodingPlatform. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-};
 
 // --- Roadmap Category Card ---
 const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
@@ -696,8 +642,6 @@ const Roadmaps = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <Footer />
 
       {/* Floating Buttons */}
       <Link 

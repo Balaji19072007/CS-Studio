@@ -1,5 +1,6 @@
 // src/pages/SolveProblem.jsx
 // Updated: Fixed test execution performance and output capture
+// ADDED: Leaderboard update on problem solve
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -88,7 +89,7 @@ const normalizeOutput = (output) => {
 
 // ---------- Component ----------
 const SolveProblem = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth(); // ADDED: user from useAuth
   const navigate = useNavigate(); 
   const { isDark } = useTheme();
   const [searchParams] = useSearchParams();
@@ -511,6 +512,35 @@ const SolveProblem = () => {
     }
   };
 
+  // ---------- NEW: Update Leaderboard Function ----------
+  const updateLeaderboard = async () => {
+    try {
+      // Call the leaderboard update endpoint to refresh user stats
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/leaderboard/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          problemId: problemId,
+          difficulty: problem?.difficulty
+        })
+      });
+
+      if (response.ok) {
+        console.log('Leaderboard updated successfully');
+      } else {
+        console.warn('Failed to update leaderboard, but problem was solved');
+      }
+    } catch (error) {
+      console.warn('Error updating leaderboard:', error);
+      // Don't fail the submission if leaderboard update fails
+    }
+  };
+
   // ---------- Submit (FIXED: Proper submission with validation) ----------
   const handleSubmitCode = useCallback(async () => {
     const currentCode = editorRef.current?.getCode() || code;
@@ -555,6 +585,11 @@ const SolveProblem = () => {
         showFloatingNotification('Solution Accepted! Problem Solved!', 'success');
         ProblemManager.markAsSolved(problemId);
         
+        // NEW: Update leaderboard when problem is solved
+        if (user?.id) {
+          await updateLeaderboard();
+        }
+        
         if (timerIntervalRef.current) {
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
@@ -597,7 +632,7 @@ const SolveProblem = () => {
     } finally {
       setIsRunning(false);
     }
-  }, [code, isLoggedIn, navigate, problemId, allTestsPassed, language, showFloatingNotification]);
+  }, [code, isLoggedIn, navigate, problemId, allTestsPassed, language, showFloatingNotification, user, problem]);
 
   // Copy, reset, load solution
   const copyCodeToClipboard = () => {

@@ -31,6 +31,7 @@ const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const predictionRoutes = require('./routes/predictionRoutes');
 const statsRoutes = require('./routes/statsRoutes'); 
 const notificationRoutes = require('./routes/notificationRoutes');
+const testRoutes = require('./routes/testRoutes');
 
 // Enable CORS for all routes
 app.use(cors({
@@ -74,7 +75,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth/signin', authLimiter);
 app.use('/api/auth/signup', authLimiter);
 app.use('/api/notifications', notificationRoutes);
-
+app.use('/api/tests', testRoutes);
 // --- CLOUDINARY & MULTER SETUP ---
 
 if (

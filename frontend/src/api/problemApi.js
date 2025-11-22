@@ -2,21 +2,10 @@
 
 import { io } from 'socket.io-client';
 import api from '../services/apiService'; // Import the configured axios instance
+import socketService from '../services/socketService.js';
 
 const API_BASE_URL = 'http://localhost:5000/api/problems';
 const SOCKET_URL = 'http://localhost:5000';
-
-// Import the actual problem data from the JSON file
-import problemData from '../data/problemData.json';
-
-// Convert the array from problemData.json to a lookup object by ID
-const MOCK_PROBLEMS = {};
-problemData.forEach(problem => {
-  MOCK_PROBLEMS[problem.id] = problem;
-});
-
-// Simulate API delay
-const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Fetches all coding problems from the backend.
@@ -29,17 +18,8 @@ export const fetchAllProblems = async () => {
     }
     return response.json();
   } catch (error) {
-    console.warn('Backend unavailable, using data from problemData.json:', error.message);
-    await simulateDelay(600);
-    
-    // Return basic problem info from the imported data
-    return problemData.map(problem => ({
-      id: problem.id,
-      title: problem.title,
-      difficulty: problem.difficulty,
-      category: problem.category || 'General',
-      language: problem.language
-    }));
+    console.error('Backend unavailable:', error.message);
+    throw new Error('Failed to fetch problems. Please check if the backend server is running.');
   }
 };
 
@@ -54,15 +34,8 @@ export const fetchProblemById = async (id) => {
     }
     return response.json();
   } catch (error) {
-    console.warn('Backend unavailable, using data from problemData.json:', error.message);
-    await simulateDelay(800);
-    
-    const problem = MOCK_PROBLEMS[id];
-    if (!problem) {
-      throw new Error(`Problem with ID ${id} not found`);
-    }
-    
-    return problem;
+    console.error('Backend unavailable:', error.message);
+    throw new Error(`Failed to fetch problem ${id}. Please check if the backend server is running.`);
   }
 };
 
@@ -78,19 +51,76 @@ export const fetchProblemTestCases = async (id) => {
     const data = await response.json();
     return data.testCases || [];
   } catch (error) {
-    console.warn('Backend /test-cases unavailable, using data from problemData.json:', error.message);
-    await simulateDelay(300);
-    
-    const problem = MOCK_PROBLEMS[id];
-    if (problem && problem.testCases) {
-      // Ensure all test cases are visible when fetching
-      return problem.testCases.map((testCase, index) => ({
-        ...testCase,
-        isVisible: true // Force visibility
-      }));
-    }
-    
-    return [];
+    console.error('Backend /test-cases unavailable:', error.message);
+    throw new Error(`Failed to fetch test cases for problem ${id}. Please check if the backend server is running.`);
+  }
+};
+
+/**
+ * Fetches user progress for a specific problem
+ */
+export const fetchProblemProgress = async (problemId) => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/${problemId}/progress`);
+    return response.data;
+  } catch (error) {
+    console.error('Progress fetch failed:', error.message);
+    throw new Error(`Failed to fetch progress for problem ${problemId}.`);
+  }
+};
+
+/**
+ * Updates user progress when a problem is solved or attempted
+ */
+const updateUserProgress = async (problemId, accuracy, isSolved) => {
+  try {
+    const response = await api.post(`${API_BASE_URL}/${problemId}/progress`, {
+      accuracy,
+      isSolved
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Progress update failed:', error.message);
+    throw new Error('Failed to update progress. Please try again.');
+  }
+};
+
+/**
+ * Starts timer for a problem
+ */
+export const startProblemTimer = async (problemId) => {
+  try {
+    const response = await api.post(`${API_BASE_URL}/${problemId}/start-timer`);
+    return response.data;
+  } catch (error) {
+    console.error('Start timer failed:', error.message);
+    throw new Error('Failed to start timer. Please try again.');
+  }
+};
+
+/**
+ * Stops timer for a problem
+ */
+export const stopProblemTimer = async (problemId) => {
+  try {
+    const response = await api.post(`${API_BASE_URL}/${problemId}/stop-timer`);
+    return response.data;
+  } catch (error) {
+    console.error('Stop timer failed:', error.message);
+    throw new Error('Failed to stop timer. Please try again.');
+  }
+};
+
+/**
+ * Gets current timer status for a problem
+ */
+export const getProblemTimer = async (problemId) => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/${problemId}/timer`);
+    return response.data;
+  } catch (error) {
+    console.error('Get timer failed:', error.message);
+    throw new Error('Failed to get timer status. Please try again.');
   }
 };
 
@@ -100,10 +130,13 @@ export const fetchProblemTestCases = async (id) => {
  */
 export const submitSolution = async (problemId, code, language) => {
   try {
+    console.log('🚀 Submitting solution for problem:', problemId);
     const response = await api.post(`${API_BASE_URL}/${problemId}/submit`, { 
       code, 
       language 
     });
+    
+    console.log('✅ Submit response:', response.data);
     
     // Ensure all test cases are visible in the response
     if (response.data && response.data.results) {
@@ -113,76 +146,30 @@ export const submitSolution = async (problemId, code, language) => {
       }));
     }
     
+    // Update user progress if the problem was solved
+    if (response.data.isSolved) {
+      console.log('🎯 Problem solved, updating progress...');
+      await updateUserProgress(problemId, response.data.accuracy, true);
+    } else if (response.data.passedCount > 0) {
+      // Problem attempted but not fully solved
+      console.log('📝 Problem attempted, updating progress...');
+      await updateUserProgress(problemId, response.data.accuracy, false);
+    }
+    
     return response.data;
   } catch (error) {
-    console.error('Submit solution error:', error);
-    // Fallback to mock submission logic using problemData.json
-    await simulateDelay(1500);
+    console.error('❌ Submit solution error:', error);
     
-    const problem = MOCK_PROBLEMS[problemId];
-    if (!problem) {
-      throw new Error(`Problem with ID ${problemId} not found`);
+    // More detailed error information
+    if (error.response) {
+      console.error('Response error:', error.response.data);
+      throw new Error(`Submission failed: ${error.response.data.msg || error.response.data.message || 'Unknown error'}`);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      throw new Error('Cannot connect to the server. Please check if the backend is running.');
+    } else {
+      throw new Error(`Submission failed: ${error.message}`);
     }
-    
-    // Mock submission logic - run all test cases
-    const testCases = problem.testCases || [];
-    const results = [];
-    let passedCount = 0;
-    
-    // Enhanced mock validation based on problem type
-    for (const testCase of testCases) {
-      let passed = false;
-      
-      // Different validation based on problem title/content
-      if (problem.title.includes("Sum") && problem.title.includes("Product")) {
-        // For arithmetic problems
-        const hasSum = code.includes('sum') || code.includes('+');
-        const hasProduct = code.includes('product') || code.includes('*');
-        passed = hasSum && hasProduct;
-      } else if (problem.title.includes("Even") || problem.title.includes("Odd")) {
-        // For even/odd problems
-        const hasModulus = code.includes('%') || code.includes("mod");
-        const hasCondition = code.includes('if') || code.includes('else');
-        passed = hasModulus && hasCondition;
-      } else if (problem.title.includes("Factorial")) {
-        // For factorial problems
-        const hasLoop = code.includes('for') || code.includes('while');
-        const hasMultiplication = code.includes('*') || code.includes('factorial');
-        passed = hasLoop && hasMultiplication;
-      } else if (problem.title.includes("Prime")) {
-        // For prime number problems
-        const hasLoop = code.includes('for') || code.includes('while');
-        const hasCondition = code.includes('if') || code.includes('%');
-        passed = hasLoop && hasCondition;
-      } else {
-        // Default validation
-        passed = code.length > 10; // Basic check if code is non-trivial
-      }
-      
-      if (passed) passedCount++;
-      
-      // FIX: Always show input and output values, never hide them
-      results.push({
-        testCase: testCase.id || `test-${results.length + 1}`,
-        input: testCase.input,
-        expectedOutput: testCase.expected,
-        codeOutput: passed ? testCase.expected : "Incorrect output",
-        status: passed ? 'pass' : 'fail',
-        isVisible: true, // Always show test case details
-        isHidden: false // Explicitly mark as not hidden
-      });
-    }
-    
-    const isSolved = passedCount === testCases.length;
-    
-    return {
-      isSolved,
-      passedCount,
-      totalTests: testCases.length,
-      accuracy: testCases.length > 0 ? Math.round((passedCount / testCases.length) * 100) : 0,
-      message: isSolved ? 'All tests passed! Solution accepted.' : 'Some tests failed.',
-      results
-    };
   }
 };
 
@@ -192,10 +179,13 @@ export const submitSolution = async (problemId, code, language) => {
  */
 export const runTestCases = async (problemId, code, language) => {
   try {
+    console.log('🔧 Running test cases for problem:', problemId);
     const response = await api.post(`${API_BASE_URL}/${problemId}/run-tests`, { 
       code, 
       language 
     });
+    
+    console.log('✅ Run tests response:', response.data);
     
     // Ensure all test cases are visible in the response
     if (response.data && response.data.results) {
@@ -207,87 +197,46 @@ export const runTestCases = async (problemId, code, language) => {
     
     return response.data;
   } catch (error) {
-    console.error('Run test cases error:', error);
-    // Fallback to mock test execution using problemData.json
-    await simulateDelay(2000);
+    console.error('❌ Run test cases error:', error);
     
-    const problem = MOCK_PROBLEMS[problemId];
-    if (!problem) {
-      throw new Error(`Problem with ID ${problemId} not found`);
+    // More detailed error information
+    if (error.response) {
+      console.error('Response error:', error.response.data);
+      throw new Error(`Test execution failed: ${error.response.data.msg || error.response.data.message || 'Unknown error'}`);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      throw new Error('Cannot connect to the server. Please check if the backend is running.');
+    } else {
+      throw new Error(`Test execution failed: ${error.message}`);
     }
-    
-    const testCases = problem.testCases || [];
-    const results = [];
-    let passedCount = 0;
-    
-    // Enhanced mock test execution logic
-    for (const testCase of testCases) {
-      let passed = false;
-      let errorMsg = null;
-      
-      // More sophisticated mock validation
-      if (problem.language === 'C') {
-        const hasMain = code.includes('main(');
-        const hasInclude = code.includes('#include');
-        const hasPrintf = code.includes('printf');
-        
-        if (!hasMain) errorMsg = "Missing main function";
-        else if (!hasInclude) errorMsg = "Missing necessary includes";
-        else if (!hasPrintf) errorMsg = "Missing output statements";
-        else passed = true;
-      } else if (problem.language === 'Python') {
-        const hasPrint = code.includes('print(');
-        const hasDef = code.includes('def ') || code.includes('input(');
-        
-        if (!hasPrint) errorMsg = "Missing print statements";
-        else if (!hasDef && !code.includes('input(')) errorMsg = "Missing function definition or input handling";
-        else passed = true;
-      }
-      
-      if (passed) passedCount++;
-      
-      // FIX: Always show input and output values, never hide them
-      results.push({
-        testCase: testCase.id || `test-${results.length + 1}`,
-        input: testCase.input,
-        expectedOutput: testCase.expected,
-        codeOutput: passed ? testCase.expected : "Compilation or runtime error",
-        status: passed ? 'pass' : 'fail',
-        isVisible: true, // Always show test case details
-        isHidden: false, // Explicitly mark as not hidden
-        error: errorMsg
-      });
-    }
-    
-    return {
-      passedCount,
-      totalTests: testCases.length,
-      accuracy: testCases.length > 0 ? Math.round((passedCount / testCases.length) * 100) : 0,
-      results
-    };
   }
 };
 
 /**
  * Sets up the WebSocket client for real-time code compilation.
+ * Now uses the centralized socketService instead of creating its own connection.
  */
 export const setupCompilerSocket = (onOutputCallback) => {
-  const socket = io(SOCKET_URL);
+  // Get the socket instance from the service
+  const socket = socketService.socket;
+  
+  if (!socket) {
+    console.error('❌ Socket service not initialized. Please connect first.');
+    onOutputCallback('❌ Compiler service not available. Please refresh the page.', true, false);
+    return null;
+  }
 
-  // This handles final execution completion/error
+  // Set up event listeners for code execution
   socket.on('execution-result', (result) => {
-    onOutputCallback(result.output, !result.success, false); // Pass output, error status, and isRunning=false
+    onOutputCallback(result.output, !result.success, false);
   });
   
-  // This handles real-time output (stdout/stderr chunks)
   socket.on('execution-output', (data) => {
-    onOutputCallback(data.output, Boolean(data.isError), true); // isRunning=true
+    onOutputCallback(data.output, Boolean(data.isError), true);
   });
 
-  // This signals the client to prompt for input
   socket.on('waiting-for-input', () => {
-    // Pass a specific flag to the callback indicating input is needed
-    onOutputCallback('', false, true, true); 
+    onOutputCallback('', false, true, true);
   });
 
   socket.on('connect_error', (err) => {
@@ -306,11 +255,11 @@ export const setupCompilerSocket = (onOutputCallback) => {
  * Sends code for execution via the established socket.
  */
 export const sendCodeForExecution = (socketInstance, code, language, input = '') => {
-  if (socketInstance && socketInstance.connected) {
+  if (socketInstance && socketService.isConnected) {
     socketInstance.emit('execute-code', { 
       code, 
       language: language.toLowerCase(),
-      input // Pass user input buffer in the initial request
+      input
     });
   } else {
     throw new Error('Compiler socket is not connected.');
@@ -321,9 +270,8 @@ export const sendCodeForExecution = (socketInstance, code, language, input = '')
  * Sends input to running program
  */
 export const sendInputToProgram = (socketInstance, input) => {
-  if (socketInstance && socketInstance.connected) {
-    // FIX: Socket input event should emit the raw input string
-    socketInstance.emit('send-input', input); 
+  if (socketInstance && socketService.isConnected) {
+    socketInstance.emit('send-input', input);
   }
 };
 
@@ -331,10 +279,7 @@ export const sendInputToProgram = (socketInstance, input) => {
  * Stops code execution
  */
 export const stopCodeExecution = (socketInstance) => {
-  if (socketInstance && socketInstance.connected) {
+  if (socketInstance && socketService.isConnected) {
     socketInstance.emit('stop-execution');
   }
 };
-
-// Export the mock problems for debugging or other uses
-export { MOCK_PROBLEMS };

@@ -233,6 +233,55 @@ class SocketService {
   forceJoinRoom() {
     this.joinNotificationRoom();
   }
+
+  // Compiler-specific methods
+  setupCompilerListeners(onOutputCallback) {
+    if (!this.socket) return;
+
+    this.socket.on('execution-result', (result) => {
+      onOutputCallback(result.output, !result.success, false);
+    });
+    
+    this.socket.on('execution-output', (data) => {
+      onOutputCallback(data.output, Boolean(data.isError), true);
+    });
+
+    this.socket.on('waiting-for-input', () => {
+      onOutputCallback('', false, true, true);
+    });
+  }
+
+  removeCompilerListeners() {
+    if (!this.socket) return;
+    
+    this.socket.off('execution-result');
+    this.socket.off('execution-output');
+    this.socket.off('waiting-for-input');
+  }
+
+  executeCode(code, language, input = '') {
+    if (this.socket && this.isConnected) {
+      this.socket.emit('execute-code', { 
+        code, 
+        language: language.toLowerCase(),
+        input
+      });
+    } else {
+      throw new Error('Compiler socket is not connected.');
+    }
+  }
+
+  sendInput(input) {
+    if (this.socket && this.isConnected) {
+      this.socket.emit('send-input', input);
+    }
+  }
+
+  stopExecution() {
+    if (this.socket && this.isConnected) {
+      this.socket.emit('stop-execution');
+    }
+  }
 }
 
 // Create instance and expose to window for debugging

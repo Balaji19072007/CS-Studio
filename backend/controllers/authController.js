@@ -519,8 +519,11 @@ exports.signUpUser = async (req, res) => {
           token,
           userId: newUser.id,
           name: `${newUser.firstName} ${newUser.lastName}`,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
           email: newUser.email,
-          photoUrl: newUser.photoUrl
+          photoUrl: newUser.photoUrl,
+          username: newUser.username
         });
       }
     );
@@ -577,8 +580,12 @@ exports.signInUser = async (req, res) => {
           token,
           userId: user.id,
           name: `${user.firstName} ${user.lastName}`,
+          firstName: user.firstName,
+          lastName: user.lastName,
           email: user.email,
-          photoUrl: user.photoUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`
+          photoUrl: user.photoUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`,
+          username: user.username,
+          bio: user.bio
         });
       }
     );
@@ -609,9 +616,11 @@ exports.getCurrentUser = async (req, res) => {
       username: user.username,
       email: user.email,
       photoUrl: user.photoUrl,
+      bio: user.bio,
       totalPoints: user.totalPoints,
       currentStreak: user.currentStreak,
-      role: user.role
+      role: user.role,
+      updatedAt: user.updatedAt
     });
   } catch (err) {
     console.error('Get current user error:', err.message);
@@ -626,7 +635,7 @@ exports.getCurrentUser = async (req, res) => {
  */
 exports.updateProfile = async (req, res) => {
   // Fields sent from the frontend (via req.body, even if FormData is used)
-  const { firstName, lastName, bio } = req.body;
+  const { firstName, lastName, bio, removeProfilePicture } = req.body;
   const file = req.file; // File data from multer (only present if an image was sent)
   
   try {
@@ -636,14 +645,32 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    // --- 1. Handle Text Fields (First Name, Last Name, Bio) ---
+    // --- 1. Handle Profile Picture Removal ---
+    if (removeProfilePicture === 'true') {
+      // Remove profile picture logic
+      if (user.photoUrl && user.photoUrl.includes('cloudinary')) {
+        // Optional: Delete from Cloudinary if needed
+        const cloudinary = req.app.get('cloudinary');
+        if (cloudinary) {
+          try {
+            const publicId = user.photoUrl.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`cs_studio_profiles/${user.id}/profile_${publicId}`);
+          } catch (error) {
+            console.error('Error deleting from Cloudinary:', error);
+          }
+        }
+      }
+      user.photoUrl = ''; // Clear the photo URL
+    }
+
+    // --- 2. Handle Text Fields (First Name, Last Name, Bio) ---
     // Check for undefined because firstName/lastName can be sent even without change
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
     // Note: Bio can be an empty string, so we check for undefined
     if (bio !== undefined) user.bio = bio; 
     
-    // --- 2. Handle Profile Picture Upload (if file is present) ---
+    // --- 3. Handle Profile Picture Upload (if file is present) ---
     if (file) {
         const cloudinary = req.app.get('cloudinary');
         if (!cloudinary) {
@@ -687,13 +714,10 @@ exports.updateProfile = async (req, res) => {
         user.photoUrl = result.secure_url;
     }
 
-    // --- 3. Save User to MongoDB and Respond ---
-    // Update the combined name field if necessary (not explicitly in schema, but good practice)
-    user.name = `${user.firstName} ${user.lastName}`.trim();
+    // Update the timestamp to force cache refresh
+    user.updatedAt = Date.now();
 
-    // Since username and email are not exposed in Settings.jsx, we skip the logic 
-    // to check if they are taken, allowing the rest of the profile update to proceed.
-    
+    // --- 4. Save User to MongoDB and Respond ---
     await user.save();
 
     res.json({
@@ -706,7 +730,8 @@ exports.updateProfile = async (req, res) => {
         username: user.username,
         email: user.email,
         photoUrl: user.photoUrl,
-        bio: user.bio 
+        bio: user.bio,
+        updatedAt: user.updatedAt
       },
     });
   } catch (err) {

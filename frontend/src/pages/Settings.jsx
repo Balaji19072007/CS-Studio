@@ -1,263 +1,129 @@
 // frontend/src/pages/Settings.jsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx'; 
 import * as feather from 'feather-icons';
 import { updateProfile } from '../api/authApi.js'; 
-import Cropper from 'cropperjs'; 
+import { useSimpleImageCropper } from '../hooks/useSimpleImageCropper.js';
 
 const Settings = () => {
-    const { user, updateUser, isLoggedIn, logout } = useAuth();
+    const { user, updateUser, updateUserProfile, isLoggedIn, logout } = useAuth();
     const navigate = useNavigate();
 
     // Local form state
-    const [firstName, setFirstName] = useState(user?.name?.split(' ')[0] || '');
-    const [lastName, setLastName] = useState(user?.name?.split(' ').slice(1).join(' ') || '');
-    const [bio, setBio] = useState(user?.bio || ''); 
-    const [activeTab, setActiveTab] = useState('profile');
+    const [firstName, setFirstName] = useState(user?.firstName || user?.name?.split(' ')[0] || '');
+    const [lastName, setLastName] = useState(user?.lastName || user?.name?.split(' ').slice(1).join(' ') || '');
+    const [bio, setBio] = useState(user?.bio || '');
     const [loading, setLoading] = useState(false);
     const [alertMessage, setAlertMessage] = useState(null);
     
-    // Enhanced Image cropping state
-    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-    const [imageToCrop, setImageToCrop] = useState(null);
-    const [cropperReady, setCropperReady] = useState(false);
-    const [cropLoading, setCropLoading] = useState(false);
-    const cropperImageRef = useRef(null); 
-    const cropperInstanceRef = useRef(null);
-    const fileInputRef = useRef(null);
-    const modalInitializedRef = useRef(false);
-
-    // Notification settings state
-    const [notificationSettings, setNotificationSettings] = useState({
-        emailLessons: true,
-        emailProgress: true,
-        emailCommunity: false,
-        pushLessons: true,
-        pushAchievements: true,
-        smsUpdates: false
-    });
+    // Profile picture states
+    const [profilePicture, setProfilePicture] = useState(user?.photoUrl || '');
+    const [isUploading, setIsUploading] = useState(false);
+    
+    // Simple image cropper hook
+    const {
+        isCropModalOpen,
+        originalImage,
+        fileInputRef,
+        handlePhotoChange,
+        handleFileInputChange,
+        applyCropManually,
+        cancelCrop,
+        crop,
+        isDragging,
+        handleMouseDown,
+        handleMouseMove,
+        handleMouseUp,
+        canvasRef
+    } = useSimpleImageCropper();
 
     // Mobile navigation state
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // --- Effects & Redirections ---
+    // Update local state when user changes
+    useEffect(() => {
+        if (user) {
+            setFirstName(user.firstName || user.name?.split(' ')[0] || '');
+            setLastName(user.lastName || user.name?.split(' ').slice(1).join(' ') || '');
+            setBio(user.bio || '');
+            setProfilePicture(user.photoUrl || '');
+        }
+    }, [user]);
+
+    // Add event listeners for drag
+    useEffect(() => {
+        if (isCropModalOpen) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            return () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+        }
+    }, [isCropModalOpen, handleMouseMove, handleMouseUp]);
     
+    // Redirect if not logged in
     useEffect(() => {
         if (!isLoggedIn && !loading) {
             navigate('/signin');
         }
     }, [isLoggedIn, loading, navigate]);
     
-    // Sync icons and form data on user/tab change
+    // Sync icons
     useEffect(() => {
         feather.replace();
-    }, [user, activeTab, isCropModalOpen, alertMessage, notificationSettings]);
+    }, [user, isCropModalOpen, alertMessage, profilePicture]);
 
-    // Cleanup cropper when modal closes
-    useEffect(() => {
-        if (!isCropModalOpen) {
-            if (cropperInstanceRef.current) {
-                cropperInstanceRef.current.destroy();
-                cropperInstanceRef.current = null;
-            }
-            setCropperReady(false);
-            modalInitializedRef.current = false;
-        }
-    }, [isCropModalOpen]);
-
-    // Initialize cropper when modal opens and image is ready
-    useEffect(() => {
-        if (isCropModalOpen && imageToCrop && !modalInitializedRef.current) {
-            const timer = setTimeout(() => initializeCropper(), 100); 
-            return () => clearTimeout(timer);
-        }
-    }, [isCropModalOpen, imageToCrop]);
-
-    const initializeCropper = () => {
-        const imageElement = cropperImageRef.current;
-
-        if (!imageElement || !imageToCrop) {
-            console.error('Cropper initialization failed: No image element or image data');
-            showAlert('Failed to load image. Please try again.', 'error');
-            return;
-        }
-
-        if (cropperInstanceRef.current) {
-            cropperInstanceRef.current.destroy();
-            cropperInstanceRef.current = null;
-        }
-
-        const instantiateCropper = () => {
-            imageElement.onload = null;
-            imageElement.onerror = null;
-
-            try {
-                const newCropper = new Cropper(imageElement, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.9,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                    minCropBoxWidth: 100,
-                    minCropBoxHeight: 100,
-                    preview: '#cropper-preview',
-                    ready: function() {
-                        console.log('Cropper ready!');
-                        setCropperReady(true);
-                        modalInitializedRef.current = true;
-                    },
-                });
-                cropperInstanceRef.current = newCropper;
-            } catch (error) {
-                console.error('Failed to create cropper instance:', error);
-                showAlert('Failed to initialize image editor.', 'error');
-                setCropperReady(false);
-            }
-        };
-
-        if (imageElement.complete && imageElement.naturalHeight !== 0) {
-            console.log('Image already loaded, initializing cropper immediately');
-            instantiateCropper();
-        } else {
-            console.log('Attaching onload listener to image element.');
-            imageElement.onload = instantiateCropper;
-            imageElement.onerror = () => {
-                showAlert('Image file failed to load. Try a different file.', 'error');
-                cancelCrop();
-            };
-            
-            setTimeout(() => {
-                if (!cropperReady && !cropperInstanceRef.current) {
-                    console.log('Timeout: Attempting final forced initialization.');
-                    if(isCropModalOpen) {
-                        instantiateCropper(); 
-                    }
-                }
-            }, 3000); 
-        }
-    };
-    
     // --- Utility Functions ---
     const showAlert = (message, type = 'success') => {
         setAlertMessage({ message, type });
         setTimeout(() => setAlertMessage(null), 5000);
     };
 
-    const handlePhotoChange = () => {
-        fileInputRef.current?.click();
-    };
-    
-    const handleFileInputChange = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        setCropperReady(false);
-        modalInitializedRef.current = false;
-        setCropLoading(true);
-
-        if (file.size > 5 * 1024 * 1024) {
-            showAlert('Photo upload failed: File size exceeds 5MB.', 'error');
-            event.target.value = '';
-            setCropLoading(false);
-            return;
-        }
-
-        if (!file.type.startsWith('image/')) {
-            showAlert('Please select a valid image file (JPEG, PNG, or WebP).', 'error');
-            event.target.value = '';
-            setCropLoading(false);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => { 
-            setImageToCrop(e.target.result); 
-            setIsCropModalOpen(true); 
-            setCropLoading(false);
-        };
-        reader.onerror = () => {
-            showAlert('Failed to read the image file. Please try again.', 'error');
-            event.target.value = '';
-            setCropLoading(false);
-        };
-        reader.readAsDataURL(file); 
-        event.target.value = ''; 
-    };
-    
-    const cancelCrop = () => {
-        console.log('Canceling crop...');
-        
-        setIsCropModalOpen(false);
-        setImageToCrop(null);
-        setCropperReady(false);
-        setCropLoading(false);
-        
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    };
-    
     const applyCrop = async () => {
-        console.log('Applying crop, ready:', cropperReady, 'instance:', cropperInstanceRef.current);
-        
-        if (!cropperInstanceRef.current || !cropperReady) {
-            showAlert('Image editor is not ready. Please wait for the image to load completely.', 'error');
-            return;
-        }
-
-        setLoading(true);
+        setIsUploading(true);
 
         try {
-            const croppedCanvas = cropperInstanceRef.current.getCroppedCanvas({
-                width: 512,
-                height: 512,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-                fillColor: '#fff'
-            });
-
-            if (!croppedCanvas) {
-                throw new Error('Failed to process image. Please try again.');
+            const imageBlob = await applyCropManually();
+            
+            if (!imageBlob) {
+                throw new Error('Failed to process image');
             }
-
-            const imageBlob = await new Promise((resolve, reject) => {
-                croppedCanvas.toBlob((blob) => {
-                    if (blob) {
-                        resolve(blob);
-                    } else {
-                        reject(new Error('Failed to create image file.'));
-                    }
-                }, 'image/jpeg', 0.92);
-            });
 
             const formData = new FormData();
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
             formData.append('bio', bio);
-            formData.append('profilePicture', imageBlob, 'profile.jpg'); 
+            formData.append('profilePicture', imageBlob, 'profile.jpg');
 
             const apiResponse = await updateProfile(formData);
 
-            updateUser({ 
-                ...user, 
-                ...apiResponse.user
-            }); 
+            // Update user in global state with the new method
+            if (apiResponse.user) {
+                await updateUserProfile(apiResponse.user);
+                setProfilePicture(apiResponse.user.photoUrl);
+                showAlert('Profile picture updated successfully!');
+            } else {
+                // If backend doesn't return user, update locally with temporary URL
+                const tempUrl = URL.createObjectURL(imageBlob);
+                await updateUserProfile({
+                    photoUrl: tempUrl,
+                    firstName,
+                    lastName,
+                    bio
+                });
+                setProfilePicture(tempUrl);
+                showAlert('Profile picture updated!');
+            }
             
-            showAlert('Profile picture updated successfully!');
             cancelCrop();
             
         } catch (error) {
             console.error('Crop application error:', error);
             showAlert(error.message || 'Failed to update profile picture. Please try again.', 'error');
         } finally {
-            setLoading(false); 
+            setIsUploading(false);
         }
     };
 
@@ -283,12 +149,18 @@ const Settings = () => {
             
             const apiResponse = await updateProfile(payload);
             
-            updateUser({ 
-                ...user, 
-                name: `${firstName} ${lastName}`.trim(), 
-                bio: bio,
-                ...apiResponse.user, 
-            }); 
+            // Update user with response using the new method
+            if (apiResponse.user) {
+                await updateUserProfile(apiResponse.user);
+                setProfilePicture(apiResponse.user.photoUrl);
+            } else {
+                await updateUserProfile({ 
+                    firstName,
+                    lastName,
+                    name: `${firstName} ${lastName}`.trim(), 
+                    bio: bio,
+                });
+            }
             
             showAlert('Profile information updated successfully!');
         } catch (error) {
@@ -297,64 +169,104 @@ const Settings = () => {
             setLoading(false);
         }
     };
-
-    const handleNotificationUpdate = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            showAlert('Notification preferences updated successfully!');
-        } catch (error) {
-            showAlert('Failed to update notification settings.', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleNotificationChange = (setting) => {
-        setNotificationSettings(prev => ({
-            ...prev,
-            [setting]: !prev[setting]
-        }));
-    };
     
     const getInitials = useCallback(() => {
-        const fullName = user?.name || 'User';
+        const fullName = user?.name || `${firstName} ${lastName}`.trim() || 'User';
         const parts = fullName.split(' ');
         if (parts.length > 1) {
             return parts.map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
         return fullName.charAt(0).toUpperCase();
-    }, [user]);
+    }, [user, firstName, lastName]);
 
-    const renderProfilePicture = () => {
+    const renderProfilePictureSection = () => {
         const initials = getInitials();
-        if (user?.photoUrl) {
-            return (
-                <img 
-                    src={user.photoUrl} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                        e.target.style.display = 'none';
-                        const fallback = e.target.nextSibling;
-                        if (fallback) fallback.style.display = 'flex';
-                    }}
-                />
-            );
-        }
+        
         return (
-            <span className="flex items-center justify-center text-2xl md:text-3xl font-bold text-primary-500 dark:text-primary-400">
-                {initials}
-            </span>
+            <div className="lg:w-1/3 mb-6 lg:mb-0">
+                <div className="flex flex-col items-center space-y-6">
+                    {/* Profile Picture Preview */}
+                    <div className="relative group">
+                        <div className="relative">
+                            {profilePicture ? (
+                                <img 
+                                    src={`${profilePicture}?${user?.updatedAt || Date.now()}`} 
+                                    alt="Profile" 
+                                    className="w-40 h-40 rounded-full object-cover border-4 border-primary-500/30 shadow-2xl transition-all duration-300 group-hover:border-primary-500/50"
+                                    onError={(e) => {
+                                        // Fallback to initials if image fails to load
+                                        e.target.style.display = 'none';
+                                        const fallback = e.target.nextSibling;
+                                        if (fallback) fallback.style.display = 'flex';
+                                    }}
+                                    key={profilePicture} // Force re-render when URL changes
+                                />
+                            ) : null}
+                            
+                            {/* Fallback initials - always rendered but hidden by default */}
+                            <div className={`w-40 h-40 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center border-4 border-primary-500/30 shadow-2xl transition-all duration-300 group-hover:border-primary-500/50 ${
+                                profilePicture ? 'hidden' : 'flex'
+                            }`}>
+                                <span className="text-4xl font-bold text-white">
+                                    {initials}
+                                </span>
+                            </div>
+
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <i data-feather="camera" className="w-8 h-8 text-white"></i>
+                            </div>
+                        </div>
+
+                        {/* Camera Button */}
+                        <button 
+                            type="button" 
+                            onClick={handlePhotoChange}
+                            disabled={isUploading || loading}
+                            className="absolute -bottom-2 -right-2 bg-primary-500 hover:bg-primary-600 text-white p-4 rounded-full shadow-2xl transition-all duration-200 disabled:opacity-50 group-hover:scale-110"
+                            title="Change profile picture"
+                        >
+                            <i data-feather="camera" className="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    {/* Profile Picture Actions */}
+                    <div className="flex flex-col space-y-3 w-full max-w-xs">
+                        <div className="text-center">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                {profilePicture ? 'Update your profile photo' : 'Add a profile photo'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                JPG, PNG or WebP (max 5MB)
+                            </p>
+                        </div>
+
+                        {/* Upload Progress */}
+                        {(isUploading || loading) && (
+                            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                <i data-feather="loader" className="w-4 h-4 animate-spin"></i>
+                                <span>{isUploading ? 'Uploading...' : 'Saving...'}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         );
     };
-    
-    if (!user) return null;
+
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <i data-feather="loader" className="w-8 h-8 animate-spin text-primary-500 mx-auto mb-4"></i>
+                    <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 dark-gradient-secondary">
+        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Hidden File Input */}
             <input 
                 ref={fileInputRef}
@@ -385,54 +297,22 @@ const Settings = () => {
             </div>
 
             <main className="flex-grow py-6 md:py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-4xl mx-auto">
                     {/* Desktop Header */}
-                    <div className="hidden lg:flex items-center mb-6">
-                        <button onClick={() => navigate(-1)} className="mr-3 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center">
+                    <div className="hidden lg:flex items-center mb-8">
+                        <button onClick={() => navigate(-1)} className="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
                             <i data-feather="arrow-left" className="w-5 h-5 text-gray-600 dark:text-gray-400"></i>
                         </button>
-                        <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center">
                             <i data-feather="settings" className="w-6 h-6 md:w-8 md:h-8 mr-3 text-primary-500"></i> Account Settings
                         </h1>
                     </div>
                     
                     <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                        {/* Navigation Tabs */}
-                        <div className="border-b border-gray-200 dark:border-gray-700">
-                            <nav className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:flex lg:space-x-8 px-4 md:px-6 pt-4 flex-col lg:flex-row space-y-2 lg:space-y-0`}>
-                                <button 
-                                    onClick={() => {
-                                        setActiveTab('profile');
-                                        setIsMobileMenuOpen(false);
-                                    }} 
-                                    className={`tab-link whitespace-nowrap py-3 px-1 text-sm font-medium focus:outline-none transition-colors duration-200 ${
-                                        activeTab === 'profile' 
-                                            ? 'active text-primary-500 dark:text-primary-400 border-b-2 border-primary-500' 
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                                    }`}
-                                >
-                                    <i data-feather="user" className="w-4 h-4 inline-block mr-2"></i> Profile
-                                </button>
-                                <button 
-                                    onClick={() => {
-                                        setActiveTab('notifications');
-                                        setIsMobileMenuOpen(false);
-                                    }} 
-                                    className={`tab-link whitespace-nowrap py-3 px-1 text-sm font-medium focus:outline-none transition-colors duration-200 ${
-                                        activeTab === 'notifications' 
-                                            ? 'active text-primary-500 dark:text-primary-400 border-b-2 border-primary-500' 
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                                    }`}
-                                >
-                                    <i data-feather="bell" className="w-4 h-4 inline-block mr-2"></i> Notifications
-                                </button>
-                            </nav>
-                        </div>
-
-                        <div className="p-4 md:p-6 lg:p-8">
-                            {/* Alert Modal Placeholder */}
+                        <div className="p-6 lg:p-8">
+                            {/* Alert Message */}
                             {alertMessage && (
-                                <div className={`p-4 mb-6 rounded-lg shadow-md border ${
+                                <div className={`p-4 mb-6 rounded-lg border ${
                                     alertMessage.type === 'error' 
                                         ? 'bg-red-100 dark:bg-red-500/20 border-red-300 dark:border-red-500 text-red-700 dark:text-red-100' 
                                         : 'bg-green-100 dark:bg-primary-500/20 border-green-300 dark:border-primary-500 text-green-700 dark:text-primary-100'
@@ -444,66 +324,40 @@ const Settings = () => {
                                 </div>
                             )}
 
-                            {/* Profile Tab Content */}
-                            <div id="content-profile" className={`tab-content ${activeTab !== 'profile' ? 'hidden' : ''}`}>
-                                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4 md:mb-6">Update Profile Information</h2>
+                            {/* Profile Content */}
+                            <div>
+                                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6">Profile Information</h2>
                                 
                                 <div className="flex flex-col lg:flex-row lg:space-x-8">
-                                    {/* Left Side: Profile Picture */}
-                                    <div className="lg:w-1/4 mb-6 lg:mb-0">
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">Profile Picture</label>
-                                        <div className="flex flex-col items-center space-y-3">
-                                            <div 
-                                                id="profile-picture-container" 
-                                                className="h-24 w-24 rounded-full bg-gray-700 flex items-center justify-center text-primary-400 text-3xl font-bold border-4 border-primary-500/50 shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:border-primary-500 transition duration-200"
-                                            >
-                                                {renderProfilePicture()}
-                                            </div>
-                                            <button 
-                                                type="button" 
-                                                id="change-photo-button" 
-                                                onClick={handlePhotoChange}
-                                                disabled={loading}
-                                                className="dark-btn-secondary px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 disabled:opacity-50"
-                                            >
-                                                {cropLoading ? (
-                                                    <span className="flex items-center">
-                                                        <i data-feather="loader" className="animate-spin mr-2 h-4 w-4"></i> Loading...
-                                                    </span>
-                                                ) : (
-                                                    'Change Photo'
-                                                )}
-                                            </button>
-                                            <p className="mt-1 text-xs text-gray-500">JPG, PNG or WebP no larger than 5MB</p>
-                                        </div>
-                                    </div>
+                                    {/* Left Side: Profile Picture Section */}
+                                    {renderProfilePictureSection()}
 
                                     {/* Right Side: Form */}
-                                    <div className="lg:w-3/4">
-                                        <form onSubmit={handleProfileUpdate} className="space-y-4 md:space-y-6">
+                                    <div className="lg:w-2/3">
+                                        <form onSubmit={handleProfileUpdate} className="space-y-6">
                                             {/* Full Name */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
+                                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
                                                     <input 
                                                         type="text" 
                                                         id="firstName" 
                                                         value={firstName} 
                                                         onChange={(e) => setFirstName(e.target.value)} 
                                                         placeholder="Coder" 
-                                                        className="form-input mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                                                         disabled={loading}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
+                                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
                                                     <input 
                                                         type="text" 
                                                         id="lastName" 
                                                         value={lastName} 
                                                         onChange={(e) => setLastName(e.target.value)} 
                                                         placeholder="User" 
-                                                        className="form-input mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                                                         disabled={loading}
                                                     />
                                                 </div>
@@ -511,27 +365,27 @@ const Settings = () => {
                                             
                                             {/* Email */}
                                             <div>
-                                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+                                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
                                                 <input 
                                                     type="email" 
                                                     id="email" 
                                                     value={user.email} 
-                                                    className="form-input mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400" 
+                                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed" 
                                                     disabled
                                                 />
-                                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Your registered email address (cannot be changed)</p>
+                                                <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">Your registered email address (cannot be changed)</p>
                                             </div>
                                             
                                             {/* Bio */}
                                             <div>
-                                                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+                                                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
                                                 <textarea 
                                                     id="bio" 
                                                     value={bio} 
                                                     onChange={(e) => setBio(e.target.value)}
-                                                    rows="3" 
-                                                    placeholder="I am a passionate coder learning data structures and web development." 
-                                                    className="form-input mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                    rows="4" 
+                                                    placeholder="Tell us about yourself..." 
+                                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none transition-colors"
                                                     disabled={loading}
                                                 ></textarea>
                                             </div>
@@ -540,152 +394,23 @@ const Settings = () => {
                                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                                                 <button 
                                                     type="submit" 
-                                                    id="save-profile-button" 
-                                                    disabled={loading} 
-                                                    className="bg-primary-500 hover:bg-primary-600 text-white inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md transition-colors duration-200 disabled:opacity-50"
+                                                    disabled={loading || isUploading} 
+                                                    className="bg-primary-500 hover:bg-primary-600 text-white py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-medium transition-colors duration-200 disabled:opacity-50 flex items-center"
                                                 >
                                                     {loading ? (
-                                                        <span className="flex items-center">
-                                                            <i data-feather="loader" className="animate-spin mr-2 h-4 w-4"></i> Saving...
-                                                        </span>
+                                                        <>
+                                                            <i data-feather="loader" className="animate-spin mr-2 w-4 h-4"></i>
+                                                            Saving...
+                                                        </>
                                                     ) : (
-                                                        'Save Changes'
+                                                        <>
+                                                            <i data-feather="save" className="mr-2 w-4 h-4"></i>
+                                                            Save Changes
+                                                        </>
                                                     )}
                                                 </button>
                                             </div>
                                         </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Enhanced Notifications Tab Content */}
-                            <div id="content-notifications" className={`tab-content ${activeTab !== 'notifications' ? 'hidden' : ''}`}>
-                                <div className="flex flex-col lg:flex-row lg:space-x-8">
-                                    <div className="lg:w-3/4">
-                                        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4 md:mb-6">Notification Preferences</h2>
-                                        <p className="text-gray-600 dark:text-gray-400 mb-6 md:mb-8">Manage how you receive notifications and updates from our platform.</p>
-                                        
-                                        <form onSubmit={handleNotificationUpdate} className="space-y-6 md:space-y-8">
-                                            {/* Email Notifications Section */}
-                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
-                                                <div className="flex items-center mb-4 md:mb-6">
-                                                    <div className="bg-blue-100 dark:bg-blue-500/20 p-3 rounded-lg mr-4">
-                                                        <i data-feather="mail" className="w-5 h-5 md:w-6 md:h-6 text-blue-500 dark:text-blue-400"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
-                                                        <p className="text-gray-500 dark:text-gray-400 text-sm">Receive updates via email</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center justify-between p-3 md:p-4 bg-white dark:bg-gray-700/50 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors duration-200">
-                                                        <div className="flex items-center space-x-3 md:space-x-4">
-                                                            <div className="bg-blue-100 dark:bg-blue-500/10 p-2 rounded">
-                                                                <i data-feather="book-open" className="w-4 h-4 text-blue-500 dark:text-blue-400"></i>
-                                                            </div>
-                                                            <div>
-                                                                <label htmlFor="email-lessons" className="font-medium text-gray-700 dark:text-gray-300 cursor-pointer">New Lesson Releases</label>
-                                                                <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">Get notified when new interactive lessons are published</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="relative">
-                                                            <input 
-                                                                id="email-lessons" 
-                                                                name="email-lessons" 
-                                                                type="checkbox" 
-                                                                checked={notificationSettings.emailLessons}
-                                                                onChange={() => handleNotificationChange('emailLessons')}
-                                                                className="sr-only" 
-                                                            />
-                                                            <div className={`w-10 h-6 md:w-12 md:h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                                                                notificationSettings.emailLessons ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                                                            }`}>
-                                                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                                                                    notificationSettings.emailLessons ? 'translate-x-4 md:translate-x-6' : 'translate-x-0'
-                                                                }`}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Repeat similar structure for other notification items */}
-                                                    <div className="flex items-center justify-between p-3 md:p-4 bg-white dark:bg-gray-700/50 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors duration-200">
-                                                        <div className="flex items-center space-x-3 md:space-x-4">
-                                                            <div className="bg-green-100 dark:bg-green-500/10 p-2 rounded">
-                                                                <i data-feather="trending-up" className="w-4 h-4 text-green-500 dark:text-green-400"></i>
-                                                            </div>
-                                                            <div>
-                                                                <label htmlFor="email-progress" className="font-medium text-gray-700 dark:text-gray-300 cursor-pointer">Weekly Progress Report</label>
-                                                                <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">Receive a summary of your coding progress and learning streaks</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="relative">
-                                                            <input 
-                                                                id="email-progress" 
-                                                                name="email-progress" 
-                                                                type="checkbox" 
-                                                                checked={notificationSettings.emailProgress}
-                                                                onChange={() => handleNotificationChange('emailProgress')}
-                                                                className="sr-only" 
-                                                            />
-                                                            <div className={`w-10 h-6 md:w-12 md:h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                                                                notificationSettings.emailProgress ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
-                                                            }`}>
-                                                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                                                                    notificationSettings.emailProgress ? 'translate-x-4 md:translate-x-6' : 'translate-x-0'
-                                                                }`}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Save Button for Notifications */}
-                                            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                                                <button 
-                                                    type="submit" 
-                                                    disabled={loading}
-                                                    className="bg-primary-500 hover:bg-primary-600 text-white inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-                                                >
-                                                    {loading ? (
-                                                        <span className="flex items-center">
-                                                            <i data-feather="loader" className="animate-spin mr-2 h-4 w-4"></i> Saving Preferences...
-                                                        </span>
-                                                    ) : (
-                                                        <span className="flex items-center">
-                                                            <i data-feather="save" className="mr-2 h-4 w-4"></i>
-                                                            Save Notification Settings
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    {/* Notification Tips Sidebar */}
-                                    <div className="lg:w-1/4 mt-6 lg:mt-0">
-                                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
-                                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                                                <i data-feather="info" className="w-5 h-5 mr-2 text-primary-500 dark:text-primary-400"></i>
-                                                Notification Tips
-                                            </h4>
-                                            <div className="space-y-4">
-                                                <div className="flex items-start space-x-3">
-                                                    <i data-feather="bell" className="w-4 h-4 text-green-500 dark:text-green-400 mt-1 flex-shrink-0"></i>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Stay Updated</p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Enable notifications to never miss important updates</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-start space-x-3">
-                                                    <i data-feather="zap" className="w-4 h-4 text-yellow-500 dark:text-yellow-400 mt-1 flex-shrink-0"></i>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Real-time Alerts</p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Get instant notifications for time-sensitive content</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -694,197 +419,103 @@ const Settings = () => {
                 </div>
             </main>
             
-            {/* --- Enhanced Cropper Modal --- */}
-            <div id="crop-modal" className={`fixed inset-0 ${isCropModalOpen ? 'flex' : 'hidden'} items-center justify-center p-4 z-50`} style={{backgroundColor: 'rgba(0, 0, 0, 0.95)'}}>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl border border-gray-300 dark:border-gray-600 max-h-[90vh] flex flex-col">
-                    {/* Header */}
-                    <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900 rounded-t-xl">
-                        <div>
-                            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Edit Profile Picture</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                {cropperReady ? 'Drag to position and use handles to crop' : 'Loading image editor...'}
-                            </p>
+            {/* Simple Cropper Modal */}
+            {isCropModalOpen && originalImage && (
+                <div className="fixed inset-0 flex items-center justify-center p-4 z-50 bg-black/80">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-300 dark:border-gray-600">
+                        {/* Header */}
+                        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Crop Profile Picture</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    Drag the crop area to position, then click Apply
+                                </p>
+                            </div>
+                            <button 
+                                type="button" 
+                                onClick={cancelCrop} 
+                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors duration-200 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                                disabled={isUploading}
+                            >
+                                <i data-feather="x" className="w-5 h-5"></i>
+                            </button>
                         </div>
-                        <button 
-                            type="button" 
-                            onClick={cancelCrop} 
-                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors duration-200 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
-                            disabled={loading}
-                        >
-                            <i data-feather="x" className="w-5 h-5 md:w-6 md:h-6"></i>
-                        </button>
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="p-4 md:p-6 flex-grow overflow-auto">
-                        <div className="flex flex-col xl:flex-row gap-6 md:gap-8">
-                            {/* Enhanced Cropper Area */}
-                            <div className="xl:w-2/3">
-                                <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-0">Crop Image</h4>
-                                        {cropperReady ? (
-                                            <div className="flex items-center space-x-2 md:space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                                                <div className="flex items-center space-x-1">
-                                                    <i data-feather="move" className="w-4 h-4"></i>
-                                                    <span className="hidden sm:inline">Drag to move</span>
-                                                </div>
-                                                <div className="flex items-center space-x-1">
-                                                    <i data-feather="maximize-2" className="w-4 h-4"></i>
-                                                    <span className="hidden sm:inline">Handles to resize</span>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center space-x-2 text-sm text-primary-500 dark:text-primary-400">
-                                                <i data-feather="loader" className="w-4 h-4 animate-spin"></i>
-                                                <span>Initializing editor...</span>
-                                            </div>
-                                        )}
-                                    </div>
+                        
+                        {/* Content */}
+                        <div className="p-6">
+                            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                <div className="h-80 w-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
+                                    <img 
+                                        src={originalImage} 
+                                        alt="Crop preview" 
+                                        className="max-w-full max-h-full"
+                                    />
+                                    {/* Crop overlay */}
                                     <div 
-                                        id="cropper-container" 
-                                        className="h-64 md:h-96 w-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 overflow-hidden relative min-h-[300px] md:min-h-[400px]"
+                                        className="absolute border-2 border-white border-dashed shadow-lg cursor-move"
+                                        style={{
+                                            left: `${crop.x}px`,
+                                            top: `${crop.y}px`,
+                                            width: `${crop.width}px`,
+                                            height: `${crop.height}px`,
+                                            cursor: isDragging ? 'grabbing' : 'grab'
+                                        }}
+                                        onMouseDown={handleMouseDown}
                                     >
-                                        {!cropperReady && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-800 bg-opacity-80 z-10">
-                                                <div className="text-center">
-                                                    <i data-feather="loader" className="w-6 h-6 md:w-8 md:h-8 animate-spin text-primary-500 mx-auto mb-2"></i>
-                                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Loading image editor...</p>
-                                                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">This may take a moment for large images</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {imageToCrop && (
-                                            <img 
-                                                id="image-to-crop" 
-                                                ref={cropperImageRef} 
-                                                src={imageToCrop} 
-                                                alt="Image to crop" 
-                                                className="max-w-full max-h-full"
-                                                style={{ display: 'block', maxWidth: '100%' }}
-                                                crossOrigin="anonymous"
-                                            />
-                                        )}
+                                        <div className="absolute -top-1 -left-1 w-2 h-2 bg-white rounded-full"></div>
+                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full"></div>
+                                        <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-white rounded-full"></div>
+                                        <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-white rounded-full"></div>
                                     </div>
-                                    {cropperReady && (
-                                        <div className="mt-4 flex justify-center space-x-2 md:space-x-4">
-                                            <button 
-                                                type="button"
-                                                onClick={() => cropperInstanceRef.current && cropperInstanceRef.current.zoom(0.1)}
-                                                className="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
-                                            >
-                                                <i data-feather="zoom-in" className="w-3 h-3 mr-1 inline"></i>
-                                                Zoom In
-                                            </button>
-                                            <button 
-                                                type="button"
-                                                onClick={() => cropperInstanceRef.current && cropperInstanceRef.current.zoom(-0.1)}
-                                                className="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
-                                            >
-                                                <i data-feather="zoom-out" className="w-3 h-3 mr-1 inline"></i>
-                                                Zoom Out
-                                            </button>
-                                            <button 
-                                                type="button"
-                                                onClick={() => cropperInstanceRef.current && cropperInstanceRef.current.reset()}
-                                                className="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
-                                            >
-                                                <i data-feather="refresh-cw" className="w-3 h-3 mr-1 inline"></i>
-                                                Reset
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
-                            
-                            {/* Enhanced Preview & Controls */}
-                            <div className="xl:w-1/3">
-                                <div className="space-y-4 md:space-y-6">
-                                    {/* Enhanced Preview */}
-                                    <div className="bg-gray-100 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-                                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">Preview</h4>
-                                        <div className="flex flex-col items-center space-y-3 md:space-y-4">
-                                            <div className="relative">
-                                                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 p-1 shadow-lg">
-                                                    <div id="cropper-preview" className="w-full h-full rounded-full overflow-hidden bg-gray-300 dark:bg-gray-800 border-2 border-white/20 flex items-center justify-center">
-                                                        {!cropperReady && (
-                                                            <span className="text-gray-500 dark:text-gray-400 text-xs">Preview will appear here</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="absolute -bottom-2 -right-2 bg-primary-500 rounded-full p-1 md:p-2 shadow-lg">
-                                                    <i data-feather="user" className="w-3 h-3 md:w-4 md:h-4 text-white"></i>
-                                                </div>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-sm text-gray-700 dark:text-gray-300">Your profile picture</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Will appear as a circle across the platform</p>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    {/* Enhanced Instructions */}
-                                    <div className="bg-gray-100 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 md:p-4">
-                                        <h5 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
-                                            <i data-feather="info" className="w-4 h-4 mr-2 text-primary-500 dark:text-primary-400"></i>
-                                            Tips for best results
-                                        </h5>
-                                        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-2">
-                                            <li className="flex items-start">
-                                                <i data-feather="check-circle" className="w-3 h-3 mr-2 text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0"></i>
-                                                <span>Center your face in the square for best appearance</span>
-                                            </li>
-                                            <li className="flex items-start">
-                                                <i data-feather="check-circle" className="w-3 h-3 mr-2 text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0"></i>
-                                                <span>Use good lighting for clear, high-quality photos</span>
-                                            </li>
-                                        </ul>
+                            {/* Hidden canvas for processing */}
+                            <canvas ref={canvasRef} className="hidden" />
+
+                            {/* Controls */}
+                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+                                <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                                    <div className="flex items-center space-x-2">
+                                        <i data-feather="move" className="w-4 h-4"></i>
+                                        <span>Drag the box to move</span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Enhanced Footer Actions */}
-                    <div className="p-4 md:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
-                        <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-                            <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i data-feather="shield" className="w-3 h-3 md:w-4 md:h-4 mr-2"></i>
-                                Your photo is only visible to you and platform administrators
-                            </div>
-                            <div className="flex space-x-2 md:space-x-3">
-                                <button 
-                                    type="button" 
-                                    onClick={cancelCrop} 
-                                    disabled={loading}
-                                    className="px-4 py-2 md:px-6 md:py-3 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center disabled:opacity-50"
-                                >
-                                    <i data-feather="x" className="w-4 h-4 mr-2"></i>
-                                    Cancel
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onClick={applyCrop} 
-                                    disabled={loading || !cropperReady}
-                                    className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 md:px-6 md:py-3 border border-transparent text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 flex items-center min-w-[120px] md:min-w-[140px] justify-center"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <i data-feather="loader" className="animate-spin mr-2 w-4 h-4"></i>
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i data-feather="check" className="w-4 h-4 mr-2"></i>
-                                            Apply Changes
-                                        </>
-                                    )}
-                                </button>
+                                
+                                <div className="flex space-x-3">
+                                    <button 
+                                        type="button" 
+                                        onClick={cancelCrop} 
+                                        disabled={isUploading}
+                                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50 flex items-center"
+                                    >
+                                        <i data-feather="x" className="w-4 h-4 mr-2"></i>
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={applyCrop} 
+                                        disabled={isUploading}
+                                        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 border border-transparent text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 flex items-center"
+                                    >
+                                        {isUploading ? (
+                                            <>
+                                                <i data-feather="loader" className="animate-spin mr-2 w-4 h-4"></i>
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i data-feather="check" className="w-4 h-4 mr-2"></i>
+                                                Apply
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

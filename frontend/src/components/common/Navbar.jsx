@@ -42,6 +42,8 @@ const Navbar = () => {
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     
     const featherIconsInitialized = useRef(false);
+    const dropdownRef = useRef(null);
+    const profileButtonRef = useRef(null);
 
     const currentPath = location.pathname.replace(/.html$/, '');
     
@@ -76,17 +78,25 @@ const Navbar = () => {
         };
     }, [isLoggedIn]);
 
+    // Close dropdown when clicking outside
     useEffect(() => {
-        const handleOutsideClick = (event) => {
-            if (isDropdownOpen && !event.target.closest('#logged-in-profile')) {
+        const handleClickOutside = (event) => {
+            if (isDropdownOpen && 
+                dropdownRef.current && 
+                !dropdownRef.current.contains(event.target) &&
+                profileButtonRef.current &&
+                !profileButtonRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
             if (isNotificationsOpen && !event.target.closest('#notifications-container')) {
                 setIsNotificationsOpen(false);
             }
         };
-        document.addEventListener('click', handleOutsideClick);
-        return () => document.removeEventListener('click', handleOutsideClick);
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, [isDropdownOpen, isNotificationsOpen]);
     
     useEffect(() => {
@@ -97,7 +107,14 @@ const Navbar = () => {
         setIsMobileMenuOpen(prev => !prev);
     }
 
-    const toggleNotifications = async () => {
+    const toggleProfileDropdown = (e) => {
+        e.stopPropagation();
+        setIsDropdownOpen(prev => !prev);
+        setIsNotificationsOpen(false); // Close notifications if open
+    }
+
+    const toggleNotifications = async (e) => {
+        e.stopPropagation();
         if (!isNotificationsOpen && unreadCount > 0) {
             // Mark all as read when opening notifications
             try {
@@ -107,6 +124,7 @@ const Navbar = () => {
             }
         }
         setIsNotificationsOpen(prev => !prev);
+        setIsDropdownOpen(false); // Close profile dropdown if open
     }
 
     const handleNotificationClick = async (notification) => {
@@ -224,15 +242,37 @@ const Navbar = () => {
     }
     
     const renderAvatar = () => {
-        if (!user) return <span className="font-bold">U</span>;
+        if (!user) return <span className="font-bold text-white">U</span>;
 
         const userInitials = user.name ? 
             user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
         
-        if (user.photoUrl) {
-            return <img src={user.photoUrl} alt="Profile" className="h-full w-full rounded-full object-cover" />;
+        // Add cache busting to prevent browser caching of old images
+        const photoUrl = user.photoUrl ? 
+            `${user.photoUrl}?${user.updatedAt || Date.now()}` : 
+            null;
+        
+        if (photoUrl) {
+            return (
+                <img 
+                    src={photoUrl} 
+                    alt="Profile" 
+                    className="h-full w-full rounded-full object-cover"
+                    onError={(e) => {
+                        // If image fails to load, show initials as fallback
+                        e.target.style.display = 'none';
+                        const fallback = e.target.nextSibling;
+                        if (fallback) {
+                            fallback.style.display = 'flex';
+                            fallback.textContent = userInitials;
+                        }
+                    }}
+                    key={photoUrl} // Add key to force re-render when URL changes
+                />
+            );
         }
-        return <span className="font-bold">{userInitials}</span>;
+        
+        return <span className="font-bold text-white flex items-center justify-center w-full h-full">{userInitials}</span>;
     }
     
     const renderSearch = (isMobile = false) => {
@@ -241,6 +281,10 @@ const Navbar = () => {
 
     const handleLogout = () => {
         logout();
+        setIsDropdownOpen(false);
+    }
+
+    const handleDropdownItemClick = () => {
         setIsDropdownOpen(false);
     }
 
@@ -496,59 +540,91 @@ const Navbar = () => {
                         {/* Auth Section */}
                         <div id="auth-nav-container" className="flex items-center space-x-3">
                             {isLoggedIn ? (
-                                <div id="logged-in-profile" className="flex items-center space-x-3 relative">
+                                <div className="flex items-center space-x-3 relative">
                                     {user && user.name && (
                                         <span className={`hidden lg:block font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                             {user.name.split(' ')[0]}
                                         </span>
                                     )}
                                     
-                                    <button 
-                                        id="profile-icon-button" 
-                                        className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg ring-2 ring-primary-300/50 ring-offset-2 hover:ring-offset-1 transition-all duration-300 overflow-hidden"
-                                        onClick={() => setIsDropdownOpen(prev => !prev)}
-                                    >
-                                        {renderAvatar()}
-                                    </button>
-                                    
-                                    <div id="profile-dropdown-menu" className={`absolute right-0 top-16 mt-2 w-56 ${isDropdownOpen ? 'block' : 'hidden'} rounded-2xl shadow-xl divide-y ${isDark ? 'divide-gray-700 bg-gray-800' : 'divide-gray-200 bg-white'} z-50 border ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-                                        {user && (
-                                            <>
-                                                <div className={`px-4 py-3 rounded-t-2xl ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.name}</p>
-                                                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</p>
-                                                </div>
-                                                <div className="py-1">
-                                                    <Link 
-                                                        to="/my-courses" 
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
-                                                        onClick={() => setIsDropdownOpen(false)}
-                                                    >
-                                                        <i data-feather="book-open" className="w-4 h-4 mr-2"></i> My Courses
-                                                    </Link>
-                                                    <Link 
-                                                        to="/my-progress" 
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
-                                                        onClick={() => setIsDropdownOpen(false)}
-                                                    >
-                                                        <i data-feather="bar-chart-2" className="w-4 h-4 mr-2"></i> My Progress
-                                                    </Link>
-                                                    <Link 
-                                                        to="/settings" 
-                                                        className={`flex px-4 py-2 text-sm items-center transition-colors duration-200 ${isDark ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
-                                                        onClick={() => setIsDropdownOpen(false)}
-                                                    >
-                                                        <i data-feather="settings" className="w-4 h-4 mr-2"></i> Settings
-                                                    </Link>
-                                                    <button 
-                                                        id="sign-out-button" 
-                                                        className={`w-full text-left flex items-center px-4 py-2 text-sm transition-colors duration-200 rounded-b-2xl ${isDark ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-red-600 hover:bg-red-50 hover:text-red-700'}`}
-                                                        onClick={handleLogout}
-                                                    >
-                                                        <i data-feather="log-out" className="w-4 h-4 mr-2"></i> Sign Out
-                                                    </button>
-                                                </div>
-                                            </>
+                                    <div className="relative">
+                                        <button 
+                                            ref={profileButtonRef}
+                                            onClick={toggleProfileDropdown}
+                                            className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg ring-2 ring-primary-300/50 ring-offset-2 hover:ring-offset-1 transition-all duration-300 overflow-hidden"
+                                        >
+                                            {renderAvatar()}
+                                            {/* Fallback for image error */}
+                                            <span className="font-bold text-white hidden items-center justify-center w-full h-full">
+                                                {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
+                                            </span>
+                                        </button>
+                                        
+                                        {/* Profile Dropdown Menu */}
+                                        {isDropdownOpen && (
+                                            <div 
+                                                ref={dropdownRef}
+                                                className="absolute right-0 top-12 mt-2 w-56 rounded-2xl shadow-xl divide-y z-50 border transition-all duration-200 ease-in-out"
+                                                style={{
+                                                    backgroundColor: isDark ? '#1f2937' : 'white',
+                                                    borderColor: isDark ? '#374151' : '#e5e7eb',
+                                                    color: isDark ? 'white' : '#1f2937'
+                                                }}
+                                            >
+                                                {user && (
+                                                    <>
+                                                        <div className="px-4 py-3 rounded-t-2xl" style={{ backgroundColor: isDark ? 'rgba(55, 65, 81, 0.5)' : '#f9fafb' }}>
+                                                            <p className="text-sm font-medium">{user.name}</p>
+                                                            <p className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>{user.email}</p>
+                                                        </div>
+                                                        <div className="py-1">
+                                                            <Link 
+                                                                to="/my-courses" 
+                                                                className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
+                                                                style={{ 
+                                                                    color: isDark ? '#d1d5db' : '#374151',
+                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
+                                                                }}
+                                                                onClick={handleDropdownItemClick}
+                                                            >
+                                                                <i data-feather="book-open" className="w-4 h-4 mr-2"></i> My Courses
+                                                            </Link>
+                                                            <Link 
+                                                                to="/my-progress" 
+                                                                className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
+                                                                style={{ 
+                                                                    color: isDark ? '#d1d5db' : '#374151',
+                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
+                                                                }}
+                                                                onClick={handleDropdownItemClick}
+                                                            >
+                                                                <i data-feather="bar-chart-2" className="w-4 h-4 mr-2"></i> My Progress
+                                                            </Link>
+                                                            <Link 
+                                                                to="/settings" 
+                                                                className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
+                                                                style={{ 
+                                                                    color: isDark ? '#d1d5db' : '#374151',
+                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
+                                                                }}
+                                                                onClick={handleDropdownItemClick}
+                                                            >
+                                                                <i data-feather="settings" className="w-4 h-4 mr-2"></i> Settings
+                                                            </Link>
+                                                            <button 
+                                                                onClick={handleLogout}
+                                                                className="w-full text-left flex items-center px-4 py-2 text-sm transition-colors duration-200 rounded-b-2xl hover:bg-opacity-50"
+                                                                style={{ 
+                                                                    color: isDark ? '#f87171' : '#dc2626',
+                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
+                                                                }}
+                                                            >
+                                                                <i data-feather="log-out" className="w-4 h-4 mr-2"></i> Sign Out
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -620,6 +696,10 @@ const Navbar = () => {
                                             <div className="flex items-center space-x-3">
                                                 <div className="h-12 w-12 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white overflow-hidden shadow-lg">
                                                     {renderAvatar()}
+                                                    {/* Fallback for image error */}
+                                                    <span className="font-bold text-white hidden items-center justify-center w-full h-full">
+                                                        {user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
+                                                    </span>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-base font-semibold truncate ${mobileTextClass}`}>{user.name}</p>

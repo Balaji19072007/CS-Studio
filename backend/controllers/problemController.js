@@ -4,17 +4,15 @@ const User = require('../models/User');
 const Progress = require('../models/Progress'); 
 const fs = require('fs').promises;
 const path = require('path');
-const { runCodeTest } = require('../server'); // Import the new test runner utility
+const { runCodeTest } = require('../server');
 
 // @route   GET /api/problems
 // @desc    Get all problems with filters (for problems.html list)
 // @access  Public
 exports.getProblems = async (req, res) => {
     try {
-        // You would implement filtering logic based on req.query (difficulty, language, etc.) here.
-        // For simplicity, we fetch all problems sorted by problemId.
         const problems = await Problem.find()
-            .select('problemId title language difficulty examples') // Select only essential fields for the list view
+            .select('problemId title language difficulty examples')
             .sort('problemId'); 
 
         res.json(problems);
@@ -38,7 +36,6 @@ exports.getProblemById = async (req, res) => {
         res.json(problem);
     } catch (err) {
         console.error(err.message);
-        // Check for invalid ID format (e.g., non-numeric)
         if (err.kind === 'Number') {
             return res.status(400).json({ msg: 'Invalid Problem ID format' });
         }
@@ -53,15 +50,10 @@ exports.getProblemTestCases = async (req, res) => {
     try {
         const problemId = parseInt(req.params.id);
         
-        // Adjust the path according to your project structure
-        // Since problemData.json is in backend/utils folder
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
-        
-        // Read and parse the problemData.json file
         const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
         const problemData = JSON.parse(problemDataContent);
         
-        // Find the problem by ID
         const problem = problemData.find(p => p.id === problemId);
         
         if (!problem) {
@@ -107,85 +99,126 @@ exports.getProblemTestCases = async (req, res) => {
     }
 };
 
-
 // @route   POST /api/problems/:id/run-tests
 // @desc    Execute user code against visible and hidden test cases
 // @access  Private (requires authMiddleware)
 exports.runTestCases = async (req, res) => {
     const { code, language } = req.body;
     const problemId = parseInt(req.params.id);
-    const userId = req.user.id; // From authMiddleware
+    const userId = req.user.id;
 
     if (!code || !language) {
         return res.status(400).json({ msg: 'Code and language are required' });
     }
 
     try {
+        console.log('🔧 Running test cases for problem:', problemId, 'Language:', language);
+
         // 1. Get all test cases for the problem from JSON
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
+        console.log('📁 Looking for problem data at:', problemDataPath);
+        
         const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
         const allProblems = JSON.parse(problemDataContent);
         const problemFromJSON = allProblems.find(p => p.id === problemId);
 
-        if (!problemFromJSON || !problemFromJSON.testCases || problemFromJSON.testCases.length === 0) {
-            return res.status(404).json({ success: false, message: 'Problem or test cases not found' });
+        if (!problemFromJSON) {
+            console.error('❌ Problem not found in problemData.json for ID:', problemId);
+            return res.status(404).json({ success: false, message: 'Problem not found' });
         }
 
-        // Fetch problem from database to get official examples list (needed to determine visibility)
+        if (!problemFromJSON.testCases || problemFromJSON.testCases.length === 0) {
+            console.error('❌ No test cases found for problem:', problemId);
+            return res.status(404).json({ success: false, message: 'No test cases found for this problem' });
+        }
+
+        console.log('✅ Found problem with', problemFromJSON.testCases.length, 'test cases');
+
+        // Fetch problem from database to get official examples list
         const problemFromDB = await Problem.findOne({ problemId });
-        // Normalize examples input to match the normalization done during output check
         const normalize = (str) => str ? str.trim().replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ') : '';
         const visibleExampleInputs = problemFromDB && problemFromDB.examples ? problemFromDB.examples.map(e => normalize(e.input)) : [];
-
 
         // 2. Prepare test results
         const results = [];
         let passedCount = 0;
         
+        console.log('🧪 Running tests...');
+        
         // 3. Run code against each test case sequentially
         for (const [index, test] of problemFromJSON.testCases.entries()) {
-            const result = await runCodeTest(language, code, test.input);
-            
-            const normalizedExpected = normalize(test.expected);
-            const normalizedOutput = normalize(result.stdout);
-            
-            // CRITICAL FIX: Determine failure if there is compilation/runtime error (result.stderr)
-            const hasError = !!result.stderr;
-            const isPassed = !hasError && result.exitCode === 0 && normalizedOutput === normalizedExpected;
+            try {
+                console.log(`   Test ${index + 1}: Running...`);
+                const result = await runCodeTest(language, code, test.input);
+                
+                const normalizedExpected = normalize(test.expected);
+                const normalizedOutput = normalize(result.stdout);
+                
+                // CRITICAL FIX: Determine failure if there is compilation/runtime error (result.stderr)
+                const hasError = !!result.stderr;
+                const isPassed = !hasError && result.exitCode === 0 && normalizedOutput === normalizedExpected;
 
-            if (isPassed) {
-                passedCount++;
+                if (isPassed) {
+                    passedCount++;
+                    console.log(`   Test ${index + 1}: ✅ PASSED`);
+                } else {
+                    console.log(`   Test ${index + 1}: ❌ FAILED`, {
+                        hasError,
+                        exitCode: result.exitCode,
+                        expected: normalizedExpected,
+                        output: normalizedOutput
+                    });
+                }
+                
+                // Determine visibility: Check if the test input matches one of the known visible example inputs
+                const normalizedTestInput = normalize(test.input);
+                const isVisible = visibleExampleInputs.some(input => normalize(input) === normalizedTestInput);
+                
+                results.push({
+                    testCase: index + 1,
+                    status: isPassed ? 'pass' : (hasError ? 'error' : 'fail'),
+                    input: test.input, 
+                    expectedOutput: isVisible ? test.expected : 'Hidden',
+                    codeOutput: isVisible ? result.stdout : (hasError ? result.stderr.trim() : 'Execution Failed'),
+                    error: result.stderr ? result.stderr.trim() : null,
+                    isVisible: isVisible,
+                });
+            } catch (testError) {
+                console.error(`   Test ${index + 1}: 💥 ERROR:`, testError.message);
+                results.push({
+                    testCase: index + 1,
+                    status: 'error',
+                    input: test.input,
+                    expectedOutput: 'Hidden',
+                    codeOutput: 'Test execution failed',
+                    error: testError.message,
+                    isVisible: false,
+                });
             }
-            
-            // Determine visibility: Check if the test input matches one of the known visible example inputs
-            const normalizedTestInput = normalize(test.input);
-            const isVisible = visibleExampleInputs.some(input => normalize(input) === normalizedTestInput);
-            
-            results.push({
-                testCase: index + 1,
-                status: isPassed ? 'pass' : (hasError ? 'error' : 'fail'),
-                // Pass full input, frontend can decide to hide
-                input: test.input, 
-                // Only show expected output if it's a visible example
-                expectedOutput: isVisible ? test.expected : 'Hidden',
-                codeOutput: isVisible ? result.stdout : (hasError ? result.stderr.trim() : 'Execution Failed'),
-                error: result.stderr ? result.stderr.trim() : null,
-                isVisible: isVisible,
-            });
         }
         
         const totalTests = problemFromJSON.testCases.length;
-        const accuracy = (passedCount / totalTests) * 100;
+        const accuracy = totalTests > 0 ? (passedCount / totalTests) * 100 : 0;
 
-        // 4. Update user's progress (Only update best accuracy)
-        await Progress.findOneAndUpdate(
-            { userId, problemId },
-            { 
-                $set: { lastSubmission: new Date(), status: 'attempted' },
-                $max: { bestAccuracy: accuracy } // Only update if new accuracy is higher
-            },
-            { upsert: true, new: true } // Create if not exists, return updated document
-        );
+        console.log(`📊 Test Results: ${passedCount}/${totalTests} passed (${Math.floor(accuracy)}% accuracy)`);
+
+        // 4. Update user's progress using the Progress model methods
+        try {
+            const progress = await Progress.getUserProgress(userId, problemId);
+            
+            progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
+            progress.status = 'attempted';
+            progress.lastSubmission = new Date();
+            
+            await progress.save();
+            
+            // Update user stats for attempted problem
+            await Progress.updateUserStats(userId, accuracy, false);
+            console.log('✅ Progress updated for user:', userId);
+        } catch (progressError) {
+            console.error('⚠️ Progress update failed:', progressError.message);
+            // Don't fail the entire request if progress update fails
+        }
 
         res.json({
             success: true,
@@ -196,9 +229,13 @@ exports.runTestCases = async (req, res) => {
         });
 
     } catch (err) {
-        // Catch catastrophic errors (like file system failure or general API crash)
-        console.error('Catastrophic error running test cases:', err.message);
-        res.status(500).json({ msg: 'Server error during test execution', error: err.message });
+        console.error('💥 Catastrophic error running test cases:', err.message);
+        console.error('Stack trace:', err.stack);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server error during test execution', 
+            error: err.message 
+        });
     }
 };
 
@@ -208,14 +245,15 @@ exports.runTestCases = async (req, res) => {
 exports.submitProblem = async (req, res) => {
     const { code, language } = req.body;
     const problemId = parseInt(req.params.id);
-    const userId = req.user.id; // From authMiddleware
-    const problemPoints = 10; // Assign static points for simplicity (adjust as needed)
+    const userId = req.user.id;
 
     if (!code || !language) {
         return res.status(400).json({ msg: 'Code and language are required' });
     }
 
     try {
+        console.log('🚀 Submitting solution for problem:', problemId, 'Language:', language);
+
         // 1. Run all tests to determine final accuracy 
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
         const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
@@ -247,37 +285,44 @@ exports.submitProblem = async (req, res) => {
         const accuracy = (passedCount / totalTests) * 100;
         const isSolved = accuracy === 100;
         
-        // 2. Update Progress
-        const status = isSolved ? 'solved' : 'attempted';
-        
-        const existingProgress = await Progress.findOne({ userId, problemId });
-        
-        // Update status and ensure bestAccuracy is maintained
-        await Progress.findOneAndUpdate(
-            { userId, problemId },
-            { 
-                $set: { 
-                    status, 
-                    lastSubmission: new Date(),
-                    // Update accuracy only if it's the best score yet
-                    bestAccuracy: Math.max(existingProgress?.bestAccuracy || 0, accuracy)
-                }
-            },
-            { upsert: true, new: true }
-        );
+        console.log(`📊 Submission Results: ${passedCount}/${totalTests} passed (${accuracy}% accuracy), Solved: ${isSolved}`);
 
-        // 3. Update User Stats (only if successfully solved for the first time)
-        let pointsAwarded = 0;
-        if (isSolved && (existingProgress?.status !== 'solved' || !existingProgress)) {
-            // Only reward points and increment solved count if it was NOT solved previously
-            await User.findByIdAndUpdate(userId, {
-                $inc: { 
-                    totalPoints: problemPoints,
-                    problemsSolved: 1 
-                }
-            });
-            pointsAwarded = problemPoints;
+        // 2. Update Progress using Progress model methods
+        const progress = await Progress.getUserProgress(userId, problemId);
+        const wasPreviouslySolved = progress.status === 'solved';
+        
+        progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
+        if (isSolved) {
+            progress.status = 'solved';
+        } else if (progress.status !== 'solved') {
+            progress.status = 'attempted';
         }
+        
+        progress.lastSubmission = new Date();
+        await progress.save();
+        
+        // 3. Update User Stats using Progress model method
+        let pointsAwarded = 0;
+        
+        if (isSolved && !wasPreviouslySolved) {
+            // Use the Progress model method to update all user stats
+            await Progress.updateUserStats(userId, accuracy, true);
+            pointsAwarded = 100;
+            console.log('🎯 Problem SOLVED - User stats updated');
+        } else {
+            await Progress.updateUserStats(userId, accuracy, false);
+            console.log('📝 Problem ATTEMPTED - User stats updated');
+        }
+        
+        // 4. Get updated user data for response
+        const updatedUser = await User.findById(userId);
+        
+        console.log('✅ Final User Stats:', {
+            username: updatedUser.username,
+            problemsSolved: updatedUser.problemsSolved,
+            totalPoints: updatedUser.totalPoints,
+            averageAccuracy: updatedUser.averageAccuracy
+        });
         
         res.json({
             success: true,
@@ -285,13 +330,211 @@ exports.submitProblem = async (req, res) => {
             accuracy: Math.floor(accuracy),
             totalTests,
             passedCount,
-            message: isSolved ? (existingProgress?.status === 'solved' ? 'Problem already solved. Great job!' : 'Solution accepted! Problem solved!') : 'Solution failed some test cases. Keep trying!',
+            message: isSolved ? 
+                (wasPreviouslySolved ? 'Problem already solved. Great job!' : 'Solution accepted! Problem solved!') 
+                : 'Solution failed some test cases. Keep trying!',
             pointsAwarded: pointsAwarded,
-            newStatus: status
+            newStatus: progress.status,
+            userStats: {
+                problemsSolved: updatedUser.problemsSolved,
+                totalPoints: updatedUser.totalPoints,
+                averageAccuracy: updatedUser.averageAccuracy,
+                currentStreak: updatedUser.currentStreak
+            }
         });
 
     } catch (err) {
-        console.error('Catastrophic error submitting problem:', err.message);
-        res.status(500).json({ msg: 'Server error during submission', error: err.message });
+        console.error('💥 Catastrophic error submitting problem:', err.message);
+        console.error('Stack trace:', err.stack);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server error during submission', 
+            error: err.message 
+        });
+    }
+};
+
+// @route   POST /api/problems/:id/progress
+// @desc    Update user progress for a problem (called from frontend)
+// @access  Private
+exports.updateProgress = async (req, res) => {
+    try {
+        const { problemId } = req.params;
+        const { accuracy, isSolved } = req.body;
+        const userId = req.user.id;
+
+        const progress = await Progress.getUserProgress(userId, parseInt(problemId));
+
+        progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
+        if (isSolved) {
+            progress.status = 'solved';
+        } else if (progress.status !== 'solved') {
+            progress.status = 'attempted';
+        }
+
+        progress.lastSubmission = new Date();
+        await progress.save();
+
+        // Update user stats using Progress model
+        await Progress.updateUserStats(userId, accuracy, isSolved);
+
+        const updatedUser = await User.findById(userId);
+
+        res.json({
+            success: true,
+            progress: {
+                problemId: progress.problemId,
+                status: progress.status,
+                bestAccuracy: progress.bestAccuracy,
+                lastSubmission: progress.lastSubmission
+            },
+            userStats: {
+                problemsSolved: updatedUser.problemsSolved,
+                totalPoints: updatedUser.totalPoints,
+                averageAccuracy: updatedUser.averageAccuracy,
+                currentStreak: updatedUser.currentStreak
+            }
+        });
+
+    } catch (err) {
+        console.error('Progress update error:', err.message);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server Error updating progress',
+            error: err.message 
+        });
+    }
+};
+
+// @route   GET /api/problems/:id/progress
+// @desc    Get user progress for a specific problem
+// @access  Private
+exports.getProblemProgress = async (req, res) => {
+    try {
+        const problemId = parseInt(req.params.id);
+        const userId = req.user.id;
+
+        const progress = await Progress.getUserProgress(userId, problemId);
+
+        res.json({
+            success: true,
+            progress: {
+                problemId: progress.problemId,
+                status: progress.status,
+                bestAccuracy: progress.bestAccuracy,
+                lastSubmission: progress.lastSubmission,
+                timer: {
+                    timeRemaining: progress.getTimeRemaining(),
+                    isRunning: progress.timer.isRunning,
+                    hasExpired: progress.hasTimerExpired()
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error('Get progress error:', err.message);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server Error getting progress',
+            error: err.message 
+        });
+    }
+};
+
+// @route   POST /api/problems/:id/start-timer
+// @desc    Start 10-minute timer for a problem
+// @access  Private
+exports.startProblemTimer = async (req, res) => {
+    try {
+        const problemId = parseInt(req.params.id);
+        const userId = req.user.id;
+
+        const progress = await Progress.getUserProgress(userId, problemId);
+        
+        await progress.startTimer();
+        
+        res.json({
+            success: true,
+            message: 'Timer started (10 minutes)',
+            timer: {
+                startTime: progress.timer.startTime,
+                duration: progress.timer.duration,
+                timeRemaining: progress.getTimeRemaining(),
+                isRunning: progress.timer.isRunning
+            }
+        });
+        
+    } catch (err) {
+        console.error('Start timer error:', err.message);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server Error starting timer',
+            error: err.message 
+        });
+    }
+};
+
+// @route   POST /api/problems/:id/stop-timer
+// @desc    Stop timer for a problem
+// @access  Private
+exports.stopProblemTimer = async (req, res) => {
+    try {
+        const problemId = parseInt(req.params.id);
+        const userId = req.user.id;
+
+        const progress = await Progress.getUserProgress(userId, problemId);
+        
+        await progress.stopTimer();
+        
+        res.json({
+            success: true,
+            message: 'Timer stopped',
+            timer: {
+                timeRemaining: progress.timer.timeRemaining,
+                isRunning: progress.timer.isRunning
+            }
+        });
+        
+    } catch (err) {
+        console.error('Stop timer error:', err.message);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server Error stopping timer',
+            error: err.message 
+        });
+    }
+};
+
+// @route   GET /api/problems/:id/timer
+// @desc    Get current timer status for a problem
+// @access  Private
+exports.getProblemTimer = async (req, res) => {
+    try {
+        const problemId = parseInt(req.params.id);
+        const userId = req.user.id;
+
+        const progress = await Progress.getUserProgress(userId, problemId);
+        
+        const timeRemaining = progress.getTimeRemaining();
+        const hasExpired = progress.hasTimerExpired();
+        
+        res.json({
+            success: true,
+            timer: {
+                timeRemaining,
+                isRunning: progress.timer.isRunning,
+                hasExpired,
+                startTime: progress.timer.startTime,
+                duration: progress.timer.duration
+            }
+        });
+        
+    } catch (err) {
+        console.error('Get timer error:', err.message);
+        res.status(500).json({ 
+            success: false,
+            msg: 'Server Error getting timer',
+            error: err.message 
+        });
     }
 };

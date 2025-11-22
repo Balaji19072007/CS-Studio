@@ -1,8 +1,9 @@
 // src/components/problems/CodeEditor.jsx
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
-import { io } from 'socket.io-client';
 import { API_CONFIG } from '../../config/api.js';
+import { setupCompilerSocket, sendCodeForExecution, sendInputToProgram, stopCodeExecution } from '../../api/problemApi.js';
+import socketService from '../../services/socketService.js';
 
 // --- CONFIGURATION ---
 const MONACO_LANGUAGE_MAP = {
@@ -91,48 +92,47 @@ const CodeEditor = forwardRef(({
   const inputPromptClass = isDarkTheme ? 'text-yellow-400' : 'text-yellow-600';
   // ----------------------------------------------------
 
-  // --- Socket.IO Initialization and Listeners ---
+  // --- Socket.IO Initialization and Listeners (FIXED) ---
   useEffect(() => {
-    socketRef.current = io(API_CONFIG.SOCKET_URL);
+    // Initialize socket service if not already connected
+    const token = localStorage.getItem('token');
+    if (token && !socketService.isConnected) {
+      console.log('🔌 Initializing socket service for freeform editor...');
+      socketService.connect(token);
+    }
 
-    socketRef.current.on('execution-result', (result) => {
-      setIsRunning(false);
-      setIsWaitingForInput(false);
-      isInputActiveRef.current = false;
-      
-      if (result.success) {
-        setOutput(prev => prev + (result.output || '\n[Program completed successfully]'));
-        setError('');
-      } else {
-        setError(result.error || 'Execution failed');
+    // Set up compiler socket with the centralized service
+    socketRef.current = setupCompilerSocket((output, isError, isRunningState, isWaitingInput) => {
+      if (isWaitingInput !== undefined) {
+        setIsWaitingForInput(isWaitingInput);
+        isInputActiveRef.current = isWaitingInput;
       }
-    });
-
-    // Real-time output
-    socketRef.current.on('execution-output', (data) => {
-      if (data.output) {
+      
+      if (isError) {
+        setError(output);
+      } else {
         setOutput(prev => {
-          // Remove any existing "Executing..." message
-          if (prev === 'Executing...\n') {
-            return data.output;
+          if (prev === 'Output will appear here.' || prev === 'Executing...\n') {
+            return output;
           }
-          return prev + data.output;
+          return prev + output;
         });
       }
-    });
-
-    // Event when program is waiting for input
-    socketRef.current.on('waiting-for-input', () => {
-      setIsWaitingForInput(true);
-      isInputActiveRef.current = true;
+      
+      setIsRunning(Boolean(isRunningState));
     });
 
     return () => {
+      // Remove compiler-specific event listeners
       if (socketRef.current) {
-        socketRef.current.disconnect();
+        socketRef.current.off('execution-result');
+        socketRef.current.off('execution-output');
+        socketRef.current.off('waiting-for-input');
+        socketRef.current.off('connect_error');
+        socketRef.current.off('disconnect');
       }
     };
-  }, [onOutputReceived]);
+  }, []);
 
   // Handle terminal key presses for input
   useEffect(() => {
@@ -146,8 +146,8 @@ const CodeEditor = forwardRef(({
         e.preventDefault();
         // Send the input buffer
         if (inputBufferRef.current.trim() !== '') {
-          if (socketRef.current && socketRef.current.connected) {
-            socketRef.current.emit('send-input', inputBufferRef.current);
+          if (socketRef.current && socketService.isConnected) {
+            sendInputToProgram(socketRef.current, inputBufferRef.current);
             // Add the input to output with a newline
             setOutput(prev => prev + inputBufferRef.current + '\n');
             inputBufferRef.current = '';
@@ -197,7 +197,7 @@ const CodeEditor = forwardRef(({
 
   // Use proper execution language mapping
   const handleRunCode = useCallback((codeToRun) => {
-    if (!socketRef.current || !socketRef.current.connected) {
+    if (!socketRef.current || !socketService.isConnected) {
         setOutput('Compiler service is disconnected. Check network.');
         return;
     }
@@ -212,16 +212,18 @@ const CodeEditor = forwardRef(({
     // Use the correct execution language mapping
     const executionLanguage = EXECUTION_LANGUAGE_MAP[language] || language.toLowerCase();
     
-    socketRef.current.emit('execute-code', {
-      language: executionLanguage,
-      code: codeToRun,
-    });
+    try {
+      sendCodeForExecution(socketRef.current, codeToRun, executionLanguage);
+    } catch (error) {
+      setOutput(`Execution Error: ${error.message}`);
+      setIsRunning(false);
+    }
   }, [language]);
 
   // Stop execution
   const handleStopExecution = useCallback(() => {
-    if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit('stop-execution');
+    if (socketRef.current && socketService.isConnected) {
+      stopCodeExecution(socketRef.current);
     }
     setIsRunning(false);
     setIsWaitingForInput(false);

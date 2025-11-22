@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CodeEditor from '../components/problems/CodeEditor.jsx'; 
 import * as feather from 'feather-icons';
+import socketService from '../services/socketService.js';
 
 const Code = () => {
     const navigate = useNavigate(); 
     const [isDark, setIsDark] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('connecting');
     
     useEffect(() => {
         feather.replace();
@@ -26,8 +28,39 @@ const Code = () => {
         return () => observer.disconnect();
     }, []);
     
+    // Initialize socket service when component mounts
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token && !socketService.isConnected) {
+            console.log('🔌 Initializing socket service for freeform playground...');
+            socketService.connect(token);
+        }
+
+        // Listen for connection status changes
+        const updateStatus = () => {
+            setConnectionStatus(socketService.isConnected ? 'connected' : 'disconnected');
+        };
+
+        // Initial status
+        updateStatus();
+
+        // Check status periodically
+        const statusInterval = setInterval(updateStatus, 2000);
+
+        return () => {
+            clearInterval(statusInterval);
+        };
+    }, []);
+    
     const handleGoBack = () => {
         navigate(-1);
+    };
+
+    const handleRetryConnection = () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            socketService.manualReconnect();
+        }
     };
     
     // Theme-aware classes for button appearance
@@ -56,6 +89,39 @@ const Code = () => {
                     Freeform Code Playground
                 </h1>
                 <p className="text-gray-400 mb-4">Run quick tests and experiments across supported languages (C, Python, Java...) using our real-time compiler service.</p>
+                
+                {/* Connection Status Indicator */}
+                <div className="mb-4 flex items-center">
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                        connectionStatus === 'connected' 
+                            ? 'bg-green-600/30 text-green-300' 
+                            : connectionStatus === 'connecting'
+                            ? 'bg-yellow-600/30 text-yellow-300'
+                            : 'bg-red-600/30 text-red-300'
+                    }`}>
+                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                            connectionStatus === 'connected' 
+                                ? 'bg-green-400 animate-pulse' 
+                                : connectionStatus === 'connecting'
+                                ? 'bg-yellow-400 animate-pulse'
+                                : 'bg-red-400'
+                        }`}></div>
+                        {connectionStatus === 'connected' 
+                            ? 'Compiler Connected' 
+                            : connectionStatus === 'connecting'
+                            ? 'Connecting to Compiler...'
+                            : 'Compiler Disconnected'
+                        }
+                    </div>
+                    {connectionStatus !== 'connected' && (
+                        <button 
+                            onClick={handleRetryConnection}
+                            className="ml-2 inline-flex items-center px-2 py-1 rounded text-xs bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                        >
+                            <i data-feather="refresh-cw" className="w-3 h-3 mr-1"></i> Retry
+                        </button>
+                    )}
+                </div>
                 
                 {/* Editor fills the height of the container */}
                 <div className="flex-grow min-h-0 h-[calc(100vh-14rem)] lg:h-[calc(100vh-10rem)]">
