@@ -13,6 +13,7 @@ const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
 const { v2: cloudinary } = require('cloudinary'); 
 const multer = require('multer');
+const jwt = require('jsonwebtoken'); // ADDED: JWT for socket authentication
 
 const app = express();
 const server = http.createServer(app);
@@ -141,7 +142,12 @@ app.get('/api/health', (req, res) => {
 // ===================================================================
 
 const io = new Server(server, {
-  cors: corsOptions
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
+    credentials: true
+  }
 });
 
 // Store execution sessions
@@ -154,6 +160,23 @@ function emitNotification(userId, notification) {
   io.to(`user_${userId}`).emit('new-notification', notification);
   console.log(`📢 Real-time notification sent to user ${userId}`);
 }
+
+// Socket.IO authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error('Authentication error'));
+  }
+  
+  try {
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.id;
+    next();
+  } catch (error) {
+    next(new Error('Authentication error'));
+  }
+});
 
 // Update NotificationService to use real-time emissions
 const NotificationService = require('./util/notificationService');
@@ -212,14 +235,12 @@ function testCompilers() {
 testCompilers();
 
 io.on('connection', (socket) => {
-  console.log(`🔌 Socket connected: ${socket.id}`);
+  console.log(`🔌 Socket connected: ${socket.id} for user ${socket.userId}`);
 
   // Join user to their personal room for notifications
-  socket.on('join-notifications', (userId) => {
-    socket.join(`user_${userId}`);
-    userSockets.set(userId, socket.id);
-    console.log(`👤 User ${userId} joined notification room`);
-  });
+  socket.join(`user_${socket.userId}`);
+  userSockets.set(socket.userId, socket.id);
+  console.log(`👤 User ${socket.userId} joined notification room`);
 
   // Handle disconnect
   socket.on('disconnect', () => {
@@ -922,6 +943,8 @@ server.listen(PORT, () => {
   console.log('🔔 Real-time notifications system active');
   console.log('💡 Make sure compilers are installed on your system!');
   console.log('✅ Stats routes registered: /api/stats/user-stats, /api/stats/rating-status, /api/stats/rating-eligibility');
+  console.log('📢 Notification routes registered: /api/notifications');
 });
 
+// Export for testing
 module.exports = { app, server, io, emitNotification };

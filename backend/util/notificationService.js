@@ -3,12 +3,12 @@ const Notification = require('../models/Notification');
 
 class NotificationService {
   /**
-   * Send notification to a single user
+   * Send notification to a single user with real-time emission
    */
   static async sendNotification(userId, notificationData) {
     try {
       const notification = new Notification({
-        userId,
+        user: userId,
         title: notificationData.title,
         message: notificationData.message,
         type: notificationData.type || 'system',
@@ -19,8 +19,8 @@ class NotificationService {
 
       await notification.save();
 
-      // Emit real-time event via Socket.IO if needed
-      // this.emitRealTimeNotification(userId, notification);
+      // EMIT REAL-TIME NOTIFICATION - FIXED
+      await this.emitRealTimeNotification(userId, notification);
 
       console.log(`📢 Notification sent to user ${userId}: ${notificationData.title}`);
       return notification;
@@ -31,12 +31,41 @@ class NotificationService {
   }
 
   /**
+   * Emit real-time notification via Socket.IO - FIXED VERSION
+   */
+  static async emitRealTimeNotification(userId, notification) {
+    try {
+      // Get the io instance from server.js
+      const { io } = require('../server');
+      
+      if (io) {
+        console.log(`📡 EMITTING real-time notification to user_${userId}:`, notification.title);
+        
+        // Convert Mongoose document to plain object
+        const notificationObj = notification.toObject ? notification.toObject() : notification;
+        
+        // Emit to the specific user's room
+        io.to(`user_${userId}`).emit('new-notification', notificationObj);
+        console.log(`✅ Real-time notification emitted to user_${userId}`);
+        
+        return true;
+      } else {
+        console.error('❌ Socket.IO instance not available');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error emitting real-time notification:', error);
+      return false;
+    }
+  }
+
+  /**
    * Send notification to multiple users
    */
   static async sendBulkNotifications(userIds, notificationData) {
     try {
       const notifications = userIds.map(userId => ({
-        userId,
+        user: userId,
         title: notificationData.title,
         message: notificationData.message,
         type: notificationData.type || 'system',
@@ -47,30 +76,15 @@ class NotificationService {
 
       const result = await Notification.insertMany(notifications);
       
+      // Emit real-time notifications for each user
+      for (let i = 0; i < result.length; i++) {
+        await this.emitRealTimeNotification(userIds[i], result[i]);
+      }
+      
       console.log(`📢 Bulk notifications sent to ${userIds.length} users: ${notificationData.title}`);
       return result;
     } catch (error) {
       console.error('Error sending bulk notifications:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Send notification to all users (for admin announcements)
-   */
-  static async sendToAllUsers(notificationData) {
-    try {
-      // In a real implementation, you'd fetch all user IDs from the database
-      // For now, this is a placeholder that would be called from admin routes
-      console.log(`📢 Admin notification to all users: ${notificationData.title}`);
-      
-      return {
-        success: true,
-        message: 'Notification scheduled for all users',
-        data: notificationData
-      };
-    } catch (error) {
-      console.error('Error sending notification to all users:', error);
       throw error;
     }
   }

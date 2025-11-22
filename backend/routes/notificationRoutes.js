@@ -13,13 +13,15 @@ router.get('/', auth, async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const notifications = await Notification.find({ userId: req.user.id })
+    // FIXED: Changed userId to user to match the model
+    const notifications = await Notification.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const total = await Notification.countDocuments({ userId: req.user.id });
+    // FIXED: Changed userId to user
+    const total = await Notification.countDocuments({ user: req.user.id });
 
     res.json({
       success: true,
@@ -45,8 +47,9 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.get('/unread-count', auth, async (req, res) => {
   try {
+    // FIXED: Changed userId to user
     const count = await Notification.countDocuments({ 
-      userId: req.user.id, 
+      user: req.user.id, 
       read: false 
     });
 
@@ -68,8 +71,9 @@ router.get('/unread-count', auth, async (req, res) => {
 // @access  Private
 router.patch('/:id/read', auth, async (req, res) => {
   try {
+    // FIXED: Changed userId to user
     const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
+      { _id: req.params.id, user: req.user.id },
       { read: true },
       { new: true }
     );
@@ -99,8 +103,9 @@ router.patch('/:id/read', auth, async (req, res) => {
 // @access  Private
 router.patch('/mark-all-read', auth, async (req, res) => {
   try {
+    // FIXED: Changed userId to user
     await Notification.updateMany(
-      { userId: req.user.id, read: false },
+      { user: req.user.id, read: false },
       { read: true }
     );
 
@@ -122,9 +127,10 @@ router.patch('/mark-all-read', auth, async (req, res) => {
 // @access  Private
 router.delete('/:id', auth, async (req, res) => {
   try {
+    // FIXED: Changed userId to user
     const notification = await Notification.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user.id
+      user: req.user.id
     });
 
     if (!notification) {
@@ -152,7 +158,8 @@ router.delete('/:id', auth, async (req, res) => {
 // @access  Private
 router.delete('/clear-all', auth, async (req, res) => {
   try {
-    await Notification.deleteMany({ userId: req.user.id });
+    // FIXED: Changed userId to user
+    await Notification.deleteMany({ user: req.user.id });
 
     res.json({
       success: true,
@@ -163,6 +170,36 @@ router.delete('/clear-all', auth, async (req, res) => {
     res.status(500).json({
       success: false,
       msg: 'Server error while clearing notifications'
+    });
+  }
+});
+
+// @desc    Create a test notification
+// @route   POST /api/notifications/test
+// @access  Private
+router.post('/test', auth, async (req, res) => {
+  try {
+    const NotificationService = require('../util/notificationService');
+    
+    const testNotification = await NotificationService.sendNotification(req.user.id, {
+      title: 'Test Notification ✅',
+      message: 'This is a test notification to verify the system is working properly!',
+      type: 'system',
+      link: '/',
+      important: true
+    });
+
+    res.json({
+      success: true,
+      message: 'Test notification sent successfully',
+      data: testNotification
+    });
+  } catch (error) {
+    console.error('Error sending test notification:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error sending test notification',
+      error: error.message
     });
   }
 });

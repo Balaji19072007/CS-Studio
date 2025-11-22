@@ -7,9 +7,15 @@ export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [socketInitialized, setSocketInitialized] = useState(false);
 
   const fetchNotifications = useCallback(async (page = 1, limit = 20) => {
-    if (!localStorage.getItem('token')) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
     
     try {
       setLoading(true);
@@ -19,19 +25,43 @@ export const useNotifications = () => {
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError(err.response?.data?.msg || 'Failed to fetch notifications');
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!localStorage.getItem('token')) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUnreadCount(0);
+      return;
+    }
     
     try {
       const response = await notificationService.getUnreadCount();
       setUnreadCount(response.count || 0);
     } catch (err) {
       console.error('Error fetching unread count:', err);
+      setUnreadCount(0);
+    }
+  }, []);
+
+  // FIXED: Better real-time notification handler
+  const handleNewNotification = useCallback((newNotification) => {
+    console.log('📢 REAL-TIME: New notification received via socket:', newNotification);
+    
+    // Immediately update both notifications list and unread count
+    setNotifications(prev => [newNotification, ...prev]);
+    setUnreadCount(prev => prev + 1);
+    
+    // Show browser notification
+    if (Notification.permission === 'granted' && document.hidden) {
+      new Notification(newNotification.title, {
+        body: newNotification.message,
+        icon: '/favicon.ico',
+        tag: 'cs-studio'
+      });
     }
   }, []);
 
@@ -89,6 +119,7 @@ export const useNotifications = () => {
         prev.filter(notification => notification._id !== notificationId)
       );
       
+      // Update unread count
       const deletedNotification = notifications.find(n => n._id === notificationId);
       if (deletedNotification && !deletedNotification.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -100,54 +131,52 @@ export const useNotifications = () => {
   }, [notifications]);
 
   const refreshNotifications = useCallback(async () => {
+    console.log('🔄 Manually refreshing notifications...');
     await Promise.all([fetchNotifications(), fetchUnreadCount()]);
   }, [fetchNotifications, fetchUnreadCount]);
 
-  // Handle real-time notifications
+  // FIXED: Better socket initialization
   useEffect(() => {
-    const handleNewNotification = (newNotification) => {
-      console.log('📢 New real-time notification:', newNotification);
+    const initializeSocket = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('userData');
       
-      // Add new notification to the top of the list
-      setNotifications(prev => [newNotification, ...prev]);
-      
-      // Increment unread count
-      setUnreadCount(prev => prev + 1);
-      
-      // Show browser notification if permitted
-      if (Notification.permission === 'granted' && document.hidden) {
-        new Notification(newNotification.title, {
-          body: newNotification.message,
-          icon: '/favicon.ico',
-          tag: 'cs-studio'
-        });
+      if (token && userData && !socketInitialized) {
+        try {
+          console.log('🔌 Initializing socket connection...');
+          
+          // Set up notification listener FIRST
+          socketService.onNotification(handleNewNotification);
+          
+          // Then connect socket
+          socketService.connect(token);
+          
+          setSocketInitialized(true);
+          console.log('✅ Socket service initialized');
+          
+        } catch (error) {
+          console.error('❌ Socket initialization failed:', error);
+        }
       }
     };
 
-    socketService.onNotification(handleNewNotification);
+    initializeSocket();
 
     return () => {
-      socketService.offNotification(handleNewNotification);
+      // Cleanup
+      if (socketInitialized) {
+        console.log('🧹 Cleaning up socket listeners');
+        socketService.offNotification(handleNewNotification);
+      }
     };
-  }, []);
+  }, [socketInitialized, handleNewNotification]);
 
-  // Initialize socket connection and fetch notifications
+  // Initial data fetch
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('userData');
-    
-    if (token && userData) {
-      try {
-        socketService.connect(token);
-        refreshNotifications();
-      } catch (error) {
-        console.error('Socket connection failed:', error);
-      }
+    if (token) {
+      refreshNotifications();
     }
-
-    return () => {
-      // Don't disconnect here - let App.jsx handle it
-    };
   }, [refreshNotifications]);
 
   // Request browser notification permission
@@ -159,33 +188,12 @@ export const useNotifications = () => {
     }
   }, []);
 
-  // Poll for updates when tab is visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        fetchUnreadCount();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        fetchUnreadCount();
-      }
-    }, 60000); // Check every minute
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearInterval(interval);
-    };
-  }, [fetchUnreadCount]);
-
   return {
     notifications,
     unreadCount,
     loading,
     error,
+    socketInitialized,
     fetchNotifications,
     fetchUnreadCount,
     markAsRead,

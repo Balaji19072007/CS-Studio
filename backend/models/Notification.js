@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const NotificationSchema = new Schema({
-  userId: {
+  user: {  // Changed from userId to user for consistency
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -44,7 +44,12 @@ const NotificationSchema = new Schema({
 });
 
 // Index for faster queries
-NotificationSchema.index({ userId: 1, createdAt: -1 });
-NotificationSchema.index({ userId: 1, read: 1 });
+NotificationSchema.index({ user: 1, createdAt: -1 });
+NotificationSchema.index({ user: 1, read: 1 });
+
+// Virtual for formatted createdAt
+NotificationSchema.virtual('createdAtFormatted').get(function() {
+  return this.createdAt.toISOString();
+});
 
 module.exports = mongoose.model('Notification', NotificationSchema);

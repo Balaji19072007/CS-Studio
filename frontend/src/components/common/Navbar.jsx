@@ -491,6 +491,7 @@ const Navbar = () => {
                                 {renderNotifications()}
                             </div>
                         )}
+                        
 
                         {/* Auth Section */}
                         <div id="auth-nav-container" className="flex items-center space-x-3">
@@ -638,6 +639,7 @@ const Navbar = () => {
                                                         )}
                                                     </button>
                                                 )}
+                                                
                                             </div>
                                         </div>
                                     )}
