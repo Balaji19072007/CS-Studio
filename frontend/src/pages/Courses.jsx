@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import * as feather from 'feather-icons';
 
 // Comprehensive Course Data matching the HTML structure
 const COURSES_DATA = [
@@ -473,8 +472,6 @@ const CourseCard = ({ course }) => {
         return icons[category] || 'book-open';
     };
     
-    // Note: The card-hover h3 selector in index.css will handle the text color based on theme
-    const iconColor = categoryColors[course.category]?.iconColor || 'text-white';
 
     return (
         // Changed styling to use card-hover for dark theme compatibility

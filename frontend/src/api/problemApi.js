@@ -1,6 +1,5 @@
 // frontend/src/api/problemApi.js
 
-import { io } from 'socket.io-client';
 import api from '../services/apiService'; // Import the configured axios instance
 import socketService from '../services/socketService.js';
 

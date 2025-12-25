@@ -101,7 +101,11 @@ export const API_ENDPOINTS = {
   PREDICTION: {
     PREDICT: `/predict`,
   },
-  
+
+  TESTS: {
+    VERIFY_CODE: `/api/tests/verify-code`,
+  },
+
   HEALTH: `/api/health`,
 };
 
@@ -150,6 +154,10 @@ export const notificationsAPI = {
 
 export const predictionAPI = {
   predict: (data) => api.post(API_ENDPOINTS.PREDICTION.PREDICT, data),
+};
+
+export const testAPI = {
+  verifyCode: (data) => api.post(API_ENDPOINTS.TESTS.VERIFY_CODE, data),
 };
 
 // Utility functions

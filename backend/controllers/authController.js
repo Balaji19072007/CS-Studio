@@ -673,45 +673,49 @@ exports.updateProfile = async (req, res) => {
     // --- 3. Handle Profile Picture Upload (if file is present) ---
     if (file) {
         const cloudinary = req.app.get('cloudinary');
-        if (!cloudinary) {
-            throw new Error('Cloudinary configuration missing on server.');
-        }
 
-        // We use an Upload Stream to send the buffer directly to Cloudinary
-        const uploadStream = () => {
-            return new Promise((resolve, reject) => {
-                // Set up the writable stream to pipe the buffer into
-                const bufferStream = new stream.PassThrough();
-                bufferStream.end(file.buffer);
+        if (cloudinary) {
+            // Use Cloudinary if available
+            const uploadStream = () => {
+                return new Promise((resolve, reject) => {
+                    // Set up the writable stream to pipe the buffer into
+                    const bufferStream = new stream.PassThrough();
+                    bufferStream.end(file.buffer);
 
-                const cld_upload_stream = cloudinary.uploader.upload_stream(
-                    {
-                        // Use the user's ID as the folder and a unique name
-                        folder: `cs_studio_profiles/${user.id}`,
-                        public_id: `profile_${Date.now()}`,
-                        tags: ['profile_picture', user.username],
-                        resource_type: 'image',
-                        quality: "auto:good", // Auto-optimize image quality
-                        fetch_format: "auto"    // Auto-optimize image format
-                    },
-                    (error, result) => {
-                        if (error) {
-                            console.error('Cloudinary Upload Error:', error);
-                            reject(new Error('Failed to upload image to storage.'));
-                        } else {
-                            resolve(result);
+                    const cld_upload_stream = cloudinary.uploader.upload_stream(
+                        {
+                            // Use the user's ID as the folder and a unique name
+                            folder: `cs_studio_profiles/${user.id}`,
+                            public_id: `profile_${Date.now()}`,
+                            tags: ['profile_picture', user.username],
+                            resource_type: 'image',
+                            quality: "auto:good", // Auto-optimize image quality
+                            fetch_format: "auto"    // Auto-optimize image format
+                        },
+                        (error, result) => {
+                            if (error) {
+                                console.error('Cloudinary Upload Error:', error);
+                                reject(new Error('Failed to upload image to storage.'));
+                            } else {
+                                resolve(result);
+                            }
                         }
-                    }
-                );
+                    );
 
-                bufferStream.pipe(cld_upload_stream);
-            });
-        };
-        
-        const result = await uploadStream();
-        
-        // Update the user's photoUrl with the secure URL from Cloudinary
-        user.photoUrl = result.secure_url;
+                    bufferStream.pipe(cld_upload_stream);
+                });
+            };
+
+            const result = await uploadStream();
+
+            // Update the user's photoUrl with the secure URL from Cloudinary
+            user.photoUrl = result.secure_url;
+        } else {
+            // Fallback: Convert to base64 data URL for development
+            console.log('⚠️ Cloudinary not configured, using base64 fallback for profile picture');
+            const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+            user.photoUrl = base64Data;
+        }
     }
 
     // Update the timestamp to force cache refresh

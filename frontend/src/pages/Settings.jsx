@@ -1,13 +1,14 @@
 // frontend/src/pages/Settings.jsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx'; 
 import * as feather from 'feather-icons';
-import { updateProfile } from '../api/authApi.js'; 
+import { updateProfile } from '../api/authApi.js';
 import { useSimpleImageCropper } from '../hooks/useSimpleImageCropper.js';
+import { ProblemManager } from '../utils/problemManager.js';
 
 const Settings = () => {
-    const { user, updateUser, updateUserProfile, isLoggedIn, logout } = useAuth();
+    const { user, updateUserProfile, isLoggedIn, logout } = useAuth();
     const navigate = useNavigate();
 
     // Local form state
@@ -31,11 +32,11 @@ const Settings = () => {
         applyCropManually,
         cancelCrop,
         crop,
-        isDragging,
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
-        canvasRef
+        canvasRef,
+        imageRef
     } = useSimpleImageCropper();
 
     // Mobile navigation state
@@ -86,16 +87,19 @@ const Settings = () => {
 
         try {
             const imageBlob = await applyCropManually();
-            
+
             if (!imageBlob) {
                 throw new Error('Failed to process image');
             }
+
+            // Convert blob to File object for proper multer handling
+            const imageFile = new File([imageBlob], 'profile.jpg', { type: 'image/jpeg' });
 
             const formData = new FormData();
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
             formData.append('bio', bio);
-            formData.append('profilePicture', imageBlob, 'profile.jpg');
+            formData.append('profilePicture', imageFile);
 
             const apiResponse = await updateProfile(formData);
 
@@ -111,17 +115,19 @@ const Settings = () => {
                     photoUrl: tempUrl,
                     firstName,
                     lastName,
-                    bio
+                    bio,
+                    updatedAt: Date.now()
                 });
                 setProfilePicture(tempUrl);
                 showAlert('Profile picture updated!');
             }
-            
+
             cancelCrop();
-            
+
         } catch (error) {
             console.error('Crop application error:', error);
-            showAlert(error.message || 'Failed to update profile picture. Please try again.', 'error');
+            const errorMessage = error.response?.data?.msg || error.message || 'Failed to update profile picture. Please try again.';
+            showAlert(errorMessage, 'error');
         } finally {
             setIsUploading(false);
         }
@@ -179,6 +185,13 @@ const Settings = () => {
         return fullName.charAt(0).toUpperCase();
     }, [user, firstName, lastName]);
 
+    const handleResetAllProblems = () => {
+        if (window.confirm('Are you sure you want to reset all problems to "todo" status and reset all timers to 10 minutes? This will keep your code and submissions but reset progress.')) {
+            ProblemManager.resetAllProblemsToTodo();
+            showAlert('All problems have been reset to "todo" status with fresh 10-minute timers!', 'success');
+        }
+    };
+
     const renderProfilePictureSection = () => {
         const initials = getInitials();
         
@@ -188,23 +201,36 @@ const Settings = () => {
                     {/* Profile Picture Preview */}
                     <div className="relative group">
                         <div className="relative">
-                            {profilePicture ? (
-                                <img 
-                                    src={`${profilePicture}?${user?.updatedAt || Date.now()}`} 
-                                    alt="Profile" 
-                                    className="w-40 h-40 rounded-full object-cover border-4 border-primary-500/30 shadow-2xl transition-all duration-300 group-hover:border-primary-500/50"
-                                    onError={(e) => {
-                                        // Fallback to initials if image fails to load
-                                        e.target.style.display = 'none';
-                                        const fallback = e.target.nextSibling;
-                                        if (fallback) fallback.style.display = 'flex';
-                                    }}
-                                    key={profilePicture} // Force re-render when URL changes
-                                />
-                            ) : null}
-                            
-                            {/* Fallback initials - always rendered but hidden by default */}
-                            <div className={`w-40 h-40 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center border-4 border-primary-500/30 shadow-2xl transition-all duration-300 group-hover:border-primary-500/50 ${
+                            {/* Profile Picture Image */}
+                            <img
+                                src={profilePicture ? `${profilePicture}?${user?.updatedAt || Date.now()}` : ''}
+                                alt="Profile"
+                                className={`w-40 h-40 rounded-full object-cover border-4 border-primary-500/30 shadow-2xl transition-all duration-300 group-hover:border-primary-500/50 ${
+                                    profilePicture ? 'block' : 'hidden'
+                                }`}
+                                onError={(e) => {
+                                    // Hide image and show fallback initials
+                                    e.target.style.display = 'none';
+                                    const fallback = e.target.parentElement?.querySelector('.profile-fallback');
+                                    if (fallback) {
+                                        fallback.classList.remove('hidden');
+                                        fallback.classList.add('flex');
+                                    }
+                                }}
+                                onLoad={(e) => {
+                                    // Show image and hide fallback
+                                    e.target.style.display = 'block';
+                                    const fallback = e.target.parentElement?.querySelector('.profile-fallback');
+                                    if (fallback) {
+                                        fallback.classList.remove('flex');
+                                        fallback.classList.add('hidden');
+                                    }
+                                }}
+                                key={profilePicture} // Force re-render when URL changes
+                            />
+
+                            {/* Fallback initials */}
+                            <div className={`profile-fallback w-40 h-40 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center border-4 border-primary-500/30 shadow-2xl transition-all duration-300 group-hover:border-primary-500/50 ${
                                 profilePicture ? 'hidden' : 'flex'
                             }`}>
                                 <span className="text-4xl font-bold text-white">
@@ -414,6 +440,33 @@ const Settings = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Progress Reset Section */}
+                            <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+                                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6">Progress Management</h2>
+
+                                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 border border-gray-200 dark:border-gray-600">
+                                    <div className="flex items-start space-x-4">
+                                        <div className="flex-shrink-0">
+                                            <i data-feather="refresh-cw" className="w-8 h-8 text-orange-500"></i>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Reset All Problems</h3>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                                Reset all problems to "todo" status and restart all timers to 10 minutes.
+                                                Your saved code and submission history will be preserved, but you'll need to solve problems again to unlock solutions.
+                                            </p>
+                                            <button
+                                                onClick={handleResetAllProblems}
+                                                className="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium transition-colors duration-200 flex items-center"
+                                            >
+                                                <i data-feather="refresh-cw" className="w-4 h-4 mr-2"></i>
+                                                Reset All Problems
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -444,28 +497,37 @@ const Settings = () => {
                         {/* Content */}
                         <div className="p-6">
                             <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                <div className="h-80 w-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-                                    <img 
-                                        src={originalImage} 
-                                        alt="Crop preview" 
-                                        className="max-w-full max-h-full"
-                                    />
-                                    {/* Crop overlay */}
-                                    <div 
-                                        className="absolute border-2 border-white border-dashed shadow-lg cursor-move"
-                                        style={{
-                                            left: `${crop.x}px`,
-                                            top: `${crop.y}px`,
-                                            width: `${crop.width}px`,
-                                            height: `${crop.height}px`,
-                                            cursor: isDragging ? 'grabbing' : 'grab'
-                                        }}
-                                        onMouseDown={handleMouseDown}
-                                    >
-                                        <div className="absolute -top-1 -left-1 w-2 h-2 bg-white rounded-full"></div>
-                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full"></div>
-                                        <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-white rounded-full"></div>
-                                        <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-white rounded-full"></div>
+                                <div className="h-[400px] w-[400px] flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
+                                    {/* Full image with circular mask */}
+                                    <div className="relative w-full h-full overflow-hidden rounded">
+                                        <img
+                                            ref={imageRef}
+                                            src={originalImage}
+                                            alt="Crop preview"
+                                            className="absolute max-w-none max-h-none cursor-move"
+                                            style={{
+                                                left: `-${crop.x}px`,
+                                                top: `-${crop.y}px`,
+                                                transform: `scale(${400 / crop.width})`,
+                                                transformOrigin: 'top left'
+                                            }}
+                                            onMouseDown={handleMouseDown}
+                                            draggable={false}
+                                        />
+                                        {/* Circular mask overlay */}
+                                        <div className="absolute inset-0 bg-black/50 rounded">
+                                            <div
+                                                className="absolute border-2 border-white shadow-lg rounded-full"
+                                                style={{
+                                                    left: `${(400 - crop.width) / 2}px`,
+                                                    top: `${(400 - crop.height) / 2}px`,
+                                                    width: `${crop.width}px`,
+                                                    height: `${crop.height}px`,
+                                                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)'
+                                                }}
+                                            >
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -10,6 +10,69 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Page refresh redirect script -->
+    <script>
+      // Handle page refresh redirect to home
+      (function() {
+        // Check if this was a page refresh/reload
+        var navigationEntries = performance.getEntriesByType('navigation');
+        if (navigationEntries.length > 0 && navigationEntries[0].type === 'reload') {
+          // This was a page refresh, redirect to home
+          if (window.location.hash !== '#/' && window.location.hash !== '') {
+            console.log('Page refresh detected, redirecting to home...');
+            window.location.hash = '#/';
+            // Force a clean reload
+            window.location.reload();
+          }
+        }
+
+        // Also check for direct navigation (not through SPA)
+        var wasSPANavigation = sessionStorage.getItem('spaNavigation');
+        if (!wasSPANavigation && window.location.hash !== '#/' && window.location.hash !== '') {
+          console.log('Direct page load detected, redirecting to home...');
+          sessionStorage.removeItem('spaNavigation');
+          window.location.hash = '#/';
+          window.location.reload();
+        }
+
+        // Set flag for SPA navigation
+        sessionStorage.setItem('spaNavigation', 'true');
+
+        // Listen for hash changes to mark as SPA navigation
+        window.addEventListener('hashchange', function() {
+          sessionStorage.setItem('spaNavigation', 'true');
+        });
+
+        // Clear flag on page unload (for refresh detection)
+        window.addEventListener('beforeunload', function() {
+          sessionStorage.removeItem('spaNavigation');
+        });
+      })();
+    </script>
+
+    <!-- Global Feather Icons Initialization -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      // Initialize feather icons immediately when DOM is ready
+      function initializeFeatherIcons() {
+        if (typeof feather !== 'undefined' && feather.replace) {
+          feather.replace();
+        }
+      }
+
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeFeatherIcons);
+      } else {
+        initializeFeatherIcons();
+      }
+
+      // Also initialize after a short delay to catch any dynamically added content
+      setTimeout(initializeFeatherIcons, 100);
+      setTimeout(initializeFeatherIcons, 500);
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

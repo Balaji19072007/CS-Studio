@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react'; // Add useContext
 import { useNavigate } from 'react-router-dom';
 
 export const AuthContext = createContext();
@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
             photoUrl: userData.photoUrl,
             bio: userData.bio,
             username: userData.username,
+            updatedAt: userData.updatedAt || Date.now(),
           };
           localStorage.setItem('userData', JSON.stringify(userDataToStore));
           setUser(userDataToStore);
@@ -113,6 +114,7 @@ export const AuthProvider = ({ children }) => {
         photoUrl: updatedUser.photoUrl !== undefined ? updatedUser.photoUrl : user?.photoUrl,
         bio: updatedUser.bio !== undefined ? updatedUser.bio : user?.bio,
         username: updatedUser.username || user?.username,
+        updatedAt: updatedUser.updatedAt || Date.now(),
       };
       
       // Update both state and localStorage
@@ -134,21 +136,19 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUser,
-    updateUserProfile, // Add this new method
+    updateUserProfile,
     checkAuthStatus,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use the auth context
+// Custom hook to use the auth context - ADD THIS
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
   return context;
 };
 

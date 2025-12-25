@@ -1,10 +1,11 @@
 // controllers/problemController.js
 const Problem = require('../models/Problem');
-const User = require('../models/User'); 
-const Progress = require('../models/Progress'); 
+const User = require('../models/User');
+const Progress = require('../models/Progress');
 const fs = require('fs').promises;
 const path = require('path');
-const { runCodeTest } = require('../server');
+const { runCodeTest } = require('../util/codeRunner');
+const TestEvaluationService = require('../util/testEvaluationService');
 
 // @route   GET /api/problems
 // @desc    Get all problems with filters (for problems.html list)
@@ -134,29 +135,26 @@ exports.runTestCases = async (req, res) => {
 
         console.log('✅ Found problem with', problemFromJSON.testCases.length, 'test cases');
 
-        // Fetch problem from database to get official examples list
-        const problemFromDB = await Problem.findOne({ problemId });
-        const normalize = (str) => str ? str.trim().replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ') : '';
-        const visibleExampleInputs = problemFromDB && problemFromDB.examples ? problemFromDB.examples.map(e => normalize(e.input)) : [];
 
         // 2. Prepare test results
-        const results = [];
+        const evaluationService = new TestEvaluationService();
         let passedCount = 0;
-        
+
         console.log('🧪 Running tests...');
-        
+
         // 3. Run code against each test case sequentially
         for (const [index, test] of problemFromJSON.testCases.entries()) {
             try {
                 console.log(`   Test ${index + 1}: Running...`);
                 const result = await runCodeTest(language, code, test.input);
-                
-                const normalizedExpected = normalize(test.expected);
-                const normalizedOutput = normalize(result.stdout);
-                
+
+                // Use proper test evaluation service for comparison
+                const cleanedOutput = evaluationService.cleanOutput(result.stdout);
+                const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
+
                 // CRITICAL FIX: Determine failure if there is compilation/runtime error (result.stderr)
                 const hasError = !!result.stderr;
-                const isPassed = !hasError && result.exitCode === 0 && normalizedOutput === normalizedExpected;
+                const isPassed = !hasError && result.exitCode === 0 && comparison.passed;
 
                 if (isPassed) {
                     passedCount++;
@@ -165,35 +163,14 @@ exports.runTestCases = async (req, res) => {
                     console.log(`   Test ${index + 1}: ❌ FAILED`, {
                         hasError,
                         exitCode: result.exitCode,
-                        expected: normalizedExpected,
-                        output: normalizedOutput
+                        expected: test.expected,
+                        output: cleanedOutput,
+                        matchType: comparison.matchType,
+                        difference: comparison.difference
                     });
                 }
-                
-                // Determine visibility: Check if the test input matches one of the known visible example inputs
-                const normalizedTestInput = normalize(test.input);
-                const isVisible = visibleExampleInputs.some(input => normalize(input) === normalizedTestInput);
-                
-                results.push({
-                    testCase: index + 1,
-                    status: isPassed ? 'pass' : (hasError ? 'error' : 'fail'),
-                    input: test.input, 
-                    expectedOutput: isVisible ? test.expected : 'Hidden',
-                    codeOutput: isVisible ? result.stdout : (hasError ? result.stderr.trim() : 'Execution Failed'),
-                    error: result.stderr ? result.stderr.trim() : null,
-                    isVisible: isVisible,
-                });
             } catch (testError) {
                 console.error(`   Test ${index + 1}: 💥 ERROR:`, testError.message);
-                results.push({
-                    testCase: index + 1,
-                    status: 'error',
-                    input: test.input,
-                    expectedOutput: 'Hidden',
-                    codeOutput: 'Test execution failed',
-                    error: testError.message,
-                    isVisible: false,
-                });
             }
         }
         
@@ -222,9 +199,7 @@ exports.runTestCases = async (req, res) => {
 
         res.json({
             success: true,
-            results,
-            passedCount,
-            totalTests,
+            passed: accuracy === 100,
             accuracy: Math.floor(accuracy),
         });
 
@@ -266,18 +241,17 @@ exports.submitProblem = async (req, res) => {
         
         let passedCount = 0;
         const totalTests = problemFromJSON.testCases.length;
-        
-        const normalize = (str) => str ? str.trim().replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ') : '';
-        
+        const evaluationService = new TestEvaluationService();
+
         // This process runs against all hidden and visible test cases
         for (const test of problemFromJSON.testCases) {
             const result = await runCodeTest(language, code, test.input);
-            const normalizedExpected = normalize(test.expected);
-            const normalizedOutput = normalize(result.stdout);
-            
+            const cleanedOutput = evaluationService.cleanOutput(result.stdout);
+            const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
+
             const hasError = !!result.stderr;
-            
-            if (!hasError && result.exitCode === 0 && normalizedOutput === normalizedExpected) {
+
+            if (!hasError && result.exitCode === 0 && comparison.passed) {
                 passedCount++;
             }
         }

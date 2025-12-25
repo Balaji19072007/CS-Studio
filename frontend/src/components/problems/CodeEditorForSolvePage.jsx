@@ -14,14 +14,14 @@ const EXECUTION_LANGUAGE_MAP = {
 };
 
 const DEFAULT_CODE = {
-  'C': `#include <stdio.h>\n\nint main() {\n    // Write your code here\n    return 0;\n}`,
-  
+  'C': `#include <stdio.h>\n\nint main() {\n    int number;\n    printf("Please enter a number: ");\n    scanf("%d", &number);\n    printf("You entered: %d\\n", number);\n    return 0;\n}`,
+
   'C++': `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}`,
-  
+
   'Java': `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}`,
-  
+
   'Python': `\n# Write your code here\n`,
-  
+
   'JavaScript': `// Write your code here\nconst solution = (input) => {\n  return "Output";\n};`
 };
 

@@ -22,7 +22,7 @@ const EXECUTION_LANGUAGE_MAP = {
 };
 
 const DEFAULT_CODE = {
- 'C': `#include <stdio.h>\n\nint main() {\n    int number;\n    printf("Please enter a number: ");\n    fflush(stdout);  // Force output flush\n    scanf("%d", &number);\n    printf("You entered: %d\\n", number);\n    return 0;\n}`,
+  'C': `#include <stdio.h>\n\nint main() {\n    int number;\n    printf("Please enter a number: ");\n    scanf("%d", &number);\n    printf("You entered: %d\\n", number);\n    return 0;\n}`,
   
   'C++': `#include <iostream>\nusing namespace std;\n\nint main() {\n    int number;\n    cout << "Enter a number: ";\n    cin >> number;\n    cout << "You entered: " << number << endl;\n    return 0;\n}`,
   
@@ -33,12 +33,11 @@ const DEFAULT_CODE = {
   'JavaScript': `const readline = require('readline');\n\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout\n});\n\nrl.question('Enter number: ', (answer) => {\n  console.log('You entered:', answer);\n  rl.close();\n});`
 };
 
-const CodeEditor = forwardRef(({ 
-    initialCode = DEFAULT_CODE['Python'], 
+const CodeEditor = forwardRef(({
+    initialCode = DEFAULT_CODE['Python'],
     language: propLanguage = 'Python',
-    theme: propTheme = 'vs-dark', 
-    isProblemSolver = false, 
-    onOutputReceived 
+    theme: propTheme = 'vs-dark',
+    isProblemSolver = false
 }, ref) => {
 
   const [code, setCode] = useState(initialCode);
@@ -62,7 +61,7 @@ const CodeEditor = forwardRef(({
     setCode(initialCode);
     setTheme(propTheme);
     setLanguage(propLanguage);
-  }, [initialCode, propTheme]);
+  }, [initialCode, propTheme, propLanguage]);
   
   // Update code when language changes
   useEffect(() => {
@@ -75,7 +74,7 @@ const CodeEditor = forwardRef(({
       inputBufferRef.current = '';
       isInputActiveRef.current = false;
     }
-  }, [language, isProblemSolver]);
+  }, [language, isProblemSolver, propLanguage]);
   
   // --- Theme-aware classes ---
   const isDarkTheme = theme === 'vs-dark' || theme === 'hc-black';

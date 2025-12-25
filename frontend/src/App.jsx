@@ -1,9 +1,10 @@
 // src/App.jsx
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext.jsx';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import { useTheme } from './hooks/useTheme.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 import Navbar from './components/common/Navbar.jsx';
 import Footer from './components/common/Footer.jsx';
@@ -18,7 +19,8 @@ import Roadmaps from './pages/Roadmaps.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import Community from './pages/Community.jsx';
 import Settings from './pages/Settings.jsx';
-import Code from './pages/Code.jsx'; 
+import Code from './pages/Code.jsx';
+import CodeVerification from './pages/CodeVerification.jsx';
 import SolveProblem from './pages/SolveProblem.jsx';
 import MyCourses from './pages/MyCourses.jsx';
 import MyProgress from './pages/MyProgress.jsx';
@@ -78,15 +80,14 @@ function App() {
 // Separate component to use hooks
 function AppContent() {
   const { isDark } = useTheme();
-  const { isLoggedIn } = useAuth();
-  
-  // Socket connection is now handled in useNotifications hook
-  // No need for duplicate connection management here
+
+  // Page refresh handling is now done in index.html for better reliability
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
+
       <main className="flex-grow pt-16" style={{ minHeight: '60vh' }}>
         <Routes>
           {/* Public Routes */}
@@ -132,6 +133,7 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/solve" element={<ProtectedRoute><SolveProblem /></ProtectedRoute>} />
           <Route path="/code" element={<ProtectedRoute><Code /></ProtectedRoute>} />
+          <Route path="/code-verification" element={<ProtectedRoute><CodeVerification /></ProtectedRoute>} />
           <Route path="/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
           <Route path="/my-progress" element={<ProtectedRoute><MyProgress /></ProtectedRoute>} />
 
@@ -139,9 +141,9 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      
+
       <RatingPopup />
-      
+
       <Footer />
     </div>
   );

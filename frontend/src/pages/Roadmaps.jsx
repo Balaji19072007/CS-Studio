@@ -414,9 +414,10 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
         case 'bigdata-ds':
           navigate('/roadmaps/data-science-bigdata');
           break;
-        default:
+        default: {
           const roadmapName = child.title;
           alert(`Viewing roadmap for: ${roadmapName}`);
+        }
       }
     } else {
       const roadmapName = roadmap.title;

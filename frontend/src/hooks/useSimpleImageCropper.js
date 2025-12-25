@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 export const useSimpleImageCropper = () => {
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [originalImage, setOriginalImage] = useState(null);
-    const [croppedImage, setCroppedImage] = useState(null);
+    const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
     const fileInputRef = useRef(null);
     const canvasRef = useRef(null);
     const imageRef = useRef(null);
@@ -39,18 +39,25 @@ export const useSimpleImageCropper = () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            setOriginalImage(e.target.result);
-            setIsCropModalOpen(true);
-            
-            // Reset crop area to center
-            setTimeout(() => {
-                setCrop({
-                    x: 100,
-                    y: 100,
-                    width: 200,
-                    height: 200
-                });
-            }, 100);
+            const img = new Image();
+            img.onload = () => {
+                setImageDimensions({ width: img.width, height: img.height });
+                setOriginalImage(e.target.result);
+                setIsCropModalOpen(true);
+
+                // Reset crop area to center
+                setTimeout(() => {
+                    const centerX = Math.max(0, (img.width - 200) / 2);
+                    const centerY = Math.max(0, (img.height - 200) / 2);
+                    setCrop({
+                        x: centerX,
+                        y: centerY,
+                        width: 200,
+                        height: 200
+                    });
+                }, 100);
+            };
+            img.src = e.target.result;
         };
         reader.onerror = () => {
             alert('Failed to read image file');
@@ -69,21 +76,24 @@ export const useSimpleImageCropper = () => {
     }, [crop]);
 
     const handleMouseMove = useCallback((e) => {
-        if (!isDragging) return;
-        
+        if (!isDragging || !originalImage) return;
+
         const newX = e.clientX - dragStart.x;
         const newY = e.clientY - dragStart.y;
-        
-        // Boundary checks
-        const boundedX = Math.max(0, Math.min(newX, 400 - crop.width));
-        const boundedY = Math.max(0, Math.min(newY, 400 - crop.height));
-        
+
+        // Boundary checks - ensure crop area stays within image bounds
+        const maxX = imageDimensions.width - crop.width;
+        const maxY = imageDimensions.height - crop.height;
+
+        const boundedX = Math.max(0, Math.min(newX, maxX));
+        const boundedY = Math.max(0, Math.min(newY, maxY));
+
         setCrop(prev => ({
             ...prev,
             x: boundedX,
             y: boundedY
         }));
-    }, [isDragging, dragStart, crop.width, crop.height]);
+    }, [isDragging, dragStart, crop.width, crop.height, originalImage, imageDimensions]);
 
     const handleMouseUp = useCallback(() => {
         setIsDragging(false);
@@ -133,7 +143,7 @@ export const useSimpleImageCropper = () => {
     const cancelCrop = useCallback(() => {
         setIsCropModalOpen(false);
         setOriginalImage(null);
-        setCroppedImage(null);
+        setImageDimensions({ width: 0, height: 0 });
         setCrop({ x: 0, y: 0, width: 200, height: 200 });
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -155,6 +165,7 @@ export const useSimpleImageCropper = () => {
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
-        canvasRef
+        canvasRef,
+        imageRef
     };
 };

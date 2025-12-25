@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../hooks/useAuth.jsx"; 
-import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { useTheme } from '../../hooks/useTheme.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
 import * as feather from 'feather-icons';
 import SearchBar from './SearchBar.jsx'; 
@@ -24,16 +24,15 @@ const NAV_ITEMS = [...PRIMARY_NAV_ITEMS, ...SECONDARY_NAV_ITEMS];
 
 const Navbar = () => {
     const { isLoggedIn, user, logout, loading } = useAuth();
-    const { theme, toggleTheme, isDark } = useTheme();
-    const { 
-        notifications, 
-        unreadCount, 
-        loading: notificationsLoading, 
-        markAsRead, 
-        markAllAsRead, 
+    const { toggleTheme, isDark } = useTheme();
+    const {
+        notifications,
+        unreadCount,
+        loading: notificationsLoading,
+        markAsRead,
+        markAllAsRead,
         clearAllNotifications,
-        deleteNotification,
-        refreshNotifications
+        deleteNotification
     } = useNotifications();
     const location = useLocation();
     const navigate = useNavigate();
@@ -61,7 +60,15 @@ const Navbar = () => {
 
     // Replace icons on component mount and updates
     useEffect(() => {
+        // Initialize immediately
         initializeFeatherIcons();
+
+        // Also initialize after a short delay to catch any dynamically added content
+        const timer = setTimeout(() => {
+            initializeFeatherIcons();
+        }, 100);
+
+        return () => clearTimeout(timer);
     });
 
     // Handle content spacing for fixed navbars
@@ -111,6 +118,10 @@ const Navbar = () => {
         e.stopPropagation();
         setIsDropdownOpen(prev => !prev);
         setIsNotificationsOpen(false); // Close notifications if open
+    }
+
+    const handleThemeToggle = () => {
+        toggleTheme();
     }
 
     const toggleNotifications = async (e) => {
@@ -254,21 +265,35 @@ const Navbar = () => {
         
         if (photoUrl) {
             return (
-                <img 
-                    src={photoUrl} 
-                    alt="Profile" 
-                    className="h-full w-full rounded-full object-cover"
-                    onError={(e) => {
-                        // If image fails to load, show initials as fallback
-                        e.target.style.display = 'none';
-                        const fallback = e.target.nextSibling;
-                        if (fallback) {
-                            fallback.style.display = 'flex';
-                            fallback.textContent = userInitials;
-                        }
-                    }}
-                    key={photoUrl} // Add key to force re-render when URL changes
-                />
+                <div className="relative h-full w-full">
+                    <img
+                        src={photoUrl}
+                        alt="Profile"
+                        className="h-full w-full rounded-full object-cover block"
+                        onError={(e) => {
+                            // Hide image and show fallback initials
+                            e.target.style.display = 'none';
+                            const fallback = e.target.parentElement?.querySelector('.avatar-fallback');
+                            if (fallback) {
+                                fallback.classList.remove('hidden');
+                                fallback.classList.add('flex');
+                            }
+                        }}
+                        onLoad={(e) => {
+                            // Show image and hide fallback
+                            e.target.style.display = 'block';
+                            const fallback = e.target.parentElement?.querySelector('.avatar-fallback');
+                            if (fallback) {
+                                fallback.classList.remove('flex');
+                                fallback.classList.add('hidden');
+                            }
+                        }}
+                        key={`${photoUrl}-${user.updatedAt || Date.now()}`} // Add key to force re-render when URL or timestamp changes
+                    />
+                    <span className="avatar-fallback absolute inset-0 font-bold text-white hidden items-center justify-center w-full h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-600">
+                        {userInitials}
+                    </span>
+                </div>
             );
         }
         
@@ -482,6 +507,7 @@ const Navbar = () => {
 
     return (
         <>
+
             {/* 1. TOP NAVBAR (STATIC) */}
             <nav className={`${isDark ? 'dark-gradient' : 'bg-white shadow-lg'} fixed top-0 left-0 w-full z-50 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                 {/* Main Flex Container */}
@@ -517,11 +543,11 @@ const Navbar = () => {
                         )}
                         
                         {/* Theme Toggle */}
-                        <button 
-                            onClick={toggleTheme}
+                        <button
+                            onClick={handleThemeToggle}
                             className={`hidden sm:block p-2 rounded-lg transition-all duration-300 ${
-                                isDark 
-                                    ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
+                                isDark
+                                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
                             }`}
                             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -548,16 +574,12 @@ const Navbar = () => {
                                     )}
                                     
                                     <div className="relative">
-                                        <button 
+                                        <button
                                             ref={profileButtonRef}
                                             onClick={toggleProfileDropdown}
                                             className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg ring-2 ring-primary-300/50 ring-offset-2 hover:ring-offset-1 transition-all duration-300 overflow-hidden"
                                         >
                                             {renderAvatar()}
-                                            {/* Fallback for image error */}
-                                            <span className="font-bold text-white hidden items-center justify-center w-full h-full">
-                                                {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
-                                            </span>
                                         </button>
                                         
                                         {/* Profile Dropdown Menu */}
@@ -589,10 +611,10 @@ const Navbar = () => {
                                                             >
                                                                 <i data-feather="book-open" className="w-4 h-4 mr-2"></i> My Courses
                                                             </Link>
-                                                            <Link 
-                                                                to="/my-progress" 
+                                                            <Link
+                                                                to="/my-progress"
                                                                 className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
-                                                                style={{ 
+                                                                style={{
                                                                     color: isDark ? '#d1d5db' : '#374151',
                                                                     backgroundColor: isDark ? 'transparent' : 'transparent'
                                                                 }}
@@ -600,10 +622,10 @@ const Navbar = () => {
                                                             >
                                                                 <i data-feather="bar-chart-2" className="w-4 h-4 mr-2"></i> My Progress
                                                             </Link>
-                                                            <Link 
-                                                                to="/settings" 
+                                                            <Link
+                                                                to="/settings"
                                                                 className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
-                                                                style={{ 
+                                                                style={{
                                                                     color: isDark ? '#d1d5db' : '#374151',
                                                                     backgroundColor: isDark ? 'transparent' : 'transparent'
                                                                 }}
@@ -696,10 +718,6 @@ const Navbar = () => {
                                             <div className="flex items-center space-x-3">
                                                 <div className="h-12 w-12 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white overflow-hidden shadow-lg">
                                                     {renderAvatar()}
-                                                    {/* Fallback for image error */}
-                                                    <span className="font-bold text-white hidden items-center justify-center w-full h-full">
-                                                        {user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
-                                                    </span>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-base font-semibold truncate ${mobileTextClass}`}>{user.name}</p>
@@ -771,8 +789,8 @@ const Navbar = () => {
 
                                     {/* Theme Toggle */}
                                     <div className={`p-4 border-t ${mobileBorderClass}`}>
-                                        <button 
-                                            onClick={toggleTheme}
+                                        <button
+                                            onClick={handleThemeToggle}
                                             className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors duration-200 group ${mobileCardBgClass} ${mobileHoverBgClass}`}
                                         >
                                             <div className="flex items-center">
@@ -836,7 +854,8 @@ const Navbar = () => {
                     </div>
                 </div>
             </nav>
-            
+
+
             {/* 2. MOBILE BOTTOM NAVIGATION (STATIC) */}
             {isLoggedIn && (
                 <div id="mobile-bottom-nav" className={`fixed bottom-0 left-0 right-0 h-16 sm:hidden z-40 shadow-2xl ${isDark ? 'dark-gradient border-t border-gray-700' : 'bg-white border-t border-gray-200'}`}>

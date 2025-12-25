@@ -118,16 +118,23 @@ export class ProblemManager {
   
   static markAsSolved(problemId) {
     // Ensure timer is stopped and final time is calculated correctly upon solving
-    this.stopTimer(problemId); 
-    
+    this.stopTimer(problemId);
+
     localStorage.setItem(this.getSolvedKey(problemId), 'true');
-    
+
     // Total time spent is already saved in time_total_elapsed
     const timeSpent = parseInt(localStorage.getItem(this.getTimeSpentKey(problemId)) || 0);
-    // We update the original time_spent key for consistency with global stats 
+    // We update the original time_spent key for consistency with global stats
     localStorage.setItem(this.getProblemKey(problemId, 'time_spent'), timeSpent.toString());
-    
+
     this.updateGlobalProgress();
+
+    // Dispatch storage event to notify other components
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: this.getSolvedKey(problemId),
+      newValue: 'true',
+      storageArea: localStorage
+    }));
   }
   
   static markSolutionViewed(problemId) {
@@ -263,7 +270,7 @@ export class ProblemManager {
   
   static resetAllProgress() {
     for (let i = 1; i <= this.TOTAL_PROBLEMS; i++) {
-      localStorage.removeItem(this.getProblemKey(i, 'start_time')); 
+      localStorage.removeItem(this.getProblemKey(i, 'start_time'));
       localStorage.removeItem(this.getStartTimeKey(i));
       localStorage.removeItem(this.getSolvedKey(i));
       localStorage.removeItem(this.getSubmissionHistoryKey(i));
@@ -272,6 +279,32 @@ export class ProblemManager {
       localStorage.removeItem(this.getProblemKey(i, 'time_spent'));
     }
     localStorage.removeItem('global_progress');
+  }
+
+  // Reset all problems to "todo" status and reset timers to 10 minutes
+  static resetAllProblemsToTodo() {
+    for (let i = 1; i <= this.TOTAL_PROBLEMS; i++) {
+      // Reset solved status to false
+      localStorage.setItem(this.getSolvedKey(i), 'false');
+
+      // Reset timer to 10 minutes (0 elapsed time)
+      localStorage.setItem(this.getTimeSpentKey(i), '0');
+      localStorage.setItem(this.getStartTimeKey(i), '0');
+
+      // Keep submission history and user code, just reset status and timer
+      // This allows users to keep their work but restart the timer
+    }
+    localStorage.removeItem('global_progress');
+    this.updateGlobalProgress();
+  }
+
+  // Reset a specific problem to "todo" status
+  static resetProblemToTodo(problemId) {
+    localStorage.setItem(this.getSolvedKey(problemId), 'false');
+    localStorage.setItem(this.getTimeSpentKey(problemId), '0');
+    localStorage.setItem(this.getStartTimeKey(problemId), '0');
+    localStorage.removeItem('global_progress');
+    this.updateGlobalProgress();
   }
   
   static exportProgress() {
@@ -382,3 +415,8 @@ for (let i = 1; i <= ProblemManager.TOTAL_PROBLEMS; i++) {
 
 // Initialize all problems on first load (uses safe check inside the method)
 ProblemManager.initializeAllProblems();
+
+// One-time fix: Reset problem 1 to todo if it's solved
+if (localStorage.getItem(ProblemManager.getSolvedKey(1)) === 'true') {
+  ProblemManager.resetProblemToTodo(1);
+}

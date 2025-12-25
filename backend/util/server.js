@@ -13,22 +13,21 @@ const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
 const { v2: cloudinary } = require('cloudinary'); 
 const multer = require('multer');
-const statsRoutes = require('./routes/statsRoutes');
+const statsRoutes = require('../routes/statsRoutes');
 
 const app = express();
 const server = http.createServer(app);
 
 // --- Model Imports ---
-const User = require('./models/User');
-const Problem = require('./models/Problem');
+const User = require('../models/User');
+const Problem = require('../models/Problem');
 
 // --- Controller & Route Imports ---
-const authRoutes = require('./routes/authRoutes');
-const googleAuthRoutes = require('./routes/googleAuthRoutes');
-const problemRoutes = require('./routes/problemRoutes');
-const leaderboardRoutes = require('./routes/leaderboardRoutes');
-const predictionRoutes = require('./routes/predictionRoutes');
-app.use('/api/stats', statsRoutes);
+const authRoutes = require('../routes/authRoutes');
+const googleAuthRoutes = require('../routes/googleAuthRoutes');
+const problemRoutes = require('../routes/problemRoutes');
+const leaderboardRoutes = require('../routes/leaderboardRoutes');
+const predictionRoutes = require('../routes/predictionRoutes');
 
 // Enable CORS for all routes
 app.use(cors({
@@ -123,7 +122,7 @@ app.use('/api/google-auth', googleAuthRoutes);
 app.use('/api/problems', problemRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/predict', predictionRoutes);
-app.use('/api/stats', require('./routes/statsRoutes'));
+app.use('/api/stats', statsRoutes);
 // --- Health Check Endpoint ---
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -840,6 +839,11 @@ function setupProcessHandlers(process, socket, tempFiles) {
 }
 
 // ===================================================================
+// --- HELPER FUNCTIONS ---
+// ===================================================================
+
+
+// ===================================================================
 // --- NEW EXPORT: Single Test Execution (Non-interactive) ---
 // This is used by the Problem Controller for Run All/Submit.
 // ===================================================================
@@ -871,20 +875,20 @@ async function runCodeTest(language, code, input) {
         runArgs = [sourceFile];
         tempFiles.push(sourceFile);
         break;
-      
+
       case 'c':
       case 'cpp': {
         const ext = language.toLowerCase() === 'c' ? '.c' : '.cpp';
         const compiler = language.toLowerCase() === 'c' ? 'gcc' : 'g++';
         sourceFile = path.join(tempDir, `${sessionId}${ext}`);
         executable = path.join(tempDir, `${sessionId}${process.platform === 'win32' ? '.exe' : ''}`);
-        
+
         fs.writeFileSync(sourceFile, cleanedCode);
-        
+
         // Compilation
         const compileProcess = spawn(compiler, [sourceFile, '-o', executable], { timeout: 15000, cwd: tempDir });
         let compileError = '';
-        
+
         compileProcess.stderr.on('data', (data) => {
           compileError += data.toString();
         });

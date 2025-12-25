@@ -42,6 +42,8 @@ class TestEvaluationService {
     const results = [
       this.compareExact(cleanedActual, cleanedExpected),
       this.compareTrimmed(cleanedActual, cleanedExpected),
+      this.compareLineTrimmed(cleanedActual, cleanedExpected),
+      this.compareCaseInsensitive(cleanedActual, cleanedExpected),
       this.compareWhitespaceInsensitive(cleanedActual, cleanedExpected),
       this.compareNumeric(cleanedActual, cleanedExpected),
       this.compareFloatingPoint(cleanedActual, cleanedExpected, 1e-6)
@@ -86,6 +88,36 @@ class TestEvaluationService {
       passed,
       matchType: passed ? 'trimmed' : 'none',
       difference: passed ? '' : `Trimmed comparison failed`
+    };
+  }
+
+  /**
+   * Line-trimmed comparison (trims each line individually)
+   */
+  compareLineTrimmed(actual, expected) {
+    const actualLines = actual.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const expectedLines = expected.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const passed = actualLines.length === expectedLines.length && actualLines.every((line, i) => line === expectedLines[i]);
+
+    return {
+      passed,
+      matchType: passed ? 'line_trimmed' : 'none',
+      difference: passed ? '' : `Line-trimmed comparison failed`
+    };
+  }
+
+  /**
+   * Case insensitive comparison
+   */
+  compareCaseInsensitive(actual, expected) {
+    const lowerActual = actual.toLowerCase();
+    const lowerExpected = expected.toLowerCase();
+    const passed = lowerActual === lowerExpected;
+
+    return {
+      passed,
+      matchType: passed ? 'case_insensitive' : 'none',
+      difference: passed ? '' : `Case-insensitive comparison failed`
     };
   }
 
@@ -176,9 +208,10 @@ class TestEvaluationService {
       .replace(/\r\n/g, '\n')      // Normalize Windows line endings
       .replace(/\r/g, '\n')        // Normalize Mac line endings
       .replace(/\t/g, ' ')         // Replace tabs with spaces
-      .replace(/\s+\n/g, '\n')     // Remove trailing spaces before newlines
-      .replace(/\n\s+/g, '\n')     // Remove leading spaces after newlines
-      .trim();                     // Remove surrounding whitespace
+      .replace(/ +\n/g, '\n')      // Remove trailing spaces before newlines
+      .replace(/\n +/g, '\n')      // Remove leading spaces after newlines
+      .replace(/^ +/, '')          // Remove leading spaces
+      .replace(/ +$/, '');         // Remove trailing spaces (but keep \n)
   }
 
   /**

@@ -14,7 +14,7 @@ class ErrorBoundary extends React.Component {
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -101,7 +101,7 @@ class ErrorBoundary extends React.Component {
             </div>
 
             {/* Error Details Toggle */}
-            {process.env.NODE_ENV === 'development' && (
+            {import.meta.env.DEV && (
               <div className="border-t border-gray-700 pt-6">
                 <button
                   onClick={this.toggleDetails}

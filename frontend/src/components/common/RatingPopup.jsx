@@ -14,8 +14,8 @@ const RatingPopup = () => {
   // Detect theme changes
   useEffect(() => {
     const detectTheme = () => {
-      const theme = document.documentElement.getAttribute('data-theme') || 
-                   (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      const theme = document.documentElement.getAttribute('data-theme') ||
+                    (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
       setCurrentTheme(theme);
     };
 
@@ -49,40 +49,9 @@ const RatingPopup = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!isAuthenticated()) return;
-
-    initializeRatingSystem();
-    
-    const interval = setInterval(checkRatingStatus, 30000);
-    
-    const handleBeforeUnload = () => {
-      stopUsageTracking();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      clearInterval(interval);
-      stopUsageTracking();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
-
-  const initializeRatingSystem = async () => {
-    if (!isAuthenticated()) return;
-
-    try {
-      await startUsageTracking();
-      await checkRatingStatus();
-    } catch (error) {
-      console.error('Error initializing rating system:', error);
-    }
-  };
-
   const startUsageTracking = async () => {
     if (!isAuthenticated()) return;
-    
+
     try {
       await statsAPI.startUsageTracking();
     } catch (error) {
@@ -92,7 +61,7 @@ const RatingPopup = () => {
 
   const stopUsageTracking = async () => {
     if (!isAuthenticated()) return;
-    
+
     try {
       await statsAPI.stopUsageTracking();
     } catch (error) {
@@ -121,13 +90,44 @@ const RatingPopup = () => {
 
   const markRatingAsShown = async () => {
     if (!isAuthenticated()) return;
-    
+
     try {
       await statsAPI.markRatingShown();
     } catch (error) {
       console.error('Error marking rating as shown:', error);
     }
   };
+
+  const initializeRatingSystem = async () => {
+    if (!isAuthenticated()) return;
+
+    try {
+      await startUsageTracking();
+      await checkRatingStatus();
+    } catch (error) {
+      console.error('Error initializing rating system:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated()) return;
+
+    initializeRatingSystem();
+
+    const interval = setInterval(checkRatingStatus, 30000);
+
+    const handleBeforeUnload = () => {
+      stopUsageTracking();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(interval);
+      stopUsageTracking();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const handleSubmitRating = async () => {
     if (rating === 0) {

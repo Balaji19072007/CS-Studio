@@ -15,15 +15,15 @@
     "testCases": [
       {
         "input": "15\n7",
-        "expected": "Sum: 22\nProduct: 105\n"
+        "expected": "Enter first integer: \\nEnter second integer: \\nSum: 22\\nProduct: 105\\n"
       },
       {
         "input": "100\n200",
-        "expected": "Sum: 300\nProduct: 20000\n"
+        "expected": "Enter first integer: \\nEnter second integer: \\nSum: 300\\nProduct: 20000\\n"
       },
       {
         "input": "-5\n10",
-        "expected": "Sum: 5\nProduct: -50\n"
+        "expected": "Enter first integer: \\nEnter second integer: \\nSum: 5\\nProduct: -50\\n"
       }
     ]
   },
@@ -5486,4 +5486,10 @@
     ]
   }
 ]
+
+
+
+
+
+
 

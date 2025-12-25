@@ -147,6 +147,10 @@ const Problems = () => {
     const totalSolved = solvedEasy + solvedMedium + solvedHard;
     const totalTotal = totalEasy + totalMedium + totalHard;
 
+    // Final feather-icons rendering
+    useEffect(() => {
+        feather.replace();
+    }, []);
 
     return (
         <div className="min-h-screen dark-gradient-secondary">
@@ -167,13 +171,13 @@ const Problems = () => {
                         </p>
                         <div className="mt-10 flex justify-center">
                             <div className="inline-flex rounded-md shadow-xl">
-                                <Link 
-                                    to="/solve"
-                                    onClick={(e) => handleSolveClick(null, e)}
+                                <Link
+                                    to="/solve?problemId=1"
+                                    onClick={(e) => handleSolveClick(1, e)}
                                     className="dark-btn inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white transition-all duration-300 transform hover:scale-105"
                                 >
                                     <i data-feather="terminal" className="w-5 h-5 mr-2"></i>
-                                    Open Code Editor
+                                    Try First Problem
                                 </Link>
                             </div>
                         </div>
@@ -239,9 +243,6 @@ const Problems = () => {
             </div>
             
             {/* Final feather-icons rendering */}
-            {useEffect(() => {
-                feather.replace();
-            })}
         </div>
     );
 };

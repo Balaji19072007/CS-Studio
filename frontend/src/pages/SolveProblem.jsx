@@ -5,7 +5,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import * as feather from 'feather-icons';
-import { fetchProblemById, submitSolution, runTestCases, fetchProblemTestCases } from '../api/problemApi.js'; 
+import { fetchProblemById, submitSolution, runTestCases, fetchProblemTestCases } from '../api/problemApi.js';
+import { testAPI } from '../config/api.js';
 import Loader from '../components/common/Loader.jsx';
 import CodeEditorForSolvePage from '../components/problems/CodeEditorForSolvePage.jsx';
 import { useAuth } from '../hooks/useAuth.jsx';
@@ -103,22 +104,13 @@ const SolveProblem = () => {
   const [error, setError] = useState(null);
 
   const [activeTab, setActiveTab] = useState('description');
-  const [outputTab, setOutputTab] = useState('console');
 
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('Run your code to see the output here.');
   const [isRunning, setIsRunning] = useState(false);
   const [outputError, setOutputError] = useState(false);
 
-  // UPDATED: testCases state structure
-  const [testCases, setTestCases] = useState([]);
-  const [isRunningTestCases, setIsRunningTestCases] = useState(false);
-  const [allTestsPassed, setAllTestsPassed] = useState(false);
-  const [testResultSummary, setTestResultSummary] = useState(null);
-
   const [hints, setHints] = useState([]);
-  const [submissionHistory, setSubmissionHistory] = useState([]);
-  const [submissionResult, setSubmissionResult] = useState(null);
 
   const [notification, showFloatingNotification] = useFloatingNotification();
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
@@ -197,10 +189,6 @@ const SolveProblem = () => {
 
     setIsLoading(true);
     setError(null);
-    setAllTestsPassed(false);
-    setTestResultSummary(null);
-
-    const normalize = (str) => str ? str.trim().replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ') : '';
 
     const load = async () => {
       try {
@@ -208,25 +196,8 @@ const SolveProblem = () => {
           ProblemManager.initializeProblemData(problemId);
         }
 
-        // Fetch problem details and ALL test cases concurrently
-        const [fetched, rawTestCases] = await Promise.all([
-          fetchProblemById(problemId),
-          fetchProblemTestCases(problemId)
-        ]);
-        
-        // Initialize testCases state with ALL raw test cases - ALWAYS VISIBLE
-        const initialTestCases = rawTestCases.map((rawTest, index) => {
-            return { 
-                id: `test-${index + 1}`, 
-                input: rawTest.input ?? '', 
-                expected: rawTest.expected ?? '',
-                explanation: rawTest.explanation ?? '',
-                userOutput: '',
-                passed: false,
-                status: 'Pending',
-                isVisible: true // ALWAYS show test case details
-            }
-        });
+        // Fetch problem details
+        const fetched = await fetchProblemById(problemId);
 
         if (canceled) return;
         setProblem(fetched);
@@ -237,9 +208,6 @@ const SolveProblem = () => {
 
         const prog = ProblemManager.getProblemProgress(problemId) || {};
         if (prog.solved) ProblemManager.markAsSolved?.(problemId);
-
-        // Set the full list of test cases (all visible)
-        setTestCases(initialTestCases); 
 
         // Hint logic remains the same
         if (Array.isArray(fetched.hints) && fetched.hints.length > 0) {
@@ -255,9 +223,6 @@ const SolveProblem = () => {
         } else {
           setHints([]);
         }
-
-        const hist = ProblemManager.getSubmissionHistory(problemId) || [];
-        setSubmissionHistory(hist);
 
         initializeOrResumeTimer();
       } catch (err) {
@@ -291,7 +256,7 @@ const SolveProblem = () => {
 
   useEffect(() => {
     feather.replace();
-  }, [isDark, activeTab, isRunning, timeState, notification, submissionResult]);
+  }, [isDark, activeTab, isRunning, timeState, notification]);
 
   // persist code
   useEffect(() => {
@@ -356,7 +321,6 @@ const SolveProblem = () => {
     });
 
     setOutputError(Boolean(isError));
-    setOutputTab('console');
 
   }, []);
 
@@ -373,22 +337,36 @@ const SolveProblem = () => {
   };
 
   // ---------- Run/Stop execution ----------
-  const handleRunCode = () => {
-    setAllTestsPassed(false);
-    setTestResultSummary(null);
+  const handleRunCode = async () => {
     const currentCode = editorRef.current?.getCode() || code;
     if (!currentCode.trim()) {
       handleOutputReceived('Execution Failed: Please write some code first.\n', true, false);
       return;
     }
-    // Clear output first to avoid duplicated old + executing messages
-    setOutput('');
-    handleOutputReceived('Executing...\n', false, true);
+    if (!isLoggedIn) {
+      showFloatingNotification('You must be signed in to run code.', 'error');
+      navigate('/signin');
+      return;
+    }
 
-    if (editorRef.current?.runCode) {
-      editorRef.current.runCode(currentCode); // No input passed here for console execution
-    } else {
-      handleOutputReceived('Execution Error: Editor is not ready.\n', true, false);
+    // Just run the code using the editor's run functionality
+    // The output will be handled by handleOutputReceived via the socket
+    setIsRunning(true);
+    setOutput('Executing code...\n');
+    setOutputError(false);
+
+    try {
+      if (editorRef.current?.runCode) {
+        editorRef.current.runCode(currentCode);
+      } else {
+        handleOutputReceived('Code execution not available.\n', true, false);
+        setIsRunning(false);
+      }
+    } catch (err) {
+      console.error('Code execution failed', err);
+      handleOutputReceived(`Execution Error: ${err.message}\n`, true, false);
+      setIsRunning(false);
+      showFloatingNotification('Failed to execute code', 'error');
     }
   };
 
@@ -403,145 +381,9 @@ const SolveProblem = () => {
     }
   };
 
-  // ---------- FIXED: Fast Test Case Execution with Backend API ----------
-  const runAllTestCases = async () => {
-    const currentCode = editorRef.current?.getCode() || code;
-    if (!currentCode.trim()) {
-      showFloatingNotification('Please write some code first.', 'error');
-      return;
-    }
-    if (!isLoggedIn) {
-      showFloatingNotification('You must be signed in to run test cases.', 'error');
-      navigate('/signin');
-      return;
-    }
-    if (!testCases || testCases.length === 0) {
-      showFloatingNotification('No test cases available for this problem.', 'info');
-      return;
-    }
 
-    setIsRunningTestCases(true);
-    setOutputTab('tests');
-    setAllTestsPassed(false);
-    setTestResultSummary(null);
 
-    try {
-      // Update all test cases to running state
-      setTestCases(prev => prev.map(tc => ({ 
-        ...tc, 
-        status: 'Running...', 
-        userOutput: '',
-        passed: false
-      })));
-
-      // Use the backend API to run all test cases at once
-      const result = await runTestCases(problemId, currentCode, language);
-      const results = result?.results || [];
-      
-      // Process results from backend
-      let passedCount = 0;
-      const updatedTestCases = testCases.map((tc, index) => {
-        const result = results.find(r => r.testCase === String(index + 1)) || results[index] || {};
-        
-        // Get the actual output from the result
-        const userOutput = result.codeOutput || result.output || '';
-        const expectedOutput = result.expectedOutput || tc.expected;
-        
-        // Normalize outputs for comparison
-        const normalizedUserOutput = normalizeOutput(userOutput);
-        const normalizedExpectedOutput = normalizeOutput(expectedOutput);
-        
-        // Determine if test passed
-        const passed = result.status === 'pass' || 
-                      (!result.error && normalizedUserOutput === normalizedExpectedOutput);
-        
-        if (passed) passedCount++;
-
-        return {
-          ...tc,
-          userOutput: userOutput || 'No output generated',
-          passed: passed,
-          status: passed ? 'Accepted' : (result.status === 'error' ? 'Error' : 'Wrong Answer'),
-          error: result.error || null
-        };
-      });
-
-      setTestCases(updatedTestCases);
-      
-      const totalTests = updatedTestCases.length;
-      const accuracy = totalTests > 0 ? Math.round((passedCount / totalTests) * 100) : 0;
-      const allPassed = passedCount === totalTests;
-      
-      setTestResultSummary({
-        passedCount,
-        totalTests,
-        accuracy,
-        message: allPassed ? 'All tests passed!' : 'Some tests failed.'
-      });
-      
-      setAllTestsPassed(allPassed);
-      
-      showFloatingNotification(
-        allPassed ? 'All tests passed!' : `${passedCount}/${totalTests} tests passed`, 
-        allPassed ? 'success' : 'error'
-      );
-      
-    } catch (err) {
-      console.error('runTestCases failed', err);
-      
-      // If API fails, fall back to simple validation
-      const updatedTestCases = testCases.map(tc => ({
-        ...tc,
-        status: 'Error',
-        userOutput: 'Test execution failed',
-        passed: false,
-        error: err.message || 'API error'
-      }));
-      
-      setTestCases(updatedTestCases);
-      setTestResultSummary({
-        passedCount: 0,
-        totalTests: testCases.length,
-        accuracy: 0,
-        message: 'Test execution failed'
-      });
-      
-      showFloatingNotification('Failed to run test cases: ' + (err.response?.data?.msg || err.message || 'API error'), 'error');
-    } finally {
-      setIsRunningTestCases(false);
-    }
-  };
-
-  // ---------- NEW: Update Leaderboard Function ----------
-  const updateLeaderboard = async () => {
-    try {
-      // Call the leaderboard update endpoint to refresh user stats
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/leaderboard/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userId: user?.id,
-          problemId: problemId,
-          difficulty: problem?.difficulty
-        })
-      });
-
-      if (response.ok) {
-        console.log('Leaderboard updated successfully');
-      } else {
-        console.warn('Failed to update leaderboard, but problem was solved');
-      }
-    } catch (error) {
-      console.warn('Error updating leaderboard:', error);
-      // Don't fail the submission if leaderboard update fails
-    }
-  };
-
-  // ---------- Submit (FIXED: Proper submission with validation) ----------
+  // ---------- Submit ----------
   const handleSubmitCode = useCallback(async () => {
     const currentCode = editorRef.current?.getCode() || code;
     if (!currentCode.trim()) {
@@ -553,86 +395,86 @@ const SolveProblem = () => {
       navigate('/signin');
       return;
     }
-    
-    // Check if all tests are passed before allowing submission
-    if (!allTestsPassed) {
-      showFloatingNotification('You must pass all tests before submitting. Click "Run All" first.', 'warning');
-      return;
-    }
 
     setIsRunning(true);
-    setOutput('Submitting solution for final evaluation...');
+    setOutput('Checking solution...');
     setOutputError(false);
-    setOutputTab('console');
 
     try {
-      // Call submitSolution API for FINAL validation
-      const result = await submitSolution(problemId, currentCode, language);
+      // Get the expected output from problem data
+      const testCases = await fetchProblemTestCases(problemId);
+      if (!testCases || testCases.length === 0) {
+        setOutput('No test cases available for this problem.');
+        setOutputError(true);
+        showFloatingNotification('No test cases available', 'error');
+        return;
+      }
 
-      const isSolved = Boolean(result.isSolved);
-      
-      // Update local progress/history
-      const record = {
-        status: isSolved ? 'Accepted' : 'Wrong Answer',
-        date: new Date().toLocaleString(),
-        passed: result.passedCount,
-        total: result.totalTests,
-      };
-      ProblemManager.addSubmission(problemId, record);
-      setSubmissionHistory(ProblemManager.getSubmissionHistory(problemId) || []);
+      // Use the first test case for verification
+      const firstTestCase = testCases[0];
+      const expectedOutput = firstTestCase.expected || firstTestCase.output;
 
-      if (isSolved) {
-        showFloatingNotification('Solution Accepted! Problem Solved!', 'success');
-        ProblemManager.markAsSolved(problemId);
-        
-        // NEW: Update leaderboard when problem is solved
-        if (user?.id) {
-          await updateLeaderboard();
+      // Verify code using CodeVerificationService
+      const verificationResult = await testAPI.verifyCode({
+        code: currentCode,
+        language: language.toLowerCase(),
+        input: firstTestCase.input || '',
+        expectedOutput: expectedOutput || ''
+      });
+
+      if (verificationResult.data && verificationResult.data.correct) {
+        // Code is correct, submit the solution
+        setOutput('Solution verified! Submitting...');
+        const result = await submitSolution(problemId, currentCode, language);
+
+        const isSolved = Boolean(result.isSolved);
+
+        if (isSolved) {
+          showFloatingNotification('Solution Accepted! Problem Solved!', 'success');
+          ProblemManager.markAsSolved(problemId);
+
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+          }
+
+          // Navigate back to problems list and scroll to the solved card
+          const scrollToId = `problem-${problemId}`;
+          setTimeout(() => {
+            navigate('/problems', { state: { scrollToId: scrollToId } });
+          }, 1000);
+        } else {
+          setOutput(`Submission failed: ${result.message || 'Unknown error'}`);
+          setOutputError(true);
+          showFloatingNotification('Submission failed', 'error');
         }
-        
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current);
-          timerIntervalRef.current = null;
-        }
-
-        // Navigate back to problems list and scroll to the solved card
-        const scrollToId = `problem-${problemId}`;
-        setTimeout(() => {
-          navigate('/problems', { state: { scrollToId: scrollToId } });
-        }, 1000);
       } else {
-        showFloatingNotification(`Submission failed. ${result.passedCount}/${result.totalTests} tests passed.`, 'error');
-        // Update test cases with submission results
-        if (result.results) {
-          const updated = result.results.map((r, index) => ({
-            id: `test-${r.testCase}`,
-            input: r.input || 'N/A',
-            expected: r.expectedOutput || 'N/A',
-            userOutput: r.codeOutput || 'No output',
-            passed: r.status === 'pass',
-            status: r.status === 'pass' ? 'Accepted' : (r.status === 'error' ? 'Error' : 'Wrong Answer'),
-            isVisible: true,
-            error: r.error || null,
-          }));
-          setTestCases(updated);
-          setAllTestsPassed(false);
+        // Code is incorrect
+        const actualOutput = verificationResult.data?.actualOutput || 'No output';
+        setOutput(`Solution incorrect.\nExpected: "${expectedOutput}"\nGot: "${actualOutput}"`);
+        setOutputError(true);
+        showFloatingNotification('Solution is incorrect', 'error');
+
+        // Mark as attempted for progress tracking
+        try {
+          // Since we can't import updateUserProgress, we'll use runTestCases with 0 tests
+          // to trigger the attempted status update
+          await runTestCases(problemId, currentCode, language);
+        } catch (progressError) {
+          console.error('Failed to update progress:', progressError);
         }
       }
-      
-      // Update console output
-      setOutput(`Submission Result: ${result.message}\nAccuracy: ${result.accuracy}% (${result.passedCount}/${result.totalTests} tests passed)`);
-      setOutputError(!isSolved);
 
     } catch (err) {
-      console.error('submitSolution failed', err);
-      const errMsg = err.response?.data?.msg || err.message || 'API failure.';
+      console.error('Submission failed', err);
+      const errMsg = err.response?.data?.msg || err.response?.data?.message || err.message || 'Verification failed.';
       setOutput(`Submission Error: ${errMsg}`);
       setOutputError(true);
       showFloatingNotification('Failed to submit solution: ' + errMsg, 'error');
     } finally {
       setIsRunning(false);
     }
-  }, [code, isLoggedIn, navigate, problemId, allTestsPassed, language, showFloatingNotification, user, problem]);
+  }, [code, isLoggedIn, navigate, problemId, language, showFloatingNotification, user, problem]);
 
   // Copy, reset, load solution
   const copyCodeToClipboard = () => {
@@ -645,10 +487,6 @@ const SolveProblem = () => {
     setCode(template);
     setOutput('Code reset to original template.');
     setOutputError(false);
-    setAllTestsPassed(false);
-    // Reset test case statuses
-    setTestCases(prev => prev.map(tc => ({ ...tc, status: 'Pending', userOutput: '', passed: false })));
-    setTestResultSummary(null);
 
     ProblemManager.saveUserCode?.(problemId, template);
     showFloatingNotification('Code has been reset to template.', 'info');
@@ -834,23 +672,6 @@ const SolveProblem = () => {
                       </div>
                     </div>
 
-                    {/* Display ALL test cases as examples */}
-                    {testCases.length > 0 && testCases.map((tc, index) => (
-                      <div key={tc.id} className={`example-container ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg p-3 lg:p-4 border-l-4 border-blue-500`}>
-                        <h4 className="example-title font-bold text-blue-500 mb-2 lg:mb-3 text-sm lg:text-base">Example Test Case {index + 1}</h4>
-                        {tc.explanation && <p className="text-xs text-gray-500 italic mb-2">{tc.explanation}</p>}
-                        <div className="example-io grid grid-cols-1 gap-3 lg:gap-4">
-                          <div>
-                            <div className={`font-medium ${textPrimary} mb-1`}>Input</div>
-                            <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-gray-800 text-gray-100'} p-2 lg:p-3 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap text-left`}>{tc.input || 'N/A'}</pre>
-                          </div>
-                          <div>
-                            <div className={`font-medium ${textPrimary} mb-1`}>Expected Output</div>
-                            <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-gray-800 text-gray-100'} p-2 lg:p-3 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap text-left`}>{tc.expected || 'N/A'}</pre>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
 
                     <div className={`pt-3 lg:pt-4 border-t ${borderClass}`}>
                       <h4 className={`text-base lg:text-lg font-semibold ${textPrimary} mb-2`}>Hints</h4>
@@ -930,115 +751,41 @@ const SolveProblem = () => {
                 <button onClick={isRunning ? handleStopCode : handleRunCode} className={`inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md transition-colors justify-center w-32 ${isRunning ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-blue-600 text-white hover:bg-blue-700'}`}><i data-feather={isRunning ? 'stop-circle' : 'play'} className="w-4 h-4 mr-1"></i>{isRunning ? 'Stop' : 'Run'}</button>
                 
                 {/* Submit Button (right side) - FIXED: Smaller width */}
-                <button onClick={handleSubmitCode} disabled={!allTestsPassed} className="inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md bg-green-600 text-white hover:bg-green-700 transition-colors justify-center w-32 disabled:opacity-50"><i data-feather="send" className="w-4 h-4 mr-1"></i>Submit</button>
+                <button onClick={handleSubmitCode} className="inline-flex items-center px-3 py-2.5 text-sm rounded shadow-md bg-green-600 text-white hover:bg-green-700 transition-colors justify-center w-32"><i data-feather="send" className="w-4 h-4 mr-1"></i>Submit</button>
               </div>
             </div>
 
-            {/* Lower panel */}
+            {/* Console */}
             <div className={`${cardBg} rounded-none lg:rounded-xl shadow-none lg:shadow-2xl overflow-hidden transition-colors duration-500`}>
-              <div className={`flex border-b ${borderClass} output-tabs`}>
-                <button onClick={() => setOutputTab('console')} className={`flex-1 py-3 px-2 lg:px-4 font-medium text-xs lg:text-sm transition-colors ${outputTab === 'console' ? `${textPrimary} border-b-2 border-green-500` : `${textSecondary} ${linkHover}`} text-center`}><i data-feather="terminal" className="w-3 h-3 lg:w-4 lg:h-4 inline-block mr-1"></i> Console</button>
-                <button onClick={() => setOutputTab('tests')} className={`flex-1 py-3 px-2 lg:px-4 font-medium text-xs lg:text-sm transition-colors ${outputTab === 'tests' ? `${textPrimary} border-b-2 border-green-500` : `${textSecondary} ${linkHover}`} text-center`}><i data-feather="clipboard" className="w-3 h-3 lg:w-4 lg:h-4 inline-block mr-1"></i> Tests ({testCases.length})</button>
-                <button onClick={() => setOutputTab('history')} className={`flex-1 py-3 px-2 lg:px-4 font-medium text-xs lg:text-sm transition-colors ${outputTab === 'history' ? `${textPrimary} border-b-2 border-green-500` : `${textSecondary} ${linkHover}`} text-center`}><i data-feather="clock" className="w-3 h-3 lg:w-4 lg:h-4 inline-block mr-1"></i> History</button>
-              </div>
-
               <div className="p-3 lg:p-4 min-h-32 lg:min-h-40">
-                {outputTab === 'console' && (
-                  <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
-                    <h4 className={`text-xs lg:text-sm font-semibold mb-2 ${textPrimary}`}>Console
-                      {editorWaitingForInput && <span className="ml-2 font-normal text-green-500 text-xs">(Input Waiting...)</span>}
-                      {isRunning && !editorWaitingForInput && <span className="ml-2 font-normal text-yellow-500 text-xs">(Running...)</span>}
-                    </h4>
-                    <div 
-                      ref={consoleRef} 
-                      tabIndex={0} 
-                      onKeyDown={handleConsoleKeyPress}
-                      className={`terminal-output font-mono text-xs whitespace-pre-wrap h-24 lg:h-32 overflow-y-auto p-2 rounded-lg cursor-text text-left terminal-output-mobile ${isDark ? 'bg-black text-gray-300' : 'bg-gray-800 text-gray-100'} border ${editorWaitingForInput ? 'border-green-500 ring-2 ring-green-500/50' : borderClass} ${outputError ? 'text-red-400' : 'text-gray-300'}`}
-                    >
-                      <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                        {output.replace(/█$/, '')}
-                        {editorWaitingForInput && (
-                          <span className="console-caret" style={{ 
-                            background: isDark ? 'white' : 'black',
-                            marginLeft: '2px'
-                          }} aria-hidden="true" />
-                        )}
-                      </span>
-                    </div>
+                <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
+                  <h4 className={`text-xs lg:text-sm font-semibold mb-2 ${textPrimary}`}>Console
+                    {editorWaitingForInput && <span className="ml-2 font-normal text-green-500 text-xs">(Input Waiting...)</span>}
+                    {isRunning && !editorWaitingForInput && <span className="ml-2 font-normal text-yellow-500 text-xs">(Running...)</span>}
+                  </h4>
+                  <div
+                    ref={consoleRef}
+                    tabIndex={0}
+                    onKeyDown={handleConsoleKeyPress}
+                    className={`terminal-output font-mono text-xs whitespace-pre-wrap h-24 lg:h-32 overflow-y-auto p-2 rounded-lg cursor-text text-left terminal-output-mobile ${isDark ? 'bg-black text-gray-300' : 'bg-gray-800 text-gray-100'} border ${editorWaitingForInput ? 'border-green-500 ring-2 ring-green-500/50' : borderClass} ${outputError ? 'text-red-400' : 'text-gray-300'}`}
+                  >
+                    <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {output.replace(/█$/, '')}
+                      {editorWaitingForInput && (
+                        <span className="console-caret" style={{
+                          background: isDark ? 'white' : 'black',
+                          marginLeft: '2px'
+                        }} aria-hidden="true" />
+                      )}
+                    </span>
                   </div>
-                )}
-
-                {outputTab === 'tests' && (
-                  <div className="space-y-3 lg:space-y-4 max-h-48 lg:max-h-64 overflow-y-auto pr-2">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 lg:gap-3">
-                      <h4 className={`text-base lg:text-lg font-bold ${textPrimary}`}>
-                        Test Cases ({testCases.length}) 
-                        {testResultSummary && (
-                          <span className={`ml-2 text-sm font-semibold ${allTestsPassed ? 'text-green-500' : 'text-red-500'}`}>
-                            (Passed {testResultSummary.passedCount}/{testResultSummary.totalTests})
-                          </span>
-                        )}
-                        {!testResultSummary && testCases.length > 0 && <span className="ml-2 text-gray-500 text-sm font-semibold">(Run All to See Results)</span>}
-                      </h4>
-                      <button onClick={runAllTestCases} disabled={isRunningTestCases} className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-blue-600 text-white rounded text-xs lg:text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors w-full sm:w-auto justify-center"><i data-feather="play" className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2"></i>{isRunningTestCases ? 'Running...' : 'Run All'}</button>
-                    </div>
-                    <div className="space-y-3 lg:space-y-4">
-                      {testCases.map((tc, index) => (
-                        <div key={tc.id} className={`p-3 lg:p-4 rounded-lg border ${borderClass} ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                          <div className="flex flex-col sm:flex-row justify-between items-start gap-1 lg:gap-2 mb-2 lg:mb-3">
-                            <div className="flex items-center space-x-2 lg:space-x-3">
-                              <span className={`font-semibold ${textPrimary} text-sm`}>Test {index + 1}</span>
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${tc.status === 'Accepted' ? (isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-600/30 text-green-700') : tc.status === 'Wrong Answer' || tc.status === 'Error' ? (isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-600/30 text-red-700') : tc.status === 'Running...' ? (isDark ? 'bg-yellow-900/30 text-yellow-300' : 'bg-yellow-600/30 text-yellow-700') : (isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-600/30 text-gray-700')}`}>{tc.status || 'Not Run'}</span>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 text-xs lg:text-sm">
-                            <div>
-                              <div className={`font-medium ${textPrimary} mb-1`}>Input</div>
-                              <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-white text-gray-800'} p-2 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap border ${borderClass}`}>
-                                {tc.input || 'N/A'}
-                              </pre>
-                            </div>
-                            <div>
-                              <div className={`font-medium ${textPrimary} mb-1`}>Expected</div>
-                              <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-white text-gray-800'} p-2 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap border ${borderClass}`}>
-                                {tc.expected || 'N/A'}
-                              </pre>
-                            </div>
-                          </div>
-                          
-                          {tc.userOutput && (
-                            <div className="mt-2 lg:mt-3">
-                              <div className={`font-medium ${textPrimary} mb-1`}>Your Output</div>
-                              <pre className={`${isDark ? 'bg-black text-gray-200' : 'bg-white text-gray-800'} p-2 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap border ${tc.passed ? 'border-green-500' : 'border-red-500'}`}>
-                                {tc.userOutput}
-                              </pre>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {outputTab === 'history' && (
-                  <div className="space-y-2 lg:space-y-3 max-h-48 lg:max-h-64 overflow-y-auto pr-2">
-                    {submissionHistory.length === 0 ? (<div className={`${textSecondary} text-xs lg:text-sm italic p-2 text-center`}>No submissions yet</div>) : ([...submissionHistory].reverse().map((submission, index) => (
-                      <div key={index} className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 lg:gap-2 p-2 lg:p-3 rounded-lg transition-colors ${isDark ? 'bg-gray-900 hover:bg-gray-700' : 'bg-gray-50 hover:bg-gray-100'} border ${borderClass}`}>
-                        <div className="flex items-center">
-                          <span className={`inline-flex items-center px-2 lg:px-3 py-1 rounded-full text-xs font-bold ${submission.status === 'Accepted' ? (isDark ? 'bg-green-600/30 text-green-300' : 'bg-green-600/30 text-green-700') : (isDark ? 'bg-red-600/30 text-red-300' : 'bg-red-600/30 text-red-700')}`}><i data-feather={submission.status === 'Accepted' ? 'check-circle' : 'x-circle'} className="w-3 h-3 mr-1"></i>{submission.status}</span>
-                          <span className={`ml-2 lg:ml-4 text-xs font-mono ${textSecondary}`}>{submission.date}</span>
-                        </div>
-                        <span className="text-xs text-gray-500">{submission.passed}/{submission.total}</span>
-                      </div>
-                    )))}
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   );
 };
