@@ -23,6 +23,35 @@ export const fetchAllProblems = async () => {
 };
 
 /**
+ * Fetches the daily problem.
+ */
+export const fetchDailyProblem = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/daily`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch daily problem.");
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Fetch daily problem failed:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Fetches recommended problems for the user.
+ */
+export const fetchRecommendedProblems = async () => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/recommended`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch recommended problems failed:', error.message);
+    return []; // Return empty array on failure
+  }
+};
+
+/**
  * Fetches a single problem by its ID.
  */
 export const fetchProblemById = async (id) => {
@@ -130,13 +159,13 @@ export const getProblemTimer = async (problemId) => {
 export const submitSolution = async (problemId, code, language) => {
   try {
     console.log('🚀 Submitting solution for problem:', problemId);
-    const response = await api.post(`${API_BASE_URL}/${problemId}/submit`, { 
-      code, 
-      language 
+    const response = await api.post(`${API_BASE_URL}/${problemId}/submit`, {
+      code,
+      language
     });
-    
+
     console.log('✅ Submit response:', response.data);
-    
+
     // Ensure all test cases are visible in the response
     if (response.data && response.data.results) {
       response.data.results = response.data.results.map(result => ({
@@ -144,21 +173,18 @@ export const submitSolution = async (problemId, code, language) => {
         isVisible: true // Force visibility for all test results
       }));
     }
-    
-    // Update user progress if the problem was solved
+
+    // Backend already updates progress, so we don't need to call updateUserProgress here.
     if (response.data.isSolved) {
-      console.log('🎯 Problem solved, updating progress...');
-      await updateUserProgress(problemId, response.data.accuracy, true);
+      console.log('🎯 Problem solved!');
     } else if (response.data.passedCount > 0) {
-      // Problem attempted but not fully solved
-      console.log('📝 Problem attempted, updating progress...');
-      await updateUserProgress(problemId, response.data.accuracy, false);
+      console.log('📝 Problem attempted.');
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('❌ Submit solution error:', error);
-    
+
     // More detailed error information
     if (error.response) {
       console.error('Response error:', error.response.data);
@@ -179,13 +205,13 @@ export const submitSolution = async (problemId, code, language) => {
 export const runTestCases = async (problemId, code, language) => {
   try {
     console.log('🔧 Running test cases for problem:', problemId);
-    const response = await api.post(`${API_BASE_URL}/${problemId}/run-tests`, { 
-      code, 
-      language 
+    const response = await api.post(`${API_BASE_URL}/${problemId}/run-tests`, {
+      code,
+      language
     });
-    
+
     console.log('✅ Run tests response:', response.data);
-    
+
     // Ensure all test cases are visible in the response
     if (response.data && response.data.results) {
       response.data.results = response.data.results.map(result => ({
@@ -193,11 +219,11 @@ export const runTestCases = async (problemId, code, language) => {
         isVisible: true // Force visibility for all test results
       }));
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('❌ Run test cases error:', error);
-    
+
     // More detailed error information
     if (error.response) {
       console.error('Response error:', error.response.data);
@@ -218,7 +244,7 @@ export const runTestCases = async (problemId, code, language) => {
 export const setupCompilerSocket = (onOutputCallback) => {
   // Get the socket instance from the service
   const socket = socketService.socket;
-  
+
   if (!socket) {
     console.error('❌ Socket service not initialized. Please connect first.');
     onOutputCallback('❌ Compiler service not available. Please refresh the page.', true, false);
@@ -227,9 +253,9 @@ export const setupCompilerSocket = (onOutputCallback) => {
 
   // Set up event listeners for code execution
   socket.on('execution-result', (result) => {
-    onOutputCallback(result.output, !result.success, false);
+    onOutputCallback(result.output, !result.success, false, false);
   });
-  
+
   socket.on('execution-output', (data) => {
     onOutputCallback(data.output, Boolean(data.isError), true);
   });
@@ -255,8 +281,8 @@ export const setupCompilerSocket = (onOutputCallback) => {
  */
 export const sendCodeForExecution = (socketInstance, code, language, input = '') => {
   if (socketInstance && socketService.isConnected) {
-    socketInstance.emit('execute-code', { 
-      code, 
+    socketInstance.emit('execute-code', {
+      code,
       language: language.toLowerCase(),
       input
     });

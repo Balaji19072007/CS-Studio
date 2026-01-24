@@ -37,18 +37,25 @@ const Problems = () => {
     // --- Data Fetching ---
     useEffect(() => {
         let isMounted = true;
+
+        const getStatus = (p) => {
+            const prog = ProblemManager.getProblemProgress(p.problemId || p.id);
+            if (prog.solved) return 'solved';
+            // Mark as attempted if there are submissions OR if user has spent time on it
+            if (prog.submissions.length > 0 || prog.timeElapsed > 0 || prog.startTime > 0) return 'attempted';
+            return 'todo';
+        };
+
         const loadProblems = async () => {
             try {
                 const data = await fetchAllProblems();
                 if (isMounted) {
-                    // Update problem status based on local progress
                     const problemsWithStatus = data.map(p => ({
                         ...p,
-                        status: ProblemManager.getProblemProgress(p.problemId || p.id).solved ? 'solved' : (ProblemManager.getProblemProgress(p.problemId || p.id).submissions.length > 0 ? 'attempted' : 'todo')
+                        status: getStatus(p)
                     }));
-                    
+
                     setAllProblems(problemsWithStatus);
-                    setFilteredProblems(problemsWithStatus); 
                     setIsLoading(false);
                 }
             } catch (err) {
@@ -63,22 +70,24 @@ const Problems = () => {
         const updateProgress = () => {
             if (isMounted) {
                 setProgress(ProblemManager.getGlobalProgress());
-                // Re-apply status to problems after progress update
                 setAllProblems(prev => prev.map(p => ({
                     ...p,
-                    status: ProblemManager.getProblemProgress(p.problemId || p.id).solved ? 'solved' : (ProblemManager.getProblemProgress(p.problemId || p.id).submissions.length > 0 ? 'attempted' : 'todo')
+                    status: getStatus(p)
                 })));
             }
         };
 
         loadProblems();
 
-        // Listener for local storage changes (e.g., problem solved on /solve page)
+        // Listener for local storage changes
         window.addEventListener('storage', updateProgress);
+        // Custom event listener for internal updates
+        window.addEventListener('problem_progress_updated', updateProgress);
 
         return () => {
             isMounted = false;
             window.removeEventListener('storage', updateProgress);
+            window.removeEventListener('problem_progress_updated', updateProgress);
         };
     }, []);
 
@@ -88,31 +97,34 @@ const Problems = () => {
             const matchesDifficulty = currentFilters.difficulty === 'All' || problem.difficulty === currentFilters.difficulty;
             const matchesLanguage = currentFilters.language === 'All' || problem.language === currentFilters.language;
             const matchesSearch = problem.title.toLowerCase().includes(currentFilters.search.toLowerCase());
-            
+
             return matchesDifficulty && matchesLanguage && matchesSearch;
         });
     }, []);
 
     useEffect(() => {
-        const filtered = applyFilters(allProblems, filters);
-        setFilteredProblems(filtered);
+        setFilteredProblems(applyFilters(allProblems, filters));
     }, [allProblems, filters, applyFilters]);
 
     // --- Scrolling to Solved Problem ---
     useEffect(() => {
-        // Check for scroll instruction from navigation state (used when returning from /solve)
-        if (location.state && location.state.scrollToId) {
-            const targetElement = document.getElementById(location.state.scrollToId);
-            if (targetElement) {
-                // Scroll to target element with an offset
-                setTimeout(() => {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100); 
-                // Clean up state so the scroll doesn't happen on refresh
-                window.history.replaceState({}, document.title); 
-            }
+        if (location.state?.scrollToId && filteredProblems.length > 0 && !isLoading) {
+            const targetId = location.state.scrollToId;
+            // Short delay to ensure DOM is ready
+            setTimeout(() => {
+                const element = document.getElementById(targetId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Optional: Highlight the card briefly
+                    element.classList.add('ring-2', 'ring-green-500');
+                    setTimeout(() => element.classList.remove('ring-2', 'ring-green-500'), 2000);
+                }
+            }, 500);
+
+            // Clear state to prevent re-scroll on refresh
+            window.history.replaceState({}, document.title);
         }
-    }, [location.state]);
+    }, [location.state, filteredProblems, isLoading]);
 
 
     // --- Handlers ---
@@ -150,7 +162,7 @@ const Problems = () => {
     // Final feather-icons rendering
     useEffect(() => {
         feather.replace();
-    }, []);
+    }, [filters]); // Re-run when filters change to ensure icons load if DOM updates
 
     return (
         <div className="min-h-screen dark-gradient-secondary">
@@ -159,7 +171,7 @@ const Problems = () => {
                 <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{
                     backgroundImage: 'radial-gradient(circle at center, #0ea5e940 0%, transparent 70%)',
                 }}></div>
-                
+
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
                     <div className="text-center">
                         <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl">
@@ -187,37 +199,49 @@ const Problems = () => {
 
             {/* Main Content & Filters - REMOVED Progress Overview Box - ADJUSTED MARGIN */}
             {/* The -mt-16 needs to be removed/adjusted since the large component is gone */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-20"> 
-                
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-20">
+
                 {/* --- REMOVED: Your Progress Overview Box --- */}
-                
+
                 {/* Filters and Search - ADDED mb-6 for spacing */}
                 <div className="mb-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
                     <div className="lg:col-span-2">
                         <SearchBar onSearch={handleSearch} placeholder="Search by problem title..." />
                     </div>
-                    
-                    <select 
-                        className="dark-input h-11"
-                        value={filters.difficulty}
-                        onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-                    >
-                        {FILTER_OPTIONS.difficulty.map(option => (
-                            <option key={option} value={option}>{option} Difficulty</option>
-                        ))}
-                    </select>
 
-                    <select 
-                        className="dark-input h-11"
-                        value={filters.language}
-                        onChange={(e) => handleFilterChange('language', e.target.value)}
-                    >
-                        {FILTER_OPTIONS.language.map(option => (
-                            <option key={option} value={option}>{option} Language</option>
-                        ))}
-                    </select>
+                    {/* Difficulty Filter */}
+                    <div className="relative group">
+                        <select
+                            className="filter-dropdown"
+                            value={filters.difficulty}
+                            onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+                        >
+                            {FILTER_OPTIONS.difficulty.map(option => (
+                                <option key={option} value={option}>{option} Difficulty</option>
+                            ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400 group-hover:text-primary-400 transition-colors">
+                            <i data-feather="chevron-down" className="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    {/* Language Filter */}
+                    <div className="relative group">
+                        <select
+                            className="filter-dropdown"
+                            value={filters.language}
+                            onChange={(e) => handleFilterChange('language', e.target.value)}
+                        >
+                            {FILTER_OPTIONS.language.map(option => (
+                                <option key={option} value={option}>{option} Language</option>
+                            ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400 group-hover:text-primary-400 transition-colors">
+                            <i data-feather="chevron-down" className="w-5 h-5"></i>
+                        </div>
+                    </div>
                 </div>
-                
+
                 {/* Problem List */}
                 {isLoading ? (
                     <div className="mt-10"><Loader message="Loading problems..." size="lg" /></div>
@@ -232,16 +256,16 @@ const Problems = () => {
                 ) : (
                     <div className="space-y-4">
                         {filteredProblems.map(problem => (
-                            <ProblemCard 
+                            <ProblemCard
                                 key={problem.problemId || problem.id} // FIX: Ensures unique key using problemId or fallback id
-                                problem={problem} 
+                                problem={problem}
                                 isLoggedIn={isLoggedIn}
                             />
                         ))}
                     </div>
                 )}
             </div>
-            
+
             {/* Final feather-icons rendering */}
         </div>
     );

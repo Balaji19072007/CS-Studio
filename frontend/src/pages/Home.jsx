@@ -2,7 +2,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import * as feather from 'feather-icons'; 
+import * as feather from 'feather-icons';
+import UserHomePage from './UserHomePage.jsx';
 
 // Use relative URLs since CORS is now enabled
 const API_BASE_URL = ''; // Empty for relative URLs
@@ -14,14 +15,14 @@ const AbstractBackground = () => (
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-                    <path d="M 80 0 L 0 0 0 80" fill="none" stroke="var(--color-primary-500)" strokeWidth="0.5" opacity="0.1"/>
+                    <path d="M 80 0 L 0 0 0 80" fill="none" stroke="var(--color-primary-500)" strokeWidth="0.5" opacity="0.1" />
                 </pattern>
             </defs>
-            
-            <rect width="100%" height="100%" fill="url(#grid)" /> 
-            
-            <circle cx="25%" cy="30%" r="50" fill="var(--color-primary-400)" opacity="0.08" className="animate-float-slow"/>
-            <circle cx="75%" cy="80%" r="80" fill="var(--color-primary-500)" opacity="0.05" className="animate-float-reverse"/>
+
+            <rect width="100%" height="100%" fill="url(#grid)" />
+
+            <circle cx="25%" cy="30%" r="50" fill="var(--color-primary-400)" opacity="0.08" className="animate-float-slow" />
+            <circle cx="75%" cy="80%" r="80" fill="var(--color-primary-500)" opacity="0.05" className="animate-float-reverse" />
         </svg>
     </div>
 );
@@ -34,7 +35,7 @@ const InteractiveDemo = () => {
     return (
         <div className="relative w-full max-w-xl rounded-2xl shadow-premium-lg overflow-hidden card-hover border-4 border-primary-500/50 hover:border-primary-500">
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-4">
-                
+
                 <div className="flex items-center justify-between text-xs text-gray-400 border-b border-gray-700 pb-3 mb-3">
                     <div className="flex items-center">
                         <span className="text-primary-400 mr-2">Problem 42:</span> Merge Sort Implementation
@@ -46,11 +47,11 @@ const InteractiveDemo = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 h-[300px]">
-                    
+
                     <div className="bg-gray-900 rounded-lg p-3 font-mono text-xs overflow-auto border border-gray-700">
                         <p className="text-white font-semibold mb-2 text-left">Code (Python)</p>
                         <pre className="text-gray-300 text-left whitespace-pre-wrap">
-{`def mergeSort(arr):
+                            {`def mergeSort(arr):
     if len(arr) > 1:
         mid = len(arr) // 2
         L = arr[:mid]
@@ -87,7 +88,7 @@ const InteractiveDemo = () => {
                     </div>
 
                     <div className="flex flex-col space-y-4">
-                        
+
                         <div className="bg-gray-900 rounded-lg p-3 overflow-auto flex-1 border border-gray-700">
                             <p className="text-white font-semibold mb-2 text-left">Console Output</p>
                             <pre className="text-xs text-left">
@@ -95,7 +96,7 @@ const InteractiveDemo = () => {
                                 <div className="text-green-500">Output: [5, 11, 12, 13]</div>
                                 <div className="text-primary-400">Status: Accepted</div>
                             </pre>
-                            
+
                             <div className="mt-3 w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
                                 <div className="h-1.5 bg-gradient-to-r from-primary-500 to-primary-400 w-full"></div>
                             </div>
@@ -122,7 +123,7 @@ const InteractiveDemo = () => {
 const APIDebug = () => {
     const [apiStatus, setApiStatus] = useState('Testing API...');
     const [responseData, setResponseData] = useState(null);
-    
+
     useEffect(() => {
         const testAPI = async () => {
             try {
@@ -130,11 +131,11 @@ const APIDebug = () => {
                 const response = await fetch('/api/stats/user-stats');
                 const contentType = response.headers.get('content-type');
                 const responseText = await response.text();
-                
+
                 console.log('Response status:', response.status);
                 console.log('Content-Type:', contentType);
                 console.log('Response text:', responseText);
-                
+
                 if (contentType && contentType.includes('text/html')) {
                     setApiStatus('❌ API ERROR: Got HTML page instead of JSON');
                     setResponseData(responseText.substring(0, 200) + '...');
@@ -152,10 +153,10 @@ const APIDebug = () => {
                 setResponseData(null);
             }
         };
-        
+
         testAPI();
     }, []);
-    
+
     return (
         <div className="fixed top-4 left-4 bg-gray-800 text-white p-4 rounded-lg z-50 text-xs max-w-md border border-yellow-500">
             <div className="font-bold mb-2 text-yellow-400">API Debug Info:</div>
@@ -164,8 +165,8 @@ const APIDebug = () => {
                 <div className="mt-2">
                     <div className="font-semibold">Response:</div>
                     <pre className="text-xs mt-1 overflow-auto max-h-32 bg-gray-900 p-2 rounded">
-                        {typeof responseData === 'string' 
-                            ? responseData 
+                        {typeof responseData === 'string'
+                            ? responseData
                             : JSON.stringify(responseData, null, 2)
                         }
                     </pre>
@@ -179,28 +180,28 @@ const APIDebug = () => {
 const RatingPrompt = () => {
     const [showPrompt, setShowPrompt] = useState(false);
     const { isLoggedIn } = useAuth();
-    
+
     useEffect(() => {
         const checkRatingEligibility = async () => {
             if (!isLoggedIn) return;
-            
+
             try {
                 const token = localStorage.getItem('token');
                 console.log('Checking rating eligibility...');
-                
+
                 const response = await fetch('/api/stats/rating-eligibility', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('text/html')) {
                     console.log('Rating eligibility API returned HTML - endpoint likely missing');
                     return;
                 }
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Rating eligibility response:', data);
@@ -225,7 +226,7 @@ const RatingPrompt = () => {
         const timer = setTimeout(checkRatingEligibility, 2000);
         return () => clearTimeout(timer);
     }, [isLoggedIn]);
-    
+
     const handleRating = async (rating) => {
         try {
             const token = localStorage.getItem('token');
@@ -237,14 +238,14 @@ const RatingPrompt = () => {
                 },
                 body: JSON.stringify({ rating })
             });
-            
+
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('text/html')) {
                 console.log('Submit rating API returned HTML - endpoint likely missing');
                 setShowPrompt(false);
                 return;
             }
-            
+
             if (response.ok) {
                 console.log('Rating submitted successfully');
                 setShowPrompt(false);
@@ -266,29 +267,29 @@ const RatingPrompt = () => {
     const handleClose = () => {
         setShowPrompt(false);
     };
-    
+
     if (!showPrompt) return null;
-    
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="dark-glass p-8 rounded-2xl max-w-md w-full border border-gray-600">
                 <div className="flex justify-between items-start mb-4">
                     <h3 className="text-xl font-bold text-white">How would you rate your experience?</h3>
-                    <button 
+                    <button
                         onClick={handleClose}
                         className="text-gray-400 hover:text-white transition-colors"
                     >
                         <i data-feather="x" className="w-5 h-5"></i>
                     </button>
                 </div>
-                
+
                 <p className="text-gray-300 mb-6">
                     You've been using CS Studio for a while now. We'd love to hear your feedback!
                 </p>
-                
+
                 <div className="flex justify-center space-x-3 mb-6">
                     {[1, 2, 3, 4, 5].map(star => (
-                        <button 
+                        <button
                             key={star}
                             onClick={() => handleRating(star)}
                             className="text-3xl text-yellow-400 hover:scale-110 transition-transform duration-200 hover:text-yellow-300"
@@ -298,7 +299,7 @@ const RatingPrompt = () => {
                         </button>
                     ))}
                 </div>
-                
+
                 <p className="text-gray-400 text-sm text-center">
                     Your feedback helps us improve the learning experience!
                 </p>
@@ -325,12 +326,12 @@ const Home = () => {
                 console.log('🔄 Fetching user stats from API...');
                 const response = await fetch('/api/stats/user-stats');
                 const contentType = response.headers.get('content-type');
-                
+
                 if (contentType && contentType.includes('text/html')) {
                     console.log('❌ API returned HTML page. Check if route exists.');
                     return;
                 }
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ API Success - Data received:', data);
@@ -348,7 +349,7 @@ const Home = () => {
         };
 
         fetchUserStats();
-        
+
         const interval = setInterval(fetchUserStats, 30000);
         return () => clearInterval(interval);
     }, []);
@@ -362,11 +363,11 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-        feather.replace(); 
+        feather.replace();
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [handleScroll]); 
-    
+    }, [handleScroll]);
+
     useEffect(() => {
         feather.replace();
     });
@@ -378,7 +379,7 @@ const Home = () => {
     const handleStartLearning = () => {
         return isLoggedIn ? '/courses' : '/signup';
     };
-    
+
     const FEATURE_DATA = [
         { icon: 'git-merge', title: 'Interactive Data Structures', description: 'See lists, trees, and graphs animate as code executes, eliminating abstract concepts.' },
         { icon: 'aperture', title: 'Visualize Algorithms', description: 'Step-by-step visualizations for sorting, pathfinding (e.g., Dijkstra), and recursion.' },
@@ -393,23 +394,28 @@ const Home = () => {
         { icon: 'database', title: 'Data Structures & Algorithms', subtitle: 'Trees, Graphs, and DP', description: 'The essential core of computer science. Prepare for any technical interview with deep visualization.' },
         { icon: 'globe', title: 'Full Stack Web Developer', subtitle: 'MERN Stack & Beyond', description: 'Learn modern web development from database management to front-end architecture.' },
     ];
-    
+
     const TESTIMONIALS_DATA = [
         { initials: 'MC', name: 'Michael Chen', title: 'Software Engineer', quote: 'The interactive lessons made complex algorithms so much easier to understand. I went from zero to getting multiple job offers in just 6 months!' },
         { initials: 'SJ', name: 'Sarah Johnson', title: 'Frontend Developer', quote: 'I love the problem-solving approach. The animated explanations helped me visualize concepts I struggled with for years. Now I\'m building my own apps!' },
         { initials: 'DW', name: 'David Wilson', title: 'CS Student', quote: 'The perfect supplement to my CS degree. The problems are challenging but the explanations are clear. My interview skills improved dramatically.' }
     ];
 
+    // --- CONDITIONAL RENDERING FOR LOGGED IN USERS ---
+    if (isLoggedIn) {
+        return <UserHomePage />;
+    }
+
     return (
         <div className="min-h-screen dark-gradient-secondary">
-            
+
             <div id="hero-section" className="gradient-bg text-white relative overflow-hidden min-h-[90vh] flex items-center border-b border-gray-700">
                 <AbstractBackground />
-                
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-20 w-full">
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 relative z-20 w-full">
                     <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-center">
                         <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-                            <h1 className="text-5xl tracking-tight font-extrabold sm:text-6xl md:text-7xl">
+                            <h1 className="text-4xl tracking-tight font-extrabold sm:text-6xl md:text-7xl">
                                 <span className="block text-white">Master Algorithms with</span>
                                 <span className="block text-primary-400">Interactive Visual Coding</span>
                             </h1>
@@ -418,35 +424,32 @@ const Home = () => {
                             </p>
                             <div className="mt-10 sm:max-w-lg sm:mx-auto lg:text-left lg:mx-0">
                                 <div className="flex flex-col sm:flex-row gap-4">
-                                    <Link 
-                                        to={handleStartLearning()} 
+                                    <Link
+                                        to={handleStartLearning()}
                                         className="dark-btn w-full flex items-center justify-center px-8 py-4 text-lg rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.03]"
                                     >
                                         Start Your Free Trial
                                     </Link>
-                                    <Link 
-                                        to="/problems" 
+                                    <Link
+                                        to="/problems"
                                         className="dark-btn-secondary w-full flex items-center justify-center px-8 py-4 text-lg rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.03]"
                                     >
                                         Browse Challenges
                                     </Link>
                                 </div>
-                                <p className="mt-4 text-sm text-gray-400">
-                                    <span className="text-primary-400 font-semibold">{userStats.totalUsers.toLocaleString()}+</span> developers are currently accelerating their careers.
-                                    {apiData && <span className="text-green-400 ml-2">(Live Data)</span>}
-                                </p>
+                                <span className="text-primary-400 font-semibold">{userStats?.totalUsers?.toLocaleString() || 0}+</span> developers are currently accelerating their careers.
                             </div>
                         </div>
-                        
+
                         <div className="mt-16 lg:mt-0 lg:col-span-6 flex justify-center w-full">
                             <div className="hidden lg:block w-full justify-center">
                                 <InteractiveDemo />
                             </div>
-                            
+
                             <div className="lg:hidden w-full max-w-sm mx-auto grid grid-cols-2 gap-4">
                                 {FEATURE_DATA.slice(0, 4).map((feature, index) => (
-                                    <div 
-                                        key={index} 
+                                    <div
+                                        key={index}
                                         className="dark-glass p-5 rounded-xl shadow-xl border border-gray-700 flex flex-col items-start space-y-2"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center text-white shadow-md">
@@ -456,8 +459,8 @@ const Home = () => {
                                         <p className="text-gray-400 text-xs">{feature.description.split(',')[0]}</p>
                                     </div>
                                 ))}
-                                <Link 
-                                    to="/problems" 
+                                <Link
+                                    to="/problems"
                                     className="col-span-2 dark-btn w-full text-center mt-2 inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.03]"
                                 >
                                     Try a Free Challenge
@@ -469,7 +472,7 @@ const Home = () => {
             </div>
 
             {/* Enhanced Stats Section - Simple & Attractive */}
-            <div className="py-16 dark-gradient-secondary border-b border-gray-700">
+            <div className="py-12 sm:py-16 dark-gradient-secondary border-b border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Elevated Stats Box */}
                     <div className="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-8 lg:p-12">
@@ -477,29 +480,29 @@ const Home = () => {
                         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
                             <div className="text-center">
                                 <div className="text-4xl font-bold text-white mb-2">
-                                    {userStats.totalUsers.toLocaleString()}+
+                                    {userStats?.totalUsers?.toLocaleString() || 0}+
                                 </div>
                                 <div className="text-gray-400">Active Learners</div>
-                                
+
                             </div>
-                            
+
                             <div className="text-center">
                                 <div className="text-4xl font-bold text-white mb-2">500+</div>
                                 <div className="text-gray-400">Interactive Lessons</div>
-                                
+
                             </div>
-                            
+
                             <div className="text-center">
                                 <div className="text-4xl font-bold text-white mb-2">250+</div>
                                 <div className="text-gray-400">Coding Problems</div>
                             </div>
-                            
+
                             <div className="text-center">
                                 <div className="text-4xl font-bold text-white mb-2">
-                                    {userStats.satisfactionRate}%
+                                    {userStats?.satisfactionRate || 100}%
                                 </div>
                                 <div className="text-gray-400">Satisfaction Rate</div>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -507,7 +510,7 @@ const Home = () => {
             </div>
 
             {/* Rest of your sections remain the same */}
-            <div className="py-20 dark-gradient-secondary">
+            <div className="py-12 sm:py-20 dark-gradient-secondary">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
                         <h2 className="text-base text-primary-500 font-semibold tracking-wide uppercase">The CS Studio Advantage</h2>
@@ -536,7 +539,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-            
+
             <div className="py-20 dark-gradient-secondary border-t border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
@@ -562,8 +565,8 @@ const Home = () => {
                                     </div>
                                 </div>
                                 <p className="mt-4 text-gray-400 text-sm">{path.description}</p>
-                                <Link 
-                                    to="/roadmaps" 
+                                <Link
+                                    to="/roadmaps"
                                     className="dark-btn-secondary w-full text-center mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:bg-gray-700"
                                 >
                                     Explore Roadmap
@@ -573,7 +576,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-            
+
             <div className="py-20 dark-gradient-secondary border-t border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
@@ -583,9 +586,9 @@ const Home = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory hide-scrollbar">
                         {TESTIMONIALS_DATA.map((testimonial, index) => (
-                            <div key={index} className="dark-glass p-8 rounded-2xl shadow-xl border border-gray-700 card-hover">
+                            <div key={index} className="dark-glass p-8 rounded-2xl shadow-xl border border-gray-700 card-hover min-w-[85vw] sm:min-w-0 snap-center">
                                 <div className="flex mb-4">
                                     {Array(5).fill(0).map((_, i) => (
                                         <i key={i} data-feather="star" className="w-5 h-5 text-yellow-400 fill-current"></i>
@@ -611,12 +614,12 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className="py-20 dark-gradient-secondary"> 
+            <div className="py-20 dark-gradient-secondary">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-premium-lg relative overflow-hidden py-16 px-8"> 
+                    <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-premium-lg relative overflow-hidden py-16 px-8">
                         <div className="absolute inset-0 bg-black opacity-5"></div>
-                        
-                        <div className="relative"> 
+
+                        <div className="relative">
                             <div className="lg:flex lg:items-center lg:justify-between">
                                 <div className="flex-1">
                                     <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
@@ -629,8 +632,8 @@ const Home = () => {
                                 </div>
                                 <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
                                     <div className="inline-flex rounded-md shadow-lg">
-                                        <Link 
-                                            to="/signup" 
+                                        <Link
+                                            to="/signup"
                                             className="dark-btn inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-semibold text-white transition-all duration-300 transform hover:scale-105"
                                         >
                                             Start Free Trial Now
@@ -643,21 +646,20 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-            
-            <Link 
-                to="/code" 
-                id="floating-action-button" 
+
+            <Link
+                to="/code"
+                id="floating-action-button"
                 className="fixed bottom-20 sm:bottom-6 right-6 h-14 w-14 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl z-50"
             >
                 <i data-feather="edit-3" className="h-6 w-6"></i>
             </Link>
 
-            <button 
-                id="back-to-top" 
+            <button
+                id="back-to-top"
                 onClick={scrollToTop}
-                className={`fixed bottom-40 sm:bottom-24 right-6 h-12 w-12 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg z-50 ${
-                    isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'
-                }`}
+                className={`fixed bottom-40 sm:bottom-24 right-6 h-12 w-12 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg z-50 ${isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'
+                    }`}
             >
                 <i data-feather="arrow-up" className="h-5 w-5"></i>
             </button>

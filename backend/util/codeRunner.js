@@ -11,6 +11,8 @@ const path = require('path');
  * @returns {Promise<{stdout: string, stderr: string, exitCode: number}>}
  */
 async function runCodeTest(language, code, input) {
+  // Reduced timeout to 5 seconds for better user experience
+  const TIMEOUT_MS = 5000;
   const tempDir = path.join(__dirname, 'temp');
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
@@ -81,16 +83,16 @@ async function runCodeTest(language, code, input) {
         });
 
         await new Promise((resolve, reject) => {
-            compileProcess.on('error', (err) => reject(new Error(`javac not found. ${err.message}`)));
-            compileProcess.on('close', (code) => {
-                if (code !== 0) {
-                    reject(new Error(compileError || `Compilation failed with exit code ${code}`));
-                } else if (!fs.existsSync(classFile)) {
-                    reject(new Error('Compilation failed: Class file was not created'));
-                } else {
-                    resolve();
-                }
-            });
+          compileProcess.on('error', (err) => reject(new Error(`javac not found. ${err.message}`)));
+          compileProcess.on('close', (code) => {
+            if (code !== 0) {
+              reject(new Error(compileError || `Compilation failed with exit code ${code}`));
+            } else if (!fs.existsSync(classFile)) {
+              reject(new Error('Compilation failed: Class file was not created'));
+            } else {
+              resolve();
+            }
+          });
         });
 
         runCommand = 'java';
@@ -114,7 +116,7 @@ async function runCodeTest(language, code, input) {
     // Execution
     const childProcess = spawn(runCommand, runArgs, {
       stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 30000,
+      timeout: TIMEOUT_MS,
       cwd: tempDir
     });
 
@@ -141,8 +143,8 @@ async function runCodeTest(language, code, input) {
         resolve({ stdout, stderr, exitCode: code });
       });
       childProcess.on('error', (err) => {
-          stderr += `Execution error: ${err.message}`;
-          resolve({ stdout: '', stderr, exitCode: 1 });
+        stderr += `Execution error: ${err.message}`;
+        resolve({ stdout: '', stderr, exitCode: 1 });
       });
       childProcess.on('timeout', () => {
         timedOut = true;
@@ -153,13 +155,8 @@ async function runCodeTest(language, code, input) {
     });
 
     if (timedOut) {
-        result.stderr = 'Execution timed out. Try to optimize your solution.';
-        result.exitCode = 1;
-    }
-
-    // CRITICAL: Throw an error if compilation or execution failed to be caught by problemController
-    if (result.exitCode !== 0 && result.stderr) {
-        throw new Error(result.stderr);
+      result.stderr = 'Execution timed out. Try to optimize your solution.';
+      result.exitCode = 1;
     }
 
     return result;

@@ -15,8 +15,11 @@ export const useSimpleImageCropper = () => {
         width: 200,
         height: 200
     });
+    const [scale, setScale] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [isResizing, setIsResizing] = useState(false);
+    const [resizeStart, setResizeStart] = useState({ width: 0, height: 0, x: 0, y: 0 });
 
     const handlePhotoChange = useCallback(() => {
         fileInputRef.current?.click();
@@ -42,18 +45,21 @@ export const useSimpleImageCropper = () => {
             const img = new Image();
             img.onload = () => {
                 setImageDimensions({ width: img.width, height: img.height });
+                const imgScale = Math.min(400 / img.width, 400 / img.height);
+                setScale(imgScale);
                 setOriginalImage(e.target.result);
                 setIsCropModalOpen(true);
 
-                // Reset crop area to center
+                // Reset crop area to center square
                 setTimeout(() => {
-                    const centerX = Math.max(0, (img.width - 200) / 2);
-                    const centerY = Math.max(0, (img.height - 200) / 2);
+                    const cropSize = Math.min(img.width, img.height);
+                    const centerX = Math.max(0, (img.width - cropSize) / 2);
+                    const centerY = Math.max(0, (img.height - cropSize) / 2);
                     setCrop({
                         x: centerX,
                         y: centerY,
-                        width: 200,
-                        height: 200
+                        width: cropSize,
+                        height: cropSize
                     });
                 }, 100);
             };
@@ -70,16 +76,19 @@ export const useSimpleImageCropper = () => {
         e.preventDefault();
         setIsDragging(true);
         setDragStart({
-            x: e.clientX - crop.x,
-            y: e.clientY - crop.y
+            x: e.clientX,
+            y: e.clientY
         });
-    }, [crop]);
+    }, []);
 
     const handleMouseMove = useCallback((e) => {
         if (!isDragging || !originalImage) return;
 
-        const newX = e.clientX - dragStart.x;
-        const newY = e.clientY - dragStart.y;
+        const deltaX = e.clientX - dragStart.x;
+        const deltaY = e.clientY - dragStart.y;
+
+        const newX = crop.x + deltaX / scale;
+        const newY = crop.y + deltaY / scale;
 
         // Boundary checks - ensure crop area stays within image bounds
         const maxX = imageDimensions.width - crop.width;
@@ -93,10 +102,44 @@ export const useSimpleImageCropper = () => {
             x: boundedX,
             y: boundedY
         }));
-    }, [isDragging, dragStart, crop.width, crop.height, originalImage, imageDimensions]);
+        setDragStart({ x: e.clientX, y: e.clientY }); // Update drag start to avoid accumulation errors
+    }, [isDragging, dragStart, crop, originalImage, imageDimensions, scale]);
 
     const handleMouseUp = useCallback(() => {
         setIsDragging(false);
+    }, []);
+
+    const handleResizeMouseDown = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsResizing(true);
+        setResizeStart({
+            circleSize: crop.width * scale, // circleSize in screen pixels
+            x: e.clientX,
+            y: e.clientY
+        });
+    }, [crop, scale]);
+
+    const handleResizeMouseMove = useCallback((e) => {
+        if (!isResizing || !originalImage) return;
+
+        const deltaX = e.clientX - resizeStart.x;
+        const newCircleSizeScreen = Math.max(50 * scale, resizeStart.circleSize + deltaX); // Min 50px visual
+        const newCropSize = newCircleSizeScreen / scale;
+
+        // Enforce boundaries
+        const maxCropSize = Math.min(imageDimensions.width - crop.x, imageDimensions.height - crop.y);
+        const finalCropSize = Math.min(newCropSize, maxCropSize);
+
+        setCrop(prev => ({
+            ...prev,
+            width: finalCropSize,
+            height: finalCropSize
+        }));
+    }, [isResizing, resizeStart, originalImage, imageDimensions, crop.x, crop.y, scale]);
+
+    const handleResizeMouseUp = useCallback(() => {
+        setIsResizing(false);
     }, []);
 
     const applyCropManually = useCallback(() => {
@@ -105,32 +148,29 @@ export const useSimpleImageCropper = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const img = new Image();
-        
+
         return new Promise((resolve) => {
             img.onload = () => {
                 // Set canvas size
                 canvas.width = 256;
                 canvas.height = 256;
-                
+
                 // Clear canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Calculate scale (we're working with a 400x400 preview, but original image might be different)
-                const scale = img.width / 400;
-                
+
                 // Draw cropped portion
                 ctx.drawImage(
                     img,
-                    crop.x * scale,
-                    crop.y * scale,
-                    crop.width * scale,
-                    crop.height * scale,
+                    crop.x,
+                    crop.y,
+                    crop.width,
+                    crop.height,
                     0,
                     0,
                     256,
                     256
                 );
-                
+
                 // Convert to blob
                 canvas.toBlob((blob) => {
                     resolve(blob);
@@ -144,6 +184,7 @@ export const useSimpleImageCropper = () => {
         setIsCropModalOpen(false);
         setOriginalImage(null);
         setImageDimensions({ width: 0, height: 0 });
+        setScale(1);
         setCrop({ x: 0, y: 0, width: 200, height: 200 });
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -153,6 +194,8 @@ export const useSimpleImageCropper = () => {
     return {
         isCropModalOpen,
         originalImage,
+        imageDimensions,
+        scale,
         fileInputRef,
         handlePhotoChange,
         handleFileInputChange,
@@ -165,6 +208,10 @@ export const useSimpleImageCropper = () => {
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
+        isResizing,
+        handleResizeMouseDown,
+        handleResizeMouseMove,
+        handleResizeMouseUp,
         canvasRef,
         imageRef
     };

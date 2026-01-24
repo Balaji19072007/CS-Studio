@@ -1,7 +1,7 @@
 // src/App.jsx
 
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { useTheme } from './hooks/useTheme.jsx';
@@ -24,7 +24,10 @@ import CodeVerification from './pages/CodeVerification.jsx';
 import SolveProblem from './pages/SolveProblem.jsx';
 import MyCourses from './pages/MyCourses.jsx';
 import MyProgress from './pages/MyProgress.jsx';
-import CProgramming from './pages/learningPage/CProgramming.jsx';
+import MyProblemStats from './pages/MyProblemStats.jsx';
+import Notifications from './pages/Notifications.jsx';
+import CourseViewer from './pages/learningPage/CourseViewer.jsx';
+// REMOVED: import CProgramming from './pages/learningPage/CProgramming.jsx';
 import CProgrammingRoadmap from './pages/roadmaps/CProgrammingRoadmap.jsx';
 import PythonProgrammingRoadmap from './pages/roadmaps/PythonProgrammingRoadmap.jsx';
 import JavaProgrammingRoadmap from './pages/roadmaps/JavaProgrammingRoadmap.jsx';
@@ -68,9 +71,9 @@ function App() {
         }}
       >
         <AuthProvider>
-          <ThemeProvider> 
+          <ThemeProvider>
             <AppContent />
-          </ThemeProvider> 
+          </ThemeProvider>
         </AuthProvider>
       </Router>
     </ErrorBoundary>
@@ -80,6 +83,7 @@ function App() {
 // Separate component to use hooks
 function AppContent() {
   const { isDark } = useTheme();
+  const location = useLocation();
 
   // Page refresh handling is now done in index.html for better reliability
 
@@ -96,7 +100,8 @@ function AppContent() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/courses" element={<Courses />} />
-          <Route path="/learn/c-programming" element={<CProgramming />} />
+          {/* Dynamic Course Route - Replaces individual imports */}
+          <Route path="/learn/:courseId" element={<CourseViewer />} />
           <Route path="/roadmaps" element={<Roadmaps />} />
           <Route path="/roadmaps/c-programming" element={<CProgrammingRoadmap />} />
           <Route path="/roadmaps/python-programming" element={<PythonProgrammingRoadmap />} />
@@ -136,6 +141,8 @@ function AppContent() {
           <Route path="/code-verification" element={<ProtectedRoute><CodeVerification /></ProtectedRoute>} />
           <Route path="/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
           <Route path="/my-progress" element={<ProtectedRoute><MyProgress /></ProtectedRoute>} />
+          <Route path="/problem-stats" element={<ProtectedRoute><MyProblemStats /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
           {/* Catch-all route - 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -144,7 +151,7 @@ function AppContent() {
 
       <RatingPopup />
 
-      <Footer />
+      {!location.pathname.startsWith('/solve') && <Footer />}
     </div>
   );
 }
@@ -152,11 +159,11 @@ function AppContent() {
 // Protected Route Component using useAuth hook
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useAuth();
-  
+
   if (!isLoggedIn) {
     return <Navigate to="/signin" replace />;
   }
-  
+
   return children;
 };
 

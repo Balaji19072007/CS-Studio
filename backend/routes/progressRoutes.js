@@ -12,6 +12,13 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/:problemId/progress', authMiddleware, progressController.updateProgress);
 
 /**
+ * @route GET /api/progress/history
+ * @desc Get full problem history for user
+ * @access Private
+ */
+router.get('/history', authMiddleware, progressController.getHistory);
+
+/**
  * @route GET /api/progress/user-stats
  * @desc Get current user's progress statistics
  * @access Private

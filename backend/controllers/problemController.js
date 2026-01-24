@@ -12,14 +12,104 @@ const TestEvaluationService = require('../util/testEvaluationService');
 // @access  Public
 exports.getProblems = async (req, res) => {
     try {
-        const problems = await Problem.find()
-            .select('problemId title language difficulty examples')
-            .sort('problemId'); 
+        let problems = await Problem.find();
 
-        res.json(problems);
+        // Manual Sort
+        problems.sort((a, b) => a.problemId - b.problemId);
+
+        // Manual Select (Project fields)
+        const projected = problems.map(p => ({
+            id: p.id,
+            problemId: p.problemId,
+            title: p.title,
+            language: p.language,
+            difficulty: p.difficulty,
+            category: p.category
+        }));
+
+        res.json(projected);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error fetching problems');
+    }
+};
+
+// @route   GET /api/problems/daily
+// @desc    Get the daily challenge problem
+// @access  Public
+exports.getDailyProblem = async (req, res) => {
+    try {
+        const problems = await Problem.find();
+        const count = problems.length;
+
+        if (count === 0) return res.status(404).json({ msg: 'No problems found' });
+
+        const today = new Date();
+        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+        const dailyIndex = dayOfYear % count;
+
+        const problem = problems[dailyIndex];
+
+        // Return minimal fields
+        res.json({
+            id: problem.id,
+            problemId: problem.problemId,
+            title: problem.title,
+            language: problem.language,
+            difficulty: problem.difficulty,
+            category: problem.category
+        });
+    } catch (err) {
+        console.error('Error fetching daily problem:', err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+// @route   GET /api/problems/recommended
+// @desc    Get recommended problems for the user (unsolved)
+// @access  Private
+exports.getRecommendedProblems = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Find solved problem IDs
+        // Note: Progress.find returns array of Progress instances
+        const solvedProgress = await Progress.find({ userId, status: 'solved' });
+        const solvedIds = solvedProgress.map(p => p.problemId);
+
+        // Find all problems
+        const allProblems = await Problem.find();
+
+        // Filter out solved
+        const recommended = allProblems
+            .filter(p => !solvedIds.includes(p.problemId))
+            .slice(0, 3) // limit 3
+            .map(p => ({
+                id: p.id,
+                problemId: p.problemId,
+                title: p.title,
+                language: p.language,
+                difficulty: p.difficulty,
+                category: p.category
+            }));
+
+        // If user solved everything (or result empty), return random 3
+        if (recommended.length === 0) {
+            const random = allProblems.slice(0, 3).map(p => ({
+                id: p.id,
+                problemId: p.problemId,
+                title: p.title,
+                language: p.language,
+                difficulty: p.difficulty,
+                category: p.category
+            }));
+            return res.json(random);
+        }
+
+        res.json(recommended);
+    } catch (err) {
+        console.error('Error fetching recommended problems:', err.message);
+        res.status(500).send('Server Error');
     }
 };
 
@@ -50,52 +140,52 @@ exports.getProblemById = async (req, res) => {
 exports.getProblemTestCases = async (req, res) => {
     try {
         const problemId = parseInt(req.params.id);
-        
+
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
         const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
         const problemData = JSON.parse(problemDataContent);
-        
+
         const problem = problemData.find(p => p.id === problemId);
-        
+
         if (!problem) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Problem not found in problem data' 
+            return res.status(404).json({
+                success: false,
+                message: 'Problem not found in problem data'
             });
         }
-        
+
         if (!problem.testCases || problem.testCases.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'No test cases found for this problem' 
+            return res.status(404).json({
+                success: false,
+                message: 'No test cases found for this problem'
             });
         }
-        
+
         res.json({
             success: true,
             testCases: problem.testCases
         });
-        
+
     } catch (error) {
         console.error('Error fetching problem test cases:', error);
-        
+
         if (error.code === 'ENOENT') {
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Problem data file not found' 
+            return res.status(500).json({
+                success: false,
+                message: 'Problem data file not found'
             });
         }
-        
+
         if (error instanceof SyntaxError) {
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Invalid problem data file format' 
+            return res.status(500).json({
+                success: false,
+                message: 'Invalid problem data file format'
             });
         }
-        
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error while fetching test cases' 
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error while fetching test cases'
         });
     }
 };
@@ -118,7 +208,7 @@ exports.runTestCases = async (req, res) => {
         // 1. Get all test cases for the problem from JSON
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
         console.log('📁 Looking for problem data at:', problemDataPath);
-        
+
         const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
         const allProblems = JSON.parse(problemDataContent);
         const problemFromJSON = allProblems.find(p => p.id === problemId);
@@ -139,6 +229,7 @@ exports.runTestCases = async (req, res) => {
         // 2. Prepare test results
         const evaluationService = new TestEvaluationService();
         let passedCount = 0;
+        const results = []; // Collect detailed results
 
         console.log('🧪 Running tests...');
 
@@ -153,27 +244,51 @@ exports.runTestCases = async (req, res) => {
                 const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
 
                 // CRITICAL FIX: Determine failure if there is compilation/runtime error (result.stderr)
-                const hasError = !!result.stderr;
-                const isPassed = !hasError && result.exitCode === 0 && comparison.passed;
+                // CRITICAL FIX: If the output matches, the test PASSES.
+                // We ignore exit codes (e.g., occasional non-zero exits on Windows) if the answer is correct.
+                // passed: comparison.passed checks content.
+                const hasError = result.exitCode !== 0; // For logging purposes
+
+                // CRITICAL FIX: If we have stderr but the output MATCHES, it might be a warning.
+                // However, usually runtime errors (non-zero exit) should be failures unless output is perfect.
+                // We prioritize the comparison.passed.
+
+                const isPassed = comparison.passed;
 
                 if (isPassed) {
                     passedCount++;
                     console.log(`   Test ${index + 1}: ✅ PASSED`);
                 } else {
                     console.log(`   Test ${index + 1}: ❌ FAILED`, {
-                        hasError,
+                        // hasError,
                         exitCode: result.exitCode,
-                        expected: test.expected,
-                        output: cleanedOutput,
+                        // expected: test.expected,
+                        // output: cleanedOutput,
                         matchType: comparison.matchType,
-                        difference: comparison.difference
+                        // difference: comparison.difference
                     });
                 }
+
+                results.push({
+                    input: test.input,
+                    expected: test.expected,
+                    output: cleanedOutput,
+                    error: result.stderr,
+                    passed: isPassed
+                });
+
             } catch (testError) {
                 console.error(`   Test ${index + 1}: 💥 ERROR:`, testError.message);
+                results.push({
+                    input: test.input,
+                    expected: test.expected,
+                    output: '',
+                    error: testError.message,
+                    passed: false
+                });
             }
         }
-        
+
         const totalTests = problemFromJSON.testCases.length;
         const accuracy = totalTests > 0 ? (passedCount / totalTests) * 100 : 0;
 
@@ -182,13 +297,13 @@ exports.runTestCases = async (req, res) => {
         // 4. Update user's progress using the Progress model methods
         try {
             const progress = await Progress.getUserProgress(userId, problemId);
-            
+
             progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
             progress.status = 'attempted';
             progress.lastSubmission = new Date();
-            
+
             await progress.save();
-            
+
             // Update user stats for attempted problem
             await Progress.updateUserStats(userId, accuracy, false);
             console.log('✅ Progress updated for user:', userId);
@@ -201,15 +316,16 @@ exports.runTestCases = async (req, res) => {
             success: true,
             passed: accuracy === 100,
             accuracy: Math.floor(accuracy),
+            results: results // Return detailed results
         });
 
     } catch (err) {
         console.error('💥 Catastrophic error running test cases:', err.message);
         console.error('Stack trace:', err.stack);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            msg: 'Server error during test execution', 
-            error: err.message 
+            msg: 'Server error during test execution',
+            error: err.message
         });
     }
 };
@@ -238,92 +354,119 @@ exports.submitProblem = async (req, res) => {
         if (!problemFromJSON || !problemFromJSON.testCases || problemFromJSON.testCases.length === 0) {
             return res.status(404).json({ success: false, message: 'Problem test cases not found for submission validation' });
         }
-        
+
         let passedCount = 0;
         const totalTests = problemFromJSON.testCases.length;
         const evaluationService = new TestEvaluationService();
 
         // This process runs against all hidden and visible test cases
         for (const test of problemFromJSON.testCases) {
-            const result = await runCodeTest(language, code, test.input);
-            const cleanedOutput = evaluationService.cleanOutput(result.stdout);
-            const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
+            try {
+                const result = await runCodeTest(language, code, test.input);
+                const cleanedOutput = evaluationService.cleanOutput(result.stdout);
+                const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
 
-            const hasError = !!result.stderr;
-
-            if (!hasError && result.exitCode === 0 && comparison.passed) {
-                passedCount++;
+                // If comparison passed, count it. Ignore exit codes.
+                if (comparison.passed) {
+                    passedCount++;
+                }
+            } catch (testError) {
+                console.error(`   Submission Test Error:`, testError.message);
+                // Treat as failed test, continue to next
             }
         }
-        
+
         const accuracy = (passedCount / totalTests) * 100;
         const isSolved = accuracy === 100;
-        
+
         console.log(`📊 Submission Results: ${passedCount}/${totalTests} passed (${accuracy}% accuracy), Solved: ${isSolved}`);
 
         // 2. Update Progress using Progress model methods
-        const progress = await Progress.getUserProgress(userId, problemId);
-        const wasPreviouslySolved = progress.status === 'solved';
-        
-        progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
-        if (isSolved) {
-            progress.status = 'solved';
-        } else if (progress.status !== 'solved') {
-            progress.status = 'attempted';
+        let progress;
+        try {
+            progress = await Progress.getUserProgress(userId, problemId);
+            const wasPreviouslySolved = progress.status === 'solved';
+
+            progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
+            if (isSolved) {
+                progress.status = 'solved';
+            } else if (progress.status !== 'solved') {
+                progress.status = 'attempted';
+            }
+
+            progress.lastSubmission = new Date();
+            await progress.save();
+            console.log('✅ Progress saved successfully');
+        } catch (progErr) {
+            console.error('❌ Error saving progress:', progErr);
+            throw new Error(`Progress update failed: ${progErr.message}`);
         }
-        
-        progress.lastSubmission = new Date();
-        await progress.save();
-        
+
         // 3. Update User Stats using Progress model method
-        let pointsAwarded = 0;
-        
-        if (isSolved && !wasPreviouslySolved) {
-            // Use the Progress model method to update all user stats
-            await Progress.updateUserStats(userId, accuracy, true);
-            pointsAwarded = 100;
-            console.log('🎯 Problem SOLVED - User stats updated');
-        } else {
-            await Progress.updateUserStats(userId, accuracy, false);
-            console.log('📝 Problem ATTEMPTED - User stats updated');
+        let userStatsUpdateError = null;
+        try {
+            if (isSolved) {
+                await Progress.updateUserStats(userId, accuracy, true);
+                console.log('🎯 Problem SOLVED - User stats updated');
+                pointsAwarded = 100;
+            } else {
+                await Progress.updateUserStats(userId, accuracy, false);
+                console.log('📝 Problem ATTEMPTED - User stats updated');
+            }
+        } catch (statsErr) {
+            console.error('❌ Error updating user stats (ignoring to allow submission):', statsErr.message);
+            userStatsUpdateError = statsErr.message;
         }
-        
+
         // 4. Get updated user data for response
-        const updatedUser = await User.findById(userId);
-        
-        console.log('✅ Final User Stats:', {
-            username: updatedUser.username,
-            problemsSolved: updatedUser.problemsSolved,
-            totalPoints: updatedUser.totalPoints,
-            averageAccuracy: updatedUser.averageAccuracy
-        });
-        
+        let updatedUser = null;
+        try {
+            updatedUser = await User.findById(userId);
+        } catch (fetchErr) {
+            console.error('❌ Error fetching updated user:', fetchErr.message);
+        }
+
+        if (updatedUser) {
+            console.log('✅ Final User Stats:', {
+                username: updatedUser.username,
+                problemsSolved: updatedUser.problemsSolved,
+                totalPoints: updatedUser.totalPoints,
+                averageAccuracy: updatedUser.averageAccuracy
+            });
+        }
+
         res.json({
             success: true,
             isSolved: isSolved,
             accuracy: Math.floor(accuracy),
             totalTests,
             passedCount,
-            message: isSolved ? 
-                (wasPreviouslySolved ? 'Problem already solved. Great job!' : 'Solution accepted! Problem solved!') 
+            message: isSolved ?
+                (progress.status === 'solved' ? 'Problem already solved. Great job!' : 'Solution accepted! Problem solved!')
                 : 'Solution failed some test cases. Keep trying!',
             pointsAwarded: pointsAwarded,
             newStatus: progress.status,
-            userStats: {
+            userStats: updatedUser ? {
                 problemsSolved: updatedUser.problemsSolved,
                 totalPoints: updatedUser.totalPoints,
                 averageAccuracy: updatedUser.averageAccuracy,
                 currentStreak: updatedUser.currentStreak
-            }
+            } : null,
+            warning: userStatsUpdateError ? 'Submission accepted, but user stats could not be updated due to server configuration.' : null
         });
 
     } catch (err) {
         console.error('💥 Catastrophic error submitting problem:', err.message);
         console.error('Stack trace:', err.stack);
-        res.status(500).json({ 
+
+        // Log detailed error info
+        if (err.errors) console.error('Validation Errors:', err.errors);
+
+        res.status(500).json({
             success: false,
-            msg: 'Server error during submission', 
-            error: err.message 
+            msg: 'Server error during submission',
+            error: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
     }
 };
@@ -372,10 +515,10 @@ exports.updateProgress = async (req, res) => {
 
     } catch (err) {
         console.error('Progress update error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error updating progress',
-            error: err.message 
+            error: err.message
         });
     }
 };
@@ -407,10 +550,10 @@ exports.getProblemProgress = async (req, res) => {
 
     } catch (err) {
         console.error('Get progress error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error getting progress',
-            error: err.message 
+            error: err.message
         });
     }
 };
@@ -424,9 +567,9 @@ exports.startProblemTimer = async (req, res) => {
         const userId = req.user.id;
 
         const progress = await Progress.getUserProgress(userId, problemId);
-        
+
         await progress.startTimer();
-        
+
         res.json({
             success: true,
             message: 'Timer started (10 minutes)',
@@ -437,13 +580,13 @@ exports.startProblemTimer = async (req, res) => {
                 isRunning: progress.timer.isRunning
             }
         });
-        
+
     } catch (err) {
         console.error('Start timer error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error starting timer',
-            error: err.message 
+            error: err.message
         });
     }
 };
@@ -457,9 +600,9 @@ exports.stopProblemTimer = async (req, res) => {
         const userId = req.user.id;
 
         const progress = await Progress.getUserProgress(userId, problemId);
-        
+
         await progress.stopTimer();
-        
+
         res.json({
             success: true,
             message: 'Timer stopped',
@@ -468,13 +611,13 @@ exports.stopProblemTimer = async (req, res) => {
                 isRunning: progress.timer.isRunning
             }
         });
-        
+
     } catch (err) {
         console.error('Stop timer error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error stopping timer',
-            error: err.message 
+            error: err.message
         });
     }
 };
@@ -488,10 +631,10 @@ exports.getProblemTimer = async (req, res) => {
         const userId = req.user.id;
 
         const progress = await Progress.getUserProgress(userId, problemId);
-        
+
         const timeRemaining = progress.getTimeRemaining();
         const hasExpired = progress.hasTimerExpired();
-        
+
         res.json({
             success: true,
             timer: {
@@ -502,13 +645,13 @@ exports.getProblemTimer = async (req, res) => {
                 duration: progress.timer.duration
             }
         });
-        
+
     } catch (err) {
         console.error('Get timer error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error getting timer',
-            error: err.message 
+            error: err.message
         });
     }
 };

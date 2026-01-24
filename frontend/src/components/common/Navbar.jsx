@@ -1,11 +1,11 @@
 // frontend/src/components/common/Navbar.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from "../../hooks/useAuth.jsx"; 
+import { useAuth } from "../../hooks/useAuth.jsx";
 import { useTheme } from '../../hooks/useTheme.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
 import * as feather from 'feather-icons';
-import SearchBar from './SearchBar.jsx'; 
+import SearchBar from './SearchBar.jsx';
 
 // Data that describes all navigation links
 const PRIMARY_NAV_ITEMS = [
@@ -39,13 +39,13 @@ const Navbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-    
+
     const featherIconsInitialized = useRef(false);
     const dropdownRef = useRef(null);
     const profileButtonRef = useRef(null);
 
     const currentPath = location.pathname.replace(/.html$/, '');
-    
+
     // Initialize Feather icons safely
     const initializeFeatherIcons = () => {
         try {
@@ -77,7 +77,7 @@ const Navbar = () => {
             document.body.classList.add('mobile-nav-spacing');
         } else {
             document.body.classList.remove('mobile-nav-spacing');
-            document.body.classList.add('logged-out-top-spacing'); 
+            document.body.classList.add('logged-out-top-spacing');
         }
 
         return () => {
@@ -88,8 +88,8 @@ const Navbar = () => {
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (isDropdownOpen && 
-                dropdownRef.current && 
+            if (isDropdownOpen &&
+                dropdownRef.current &&
                 !dropdownRef.current.contains(event.target) &&
                 profileButtonRef.current &&
                 !profileButtonRef.current.contains(event.target)) {
@@ -105,11 +105,11 @@ const Navbar = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isDropdownOpen, isNotificationsOpen]);
-    
+
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [location.pathname]);
-    
+
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(prev => !prev);
     }
@@ -144,7 +144,7 @@ const Navbar = () => {
                 await markAsRead(notification._id);
             }
             setIsNotificationsOpen(false);
-            
+
             // Navigate to notification link if available
             if (notification.link) {
                 navigate(notification.link);
@@ -183,7 +183,7 @@ const Navbar = () => {
         if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
         if (diffInHours < 24) return `${diffInHours}h ago`;
         if (diffInDays < 7) return `${diffInDays}d ago`;
-        
+
         return created.toLocaleDateString();
     };
 
@@ -203,38 +203,35 @@ const Navbar = () => {
         if (!isLoggedIn) return null;
 
         return items.map(item => {
-            
+
             let isActive = false;
-            
+
             if (item.path === '/') {
-                isActive = currentPath === '/'; 
+                isActive = currentPath === '/';
             } else {
                 isActive = currentPath === item.path || currentPath.startsWith(item.path + '/');
             }
-            
+
             const baseClasses = "font-medium transition-all duration-300";
             const desktopClasses = `h-full flex items-center px-4 pt-1 text-sm ${isActive ? 'active-nav' : 'text-gray-300 hover:text-white'}`;
-            
-            const mobileClasses = `flex items-center px-4 py-3 text-base font-medium rounded-lg mx-2 transition-all duration-200 border-l-4 ${
-                isActive 
-                    ? 'bg-primary-500/20 text-primary-600 border-primary-500' 
-                    : `border-transparent ${isDark ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
-            }`;
-            
-            const bottomNavClasses = `flex flex-col items-center justify-center p-2 pt-2.5 transition-colors duration-200 ${
-                isActive
-                    ? 'text-primary-500'
-                    : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
-            }`;
+
+            const mobileClasses = `flex items-center px-4 py-3 text-base font-medium rounded-lg mx-2 transition-all duration-200 border-l-4 ${isActive
+                ? 'bg-primary-500/20 text-primary-600 border-primary-500'
+                : `border-transparent ${isDark ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
+                }`;
+
+            const bottomNavClasses = `flex flex-col items-center justify-center p-2 pt-2.5 transition-colors duration-200 ${isActive
+                ? 'text-primary-500'
+                : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+                }`;
 
             return (
-                <Link 
-                    key={item.name} 
-                    to={item.path} 
-                    className={`nav-link ${
-                        !isMobile ? desktopClasses 
+                <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`nav-link ${!isMobile ? desktopClasses
                         : (items === PRIMARY_NAV_ITEMS ? bottomNavClasses : mobileClasses)
-                    } ${baseClasses}`}
+                        } ${baseClasses}`}
                 >
                     {(isMobile && items !== PRIMARY_NAV_ITEMS) && (
                         <i data-feather={item.icon} className="w-5 h-5 mr-3"></i>
@@ -251,18 +248,18 @@ const Navbar = () => {
             );
         });
     }
-    
+
     const renderAvatar = () => {
         if (!user) return <span className="font-bold text-white">U</span>;
 
-        const userInitials = user.name ? 
+        const userInitials = user.name ?
             user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
-        
+
         // Add cache busting to prevent browser caching of old images
-        const photoUrl = user.photoUrl ? 
-            `${user.photoUrl}?${user.updatedAt || Date.now()}` : 
+        const photoUrl = user.photoUrl ?
+            `${user.photoUrl}?${user.updatedAt || Date.now()}` :
             null;
-        
+
         if (photoUrl) {
             return (
                 <div className="relative h-full w-full">
@@ -296,10 +293,10 @@ const Navbar = () => {
                 </div>
             );
         }
-        
+
         return <span className="font-bold text-white flex items-center justify-center w-full h-full">{userInitials}</span>;
     }
-    
+
     const renderSearch = (isMobile = false) => {
         return <SearchBar isMobile={isMobile} />;
     }
@@ -317,13 +314,12 @@ const Navbar = () => {
         return (
             <div id="notifications-container" className="relative">
                 {/* Notification Bell Button */}
-                <button 
+                <button
                     onClick={toggleNotifications}
-                    className={`relative p-2 rounded-lg transition-all duration-300 ${
-                        isDark 
-                            ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`relative p-2 rounded-lg transition-all duration-300 ${isDark
+                        ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                        }`}
                     title="Notifications"
                     disabled={notificationsLoading}
                 >
@@ -342,13 +338,11 @@ const Navbar = () => {
 
                 {/* Notifications Dropdown */}
                 {isNotificationsOpen && (
-                    <div className={`absolute right-0 top-12 mt-2 w-80 sm:w-96 rounded-lg shadow-xl z-50 ${
-                        isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-                    }`}>
-                        {/* Header */}
-                        <div className={`flex items-center justify-between p-4 border-b ${
-                            isDark ? 'border-gray-700' : 'border-gray-200'
+                    <div className={`absolute right-0 top-12 mt-2 w-80 sm:w-96 rounded-lg shadow-xl z-50 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
                         }`}>
+                        {/* Header */}
+                        <div className={`flex items-center justify-between p-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'
+                            }`}>
                             <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                 Notifications
                                 {unreadCount > 0 && (
@@ -359,25 +353,23 @@ const Navbar = () => {
                             </h3>
                             <div className="flex items-center space-x-2">
                                 {notifications.length > 0 && unreadCount > 0 && (
-                                    <button 
+                                    <button
                                         onClick={handleMarkAllAsRead}
-                                        className={`text-xs px-2 py-1 rounded transition-colors ${
-                                            isDark 
-                                                ? 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/20' 
-                                                : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
-                                        }`}
+                                        className={`text-xs px-2 py-1 rounded transition-colors ${isDark
+                                            ? 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/20'
+                                            : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                                            }`}
                                     >
                                         Mark all read
                                     </button>
                                 )}
                                 {notifications.length > 0 && (
-                                    <button 
+                                    <button
                                         onClick={handleClearAllNotifications}
-                                        className={`text-xs px-2 py-1 rounded transition-colors ${
-                                            isDark 
-                                                ? 'text-gray-400 hover:text-red-400 hover:bg-red-500/20' 
-                                                : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
-                                        }`}
+                                        className={`text-xs px-2 py-1 rounded transition-colors ${isDark
+                                            ? 'text-gray-400 hover:text-red-400 hover:bg-red-500/20'
+                                            : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                                            }`}
                                     >
                                         Clear all
                                     </button>
@@ -389,9 +381,8 @@ const Navbar = () => {
                         <div className="max-h-96 overflow-y-auto">
                             {notifications.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                                    <i data-feather="bell-off" className={`w-12 h-12 mb-3 ${
-                                        isDark ? 'text-gray-600' : 'text-gray-400'
-                                    }`}></i>
+                                    <i data-feather="bell-off" className={`w-12 h-12 mb-3 ${isDark ? 'text-gray-600' : 'text-gray-400'
+                                        }`}></i>
                                     <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
                                         No notifications yet
                                     </p>
@@ -402,59 +393,52 @@ const Navbar = () => {
                             ) : (
                                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                                     {notifications.map((notification) => (
-                                        <div 
+                                        <div
                                             key={notification._id}
-                                            className={`p-4 transition-colors cursor-pointer group ${
-                                                !notification.read 
-                                                    ? (isDark ? 'bg-blue-500/10 border-l-4 border-blue-500' : 'bg-blue-50 border-l-4 border-blue-500')
-                                                    : (isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50')
-                                            }`}
+                                            className={`p-4 transition-colors cursor-pointer group ${!notification.read
+                                                ? (isDark ? 'bg-blue-500/10 border-l-4 border-blue-500' : 'bg-blue-50 border-l-4 border-blue-500')
+                                                : (isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50')
+                                                }`}
                                             onClick={() => handleNotificationClick(notification)}
                                         >
                                             <div className="flex items-start space-x-3">
-                                                <div className={`flex-shrink-0 mt-1 ${
-                                                    !notification.read 
-                                                        ? (isDark ? 'text-blue-400' : 'text-blue-500')
-                                                        : (isDark ? 'text-gray-500' : 'text-gray-400')
-                                                }`}>
+                                                <div className={`flex-shrink-0 mt-1 ${!notification.read
+                                                    ? (isDark ? 'text-blue-400' : 'text-blue-500')
+                                                    : (isDark ? 'text-gray-500' : 'text-gray-400')
+                                                    }`}>
                                                     <i data-feather={getNotificationIcon(notification.type)} className="w-4 h-4"></i>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className={`text-sm font-medium ${
-                                                        isDark ? 'text-white' : 'text-gray-900'
-                                                    }`}>
+                                                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'
+                                                        }`}>
                                                         {notification.title}
                                                     </p>
-                                                    <p className={`text-sm mt-1 ${
-                                                        isDark ? 'text-gray-300' : 'text-gray-600'
-                                                    }`}>
+                                                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'
+                                                        }`}>
                                                         {notification.message}
                                                     </p>
                                                     <div className="flex items-center justify-between mt-2">
-                                                        <p className={`text-xs ${
-                                                            isDark ? 'text-gray-500' : 'text-gray-400'
-                                                        }`}>
+                                                        <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'
+                                                            }`}>
                                                             {formatNotificationTime(notification.createdAt)}
                                                         </p>
                                                         {notification.important && (
-                                                            <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                                                isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700'
-                                                            }`}>
+                                                            <span className={`text-xs px-1.5 py-0.5 rounded ${isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700'
+                                                                }`}>
                                                                 Important
                                                             </span>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         deleteNotification(notification._id);
                                                     }}
-                                                    className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all ${
-                                                        isDark 
-                                                            ? 'text-gray-400 hover:text-red-400 hover:bg-red-500/20' 
-                                                            : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
-                                                    }`}
+                                                    className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all ${isDark
+                                                        ? 'text-gray-400 hover:text-red-400 hover:bg-red-500/20'
+                                                        : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+                                                        }`}
                                                 >
                                                     <i data-feather="x" className="w-3 h-3"></i>
                                                 </button>
@@ -467,16 +451,14 @@ const Navbar = () => {
 
                         {/* Footer */}
                         {notifications.length > 0 && (
-                            <div className={`p-3 border-t ${
-                                isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'
-                            }`}>
-                                <Link 
+                            <div className={`p-3 border-t ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'
+                                }`}>
+                                <Link
                                     to="/notifications"
-                                    className={`block text-center text-sm font-medium transition-colors ${
-                                        isDark 
-                                            ? 'text-primary-400 hover:text-primary-300' 
+                                    className={`block text-center text-sm font-medium transition-colors ${isDark
+                                            ? 'text-primary-400 hover:text-primary-300'
                                             : 'text-primary-600 hover:text-primary-700'
-                                    }`}
+                                        }`}
                                     onClick={() => setIsNotificationsOpen(false)}
                                 >
                                     View All Notifications
@@ -496,7 +478,7 @@ const Navbar = () => {
     const mobileSecondaryTextClass = isDark ? 'text-gray-400' : 'text-gray-500';
     const mobileHoverBgClass = isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100';
     const mobileCardBgClass = isDark ? 'bg-gray-800/50' : 'bg-gray-50';
-    
+
     if (loading) {
         return <nav className="dark-gradient shadow-lg fixed top-0 left-0 w-full z-50 h-16 border-b border-gray-700 opacity-0"></nav>;
     }
@@ -512,7 +494,7 @@ const Navbar = () => {
             <nav className={`${isDark ? 'dark-gradient' : 'bg-white shadow-lg'} fixed top-0 left-0 w-full z-50 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                 {/* Main Flex Container */}
                 <div className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-                    
+
                     {/* 1. LEFT SIDE: LOGO + NAV LINKS */}
                     <div className="flex items-center h-full">
                         <div className="flex-shrink-0 flex items-center">
@@ -523,7 +505,7 @@ const Navbar = () => {
                                 <span className={`ml-2 text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>CS Studio</span>
                             </Link>
                         </div>
-                        
+
                         {/* Desktop Navigation Links - Combined NAV_ITEMS */}
                         {isLoggedIn && (
                             <div className="hidden h-full items-center sm:ml-6 sm:flex sm:space-x-2 lg:space-x-6">
@@ -534,22 +516,21 @@ const Navbar = () => {
 
                     {/* 2. RIGHT SIDE: SEARCH, THEME, NOTIFICATIONS & AUTH/PROFILE */}
                     <div className="flex items-center space-x-3 h-full">
-                        
+
                         {/* Desktop Search Bar */}
                         {isLoggedIn && (
                             <div className="hidden sm:block w-48 lg:w-64 mr-4">
                                 {renderSearch(false)}
                             </div>
                         )}
-                        
+
                         {/* Theme Toggle */}
                         <button
                             onClick={handleThemeToggle}
-                            className={`hidden sm:block p-2 rounded-lg transition-all duration-300 ${
-                                isDark
-                                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
-                            }`}
+                            className={`hidden sm:block p-2 rounded-lg transition-all duration-300 ${isDark
+                                ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                                }`}
                             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                         >
                             <i data-feather={themeIcon} className="w-5 h-5"></i>
@@ -561,7 +542,7 @@ const Navbar = () => {
                                 {renderNotifications()}
                             </div>
                         )}
-                        
+
 
                         {/* Auth Section */}
                         <div id="auth-nav-container" className="flex items-center space-x-3">
@@ -572,7 +553,7 @@ const Navbar = () => {
                                             {user.name.split(' ')[0]}
                                         </span>
                                     )}
-                                    
+
                                     <div className="relative">
                                         <button
                                             ref={profileButtonRef}
@@ -581,10 +562,10 @@ const Navbar = () => {
                                         >
                                             {renderAvatar()}
                                         </button>
-                                        
+
                                         {/* Profile Dropdown Menu */}
                                         {isDropdownOpen && (
-                                            <div 
+                                            <div
                                                 ref={dropdownRef}
                                                 className="absolute right-0 top-12 mt-2 w-56 rounded-2xl shadow-xl divide-y z-50 border transition-all duration-200 ease-in-out"
                                                 style={{
@@ -600,10 +581,10 @@ const Navbar = () => {
                                                             <p className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>{user.email}</p>
                                                         </div>
                                                         <div className="py-1">
-                                                            <Link 
-                                                                to="/my-courses" 
+                                                            <Link
+                                                                to="/my-courses"
                                                                 className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
-                                                                style={{ 
+                                                                style={{
                                                                     color: isDark ? '#d1d5db' : '#374151',
                                                                     backgroundColor: isDark ? 'transparent' : 'transparent'
                                                                 }}
@@ -633,10 +614,10 @@ const Navbar = () => {
                                                             >
                                                                 <i data-feather="settings" className="w-4 h-4 mr-2"></i> Settings
                                                             </Link>
-                                                            <button 
+                                                            <button
                                                                 onClick={handleLogout}
                                                                 className="w-full text-left flex items-center px-4 py-2 text-sm transition-colors duration-200 rounded-b-2xl hover:bg-opacity-50"
-                                                                style={{ 
+                                                                style={{
                                                                     color: isDark ? '#f87171' : '#dc2626',
                                                                     backgroundColor: isDark ? 'transparent' : 'transparent'
                                                                 }}
@@ -661,32 +642,31 @@ const Navbar = () => {
                                 </div>
                             )}
                         </div>
-                            
+
                         {/* Mobile menu button */}
                         <div className="flex items-center sm:hidden ml-2">
-                            <button 
-                                id="mobile-menu-button" 
-                                type="button" 
-                                className={`inline-flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${
-                                    isDark 
-                                        ? 'text-gray-400 hover:text-white hover:bg-gray-700/50' 
-                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
-                                }`}
+                            <button
+                                id="mobile-menu-button"
+                                type="button"
+                                className={`inline-flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${isDark
+                                    ? 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                                    }`}
                                 onClick={toggleMobileMenu}
                             >
                                 <i data-feather={menuIcon} className="w-6 h-6"></i>
                             </button>
                         </div>
                     </div>
-                    
+
                     {/* Enhanced Mobile menu - Now theme-aware */}
                     <div className={`sm:hidden fixed inset-0 z-40 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
                         {/* Backdrop */}
-                        <div 
+                        <div
                             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                             onClick={toggleMobileMenu}
                         ></div>
-                        
+
                         {/* Menu Panel */}
                         <div className={`absolute right-0 top-0 w-80 h-full shadow-2xl border-l transform transition-transform duration-300 ease-in-out ${mobileBgClass} ${mobileBorderClass}`}>
                             <div className="flex flex-col h-full">
@@ -698,13 +678,12 @@ const Navbar = () => {
                                         </div>
                                         <span className={`ml-2 text-lg font-bold ${mobileTextClass}`}>CS Studio</span>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={toggleMobileMenu}
-                                        className={`p-2 rounded-lg transition-colors duration-200 ${
-                                            isDark 
-                                                ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
-                                        }`}
+                                        className={`p-2 rounded-lg transition-colors duration-200 ${isDark
+                                            ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                                            }`}
                                     >
                                         <i data-feather="x" className="w-5 h-5"></i>
                                     </button>
@@ -725,7 +704,7 @@ const Navbar = () => {
                                                 </div>
                                                 {/* Mobile Notification Bell */}
                                                 {isLoggedIn && (
-                                                    <button 
+                                                    <button
                                                         onClick={toggleNotifications}
                                                         className="relative p-2"
                                                     >
@@ -737,7 +716,7 @@ const Navbar = () => {
                                                         )}
                                                     </button>
                                                 )}
-                                                
+
                                             </div>
                                         </div>
                                     )}
@@ -746,25 +725,23 @@ const Navbar = () => {
                                     {isLoggedIn && (
                                         <div className={`p-4 border-b ${mobileBorderClass}`}>
                                             <div className="grid grid-cols-2 gap-2">
-                                                <Link 
-                                                    to="/my-progress" 
+                                                <Link
+                                                    to="/my-progress"
                                                     className={`flex flex-col items-center p-3 rounded-lg transition-colors duration-200 group ${mobileCardBgClass} ${mobileHoverBgClass}`}
                                                     onClick={toggleMobileMenu}
                                                 >
                                                     <i data-feather="bar-chart-2" className="w-5 h-5 text-primary-500 mb-1 group-hover:scale-110 transition-transform"></i>
-                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${
-                                                        isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
-                                                    }`}>My Progress</span>
+                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
+                                                        }`}>My Progress</span>
                                                 </Link>
-                                                <Link 
-                                                    to="/my-courses" 
+                                                <Link
+                                                    to="/my-courses"
                                                     className={`flex flex-col items-center p-3 rounded-lg transition-colors duration-200 group ${mobileCardBgClass} ${mobileHoverBgClass}`}
                                                     onClick={toggleMobileMenu}
                                                 >
                                                     <i data-feather="book-open" className="w-5 h-5 text-primary-500 mb-1 group-hover:scale-110 transition-transform"></i>
-                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${
-                                                        isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
-                                                    }`}>My Courses</span>
+                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
+                                                        }`}>My Courses</span>
                                                 </Link>
                                             </div>
                                         </div>
@@ -795,18 +772,15 @@ const Navbar = () => {
                                         >
                                             <div className="flex items-center">
                                                 <i data-feather={themeIcon} className={`w-5 h-5 mr-3 ${isDark ? 'text-yellow-400' : 'text-yellow-500'}`}></i>
-                                                <span className={`group-hover:scale-105 transition-transform ${
-                                                    isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
-                                                }`}>
+                                                <span className={`group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
+                                                    }`}>
                                                     {isDark ? 'Light Mode' : 'Dark Mode'}
                                                 </span>
                                             </div>
-                                            <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                                                isDark ? 'bg-primary-500' : 'bg-gray-300'
-                                            }`}>
-                                                <div className={`w-5 h-5 bg-white rounded-full transform transition-transform duration-200 ${
-                                                    isDark ? 'translate-x-7' : 'translate-x-1'
-                                                }`}></div>
+                                            <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${isDark ? 'bg-primary-500' : 'bg-gray-300'
+                                                }`}>
+                                                <div className={`w-5 h-5 bg-white rounded-full transform transition-transform duration-200 ${isDark ? 'translate-x-7' : 'translate-x-1'
+                                                    }`}></div>
                                             </div>
                                         </button>
                                     </div>
@@ -816,13 +790,12 @@ const Navbar = () => {
                                 <div className={`p-4 border-t ${mobileBorderClass} ${isDark ? 'bg-gray-800/30' : 'bg-gray-50'}`}>
                                     {isLoggedIn ? (
                                         <div className="space-y-2">
-                                            <button 
+                                            <button
                                                 onClick={handleLogout}
-                                                className={`w-full flex items-center justify-center p-3 rounded-lg transition-all duration-200 group ${
-                                                    isDark 
-                                                        ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300' 
-                                                        : 'bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700'
-                                                }`}
+                                                className={`w-full flex items-center justify-center p-3 rounded-lg transition-all duration-200 group ${isDark
+                                                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300'
+                                                    : 'bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700'
+                                                    }`}
                                             >
                                                 <i data-feather="log-out" className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform"></i>
                                                 Sign Out
@@ -830,16 +803,16 @@ const Navbar = () => {
                                         </div>
                                     ) : (
                                         <div className="space-y-2">
-                                            <Link 
-                                                to="/signup" 
+                                            <Link
+                                                to="/signup"
                                                 className="w-full dark-btn inline-flex items-center justify-center p-3 rounded-lg text-sm font-medium transition-all duration-200"
                                                 onClick={toggleMobileMenu}
                                             >
                                                 <i data-feather="user-plus" className="w-4 h-4 mr-2"></i>
                                                 Join for Free
                                             </Link>
-                                            <Link 
-                                                to="/signin" 
+                                            <Link
+                                                to="/signin"
                                                 className="w-full dark-btn-secondary inline-flex items-center justify-center p-3 rounded-lg text-sm font-medium transition-all duration-200"
                                                 onClick={toggleMobileMenu}
                                             >

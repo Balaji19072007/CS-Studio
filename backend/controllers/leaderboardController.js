@@ -1,57 +1,18 @@
 // controllers/leaderboardController.js
-const User = require('../models/User'); 
-const Progress = require('../models/Progress');
+const User = require('../models/User');
 
 // @route   GET /api/leaderboard
 // @desc    Get top users sorted by problems solved and points
 // @access  Public
 exports.getGlobalLeaderboard = async (req, res) => {
     try {
-        const { timeframe = 'all-time', category = 'all' } = req.query;
+        // 1. Fetch Top Users
+        const topUsers = await User.getTopUsers(100);
 
-        // Build base query for users who have solved at least one problem
-        let userQuery = { problemsSolved: { $gt: 0 } };
-
-        // If timeframe filtering is needed in the future, we can add it here
-        let progressMatch = {};
-        if (timeframe !== 'all-time') {
-            const now = new Date();
-            let startDate;
-            
-            switch (timeframe) {
-                case 'monthly':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'weekly':
-                    startDate = new Date(now);
-                    startDate.setDate(now.getDate() - 7);
-                    break;
-                case 'daily':
-                    startDate = new Date(now);
-                    startDate.setDate(now.getDate() - 1);
-                    break;
-                default:
-                    startDate = new Date(0);
-            }
-            
-            progressMatch.lastSubmission = { $gte: startDate };
-        }
-
-        // 1. Fetch Users sorted by problems solved (descending), then by total points (descending)
-        const topUsers = await User.find(userQuery)
-            .select('firstName lastName username totalPoints problemsSolved currentStreak averageAccuracy photoUrl updatedAt')
-            .sort({ 
-                problemsSolved: -1, 
-                totalPoints: -1,
-                averageAccuracy: -1,
-                currentStreak: -1 
-            })
-            .limit(100); // Increased limit to show more users
-
-        // 2. Format data for the front-end with proper ranking
+        // 2. Format data for the front-end
         const leaderboardData = topUsers.map((user, index) => ({
             rank: index + 1,
-            _id: user._id,
+            _id: user.id, // Frontend expects _id
             name: `${user.firstName} ${user.lastName}`,
             username: user.username,
             solved: user.problemsSolved,
@@ -63,13 +24,12 @@ exports.getGlobalLeaderboard = async (req, res) => {
         }));
 
         res.json(leaderboardData);
-
     } catch (err) {
         console.error('Leaderboard error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error fetching leaderboard',
-            error: err.message 
+            error: err.message
         });
     }
 };
@@ -81,36 +41,31 @@ exports.getUserRank = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        // Get all users sorted by problems solved and points
-        const allUsers = await User.find({ problemsSolved: { $gt: 0 } })
-            .select('firstName lastName username problemsSolved totalPoints currentStreak averageAccuracy photoUrl')
-            .sort({ 
-                problemsSolved: -1, 
-                totalPoints: -1,
-                averageAccuracy: -1 
-            });
+        // 1. Get Top Users to calculate rank
+        const allUsers = await User.getTopUsers(1000);
 
-        // Find current user's position
-        const userIndex = allUsers.findIndex(user => user._id.toString() === userId);
-        const userRank = userIndex !== -1 ? userIndex + 1 : allUsers.length + 1;
+        // 2. Find current user's position
+        let userRank = allUsers.findIndex(user => user.id === userId);
+        let rank = userRank !== -1 ? userRank + 1 : null;
 
-        // Get current user's full data
-        const currentUser = await User.findById(userId)
-            .select('firstName lastName username problemsSolved totalPoints currentStreak averageAccuracy photoUrl');
+        // 3. Get current user detailed
+        const currentUser = await User.findById(userId);
 
         if (!currentUser) {
-            return res.status(404).json({ 
-                success: false, 
-                msg: 'User not found' 
+            return res.status(404).json({
+                success: false,
+                msg: 'User not found'
             });
         }
 
+        if (!rank) rank = 1001;
+
         res.json({
             success: true,
-            rank: userRank,
+            rank: rank,
             totalUsers: allUsers.length,
             user: {
-                _id: currentUser._id,
+                _id: currentUser.id,
                 firstName: currentUser.firstName,
                 lastName: currentUser.lastName,
                 username: currentUser.username,
@@ -124,10 +79,10 @@ exports.getUserRank = async (req, res) => {
 
     } catch (err) {
         console.error('User rank error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error fetching user rank',
-            error: err.message 
+            error: err.message
         });
     }
 };
@@ -137,17 +92,17 @@ exports.getUserRank = async (req, res) => {
 // @access  Public
 exports.getTotalUsers = async (req, res) => {
     try {
-        const totalUsers = await User.countDocuments({ problemsSolved: { $gt: 0 } });
-        res.json({ 
+        const count = await User.count({ hasSolvedProblems: true });
+        res.json({
             success: true,
-            totalUsers 
+            totalUsers: count || 0
         });
     } catch (err) {
         console.error('Total users error:', err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             msg: 'Server Error fetching total users',
-            error: err.message 
+            error: err.message
         });
     }
 };

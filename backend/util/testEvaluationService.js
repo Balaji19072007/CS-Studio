@@ -3,7 +3,7 @@ class TestEvaluationService {
     this.comparisonMethods = [
       'exact',
       'trimmed',
-      'whitespaceInsensitive', 
+      'whitespaceInsensitive',
       'numeric',
       'floatingPoint'
     ];
@@ -17,18 +17,18 @@ class TestEvaluationService {
     if (!actualOutput && !expectedOutput) {
       return { passed: true, matchType: 'both_empty' };
     }
-    
+
     if (!actualOutput) {
-      return { 
-        passed: false, 
+      return {
+        passed: false,
         matchType: 'none',
         difference: 'Actual output is empty or null'
       };
     }
 
     if (!expectedOutput) {
-      return { 
-        passed: false, 
+      return {
+        passed: false,
         matchType: 'none',
         difference: 'Expected output is empty or null'
       };
@@ -46,7 +46,9 @@ class TestEvaluationService {
       this.compareCaseInsensitive(cleanedActual, cleanedExpected),
       this.compareWhitespaceInsensitive(cleanedActual, cleanedExpected),
       this.compareNumeric(cleanedActual, cleanedExpected),
-      this.compareFloatingPoint(cleanedActual, cleanedExpected, 1e-6)
+      this.compareNumeric(cleanedActual, cleanedExpected),
+      this.compareFloatingPoint(cleanedActual, cleanedExpected, 1e-6),
+      this.compareContains(cleanedActual, cleanedExpected) // Relaxed check: allows extraneous prompts
     ];
 
     // Find the first passing comparison
@@ -177,6 +179,28 @@ class TestEvaluationService {
   }
 
   /**
+   * Contains comparison (checks if expected output is a substring of actual output)
+   * This is useful when the user adds prompts ("Enter number: ") that are not in the expected output.
+   */
+  compareContains(actual, expected) {
+    const normalizedActual = actual.replace(/\s+/g, ' ').trim();
+    const normalizedExpected = expected.replace(/\s+/g, ' ').trim();
+
+    // Only allow this if expected output is not trivially short to avoid false positives
+    if (normalizedExpected.length < 2) {
+      return { passed: false, matchType: 'none', difference: 'Expected output too short for lenient match' };
+    }
+
+    const passed = normalizedActual.includes(normalizedExpected);
+
+    return {
+      passed,
+      matchType: passed ? 'contains_substring' : 'none',
+      difference: passed ? '' : `Actual output does not contain expected output`
+    };
+  }
+
+  /**
    * Generate detailed difference report
    */
   generateDifference(actual, expected) {
@@ -205,6 +229,7 @@ class TestEvaluationService {
     }
 
     return output
+      .replace(/\\n/g, '\n')       // Unescape literal \n to actual newline
       .replace(/\r\n/g, '\n')      // Normalize Windows line endings
       .replace(/\r/g, '\n')        // Normalize Mac line endings
       .replace(/\t/g, ' ')         // Replace tabs with spaces

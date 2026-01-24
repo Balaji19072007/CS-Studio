@@ -65,7 +65,7 @@ export const notificationService = {
   // NEW: Create notification (for testing/admin purposes)
   createNotification: async (notificationData) => {
     try {
-      const response = await apiService.post('/api/notifications', notificationData);
+      const response = await apiService.post('/api/notifications/test', notificationData);
       return response.data;
     } catch (error) {
       console.error('Error creating notification:', error);

@@ -41,18 +41,18 @@ api.interceptors.response.use(
       console.log('Authentication failed, clearing tokens...');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
-      
+
       // Redirect to login page if not already there
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
     }
-    
+
     // Handle network errors
     if (!error.response) {
       console.error('Network error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -64,18 +64,20 @@ export const API_ENDPOINTS = {
     SEND_OTP: `/api/auth/send-otp`,
     VERIFY_OTP: `/api/auth/verify-otp`,
   },
-  
+
   GOOGLE_AUTH: {
     CALLBACK: `/api/google-auth`,
   },
-  
+
   PROBLEMS: {
     GET_ALL: `/api/problems`,
     GET_BY_ID: (id) => `/api/problems/${id}`,
   },
-  
+
   LEADERBOARD: {
     GET: `/api/leaderboard`,
+    USER_RANK: `/api/leaderboard/user-rank`,
+    TOTAL_USERS: `/api/leaderboard/total-users`,
   },
 
   STATS: {
@@ -98,6 +100,15 @@ export const API_ENDPOINTS = {
     PREFERENCES: `/api/notifications/preferences`,
   },
 
+  COMMUNITY: {
+    GET_ALL: `/api/community`,
+    GET_BY_ID: (id) => `/api/community/${id}`,
+    CREATE: `/api/community`,
+    COMMENT: (id) => `/api/community/${id}/comment`,
+    LIKE: (id) => `/api/community/${id}/like`,
+    DELETE: (id) => `/api/community/${id}`,
+  },
+
   PREDICTION: {
     PREDICT: `/predict`,
   },
@@ -113,7 +124,7 @@ export const API_ENDPOINTS = {
 export const statsAPI = {
   // Public routes
   getUserStats: () => api.get(API_ENDPOINTS.STATS.USER_STATS),
-  
+
   // Protected routes
   submitRating: (data) => api.post(API_ENDPOINTS.STATS.SUBMIT_RATING, data),
   checkRatingStatus: () => api.get(API_ENDPOINTS.STATS.RATING_STATUS),

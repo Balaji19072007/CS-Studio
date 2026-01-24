@@ -23,69 +23,74 @@ const EXECUTION_LANGUAGE_MAP = {
 
 const DEFAULT_CODE = {
   'C': `#include <stdio.h>\n\nint main() {\n    int number;\n    printf("Please enter a number: ");\n    scanf("%d", &number);\n    printf("You entered: %d\\n", number);\n    return 0;\n}`,
-  
+
   'C++': `#include <iostream>\nusing namespace std;\n\nint main() {\n    int number;\n    cout << "Enter a number: ";\n    cin >> number;\n    cout << "You entered: " << number << endl;\n    return 0;\n}`,
-  
+
   'Java': `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        System.out.print("Enter a number: ");\n        int number = scanner.nextInt();\n        System.out.println("You entered: " + number);\n        scanner.close();\n    }\n}`,
-  
+
   'Python': `user_input = input("Enter number: ")\nprint("You entered:", user_input)`,
-  
+
   'JavaScript': `const readline = require('readline');\n\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout\n});\n\nrl.question('Enter number: ', (answer) => {\n  console.log('You entered:', answer);\n  rl.close();\n});`
 };
 
 const CodeEditor = forwardRef(({
-    initialCode = DEFAULT_CODE['Python'],
-    language: propLanguage = 'Python',
-    theme: propTheme = 'vs-dark',
-    isProblemSolver = false
+  initialCode = DEFAULT_CODE['Python'],
+  language: propLanguage = 'Python',
+  theme: propTheme = 'vs-dark',
+  isProblemSolver = false
 }, ref) => {
 
   const [code, setCode] = useState(initialCode);
   const [language, setLanguage] = useState(propLanguage);
   const [theme, setTheme] = useState(propTheme);
-  
+
   // State for real-time input handling
-  const [output, setOutput] = useState('Output will appear here.'); 
+  const [output, setOutput] = useState('Output will appear here.');
   const [isRunning, setIsRunning] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
   const [error, setError] = useState('');
-  
+
   const socketRef = useRef(null);
   const editorRef = useRef(null);
   const terminalRef = useRef(null);
   const inputBufferRef = useRef('');
   const isInputActiveRef = useRef(false);
-  
+
   // Sync props to internal state
   useEffect(() => {
     setCode(initialCode);
     setTheme(propTheme);
     setLanguage(propLanguage);
   }, [initialCode, propTheme, propLanguage]);
-  
+
+  // Update code when language changes
   // Update code when language changes
   useEffect(() => {
     if (!isProblemSolver) {
-      setCode(DEFAULT_CODE[language] || '');
-      setOutput('Output will appear here.');
-      setError('');
-      setIsRunning(false);
-      setIsWaitingForInput(false);
-      inputBufferRef.current = '';
-      isInputActiveRef.current = false;
+      // Only reset to default code if the user manually changed the language
+      // (i.e., current language is different from the prop passed language)
+      if (language !== propLanguage) {
+        setCode(DEFAULT_CODE[language] || '');
+        setOutput('Output will appear here.');
+        setError('');
+        setIsRunning(false);
+        setIsWaitingForInput(false);
+        inputBufferRef.current = '';
+        isInputActiveRef.current = false;
+      }
     }
   }, [language, isProblemSolver, propLanguage]);
-  
+
   // --- Theme-aware classes ---
   const isDarkTheme = theme === 'vs-dark' || theme === 'hc-black';
-  const toolbarBg = isDarkTheme ? 'bg-gray-800' : 'bg-gray-100'; 
+  const toolbarBg = isDarkTheme ? 'bg-gray-800' : 'bg-gray-100';
   const borderClass = isDarkTheme ? 'border-gray-700' : 'border-gray-300';
   const ioHeaderBg = isDarkTheme ? 'bg-gray-800' : 'bg-gray-200';
-  const ioBodyBg = isDarkTheme ? 'bg-gray-900' : 'bg-white'; 
-  
+  const ioBodyBg = isDarkTheme ? 'bg-gray-900' : 'bg-white';
+
   const textMain = isDarkTheme ? 'text-white' : 'text-gray-900';
   const textSecondary = isDarkTheme ? 'text-gray-400' : 'text-gray-600';
-  
+
   const outputTextClass = isDarkTheme ? 'text-green-400' : 'text-green-600';
   const errorTextClass = isDarkTheme ? 'text-red-400' : 'text-red-600';
   const inputPromptClass = isDarkTheme ? 'text-yellow-400' : 'text-yellow-600';
@@ -106,7 +111,7 @@ const CodeEditor = forwardRef(({
         setIsWaitingForInput(isWaitingInput);
         isInputActiveRef.current = isWaitingInput;
       }
-      
+
       if (isError) {
         setError(output);
       } else {
@@ -117,7 +122,7 @@ const CodeEditor = forwardRef(({
           return prev + output;
         });
       }
-      
+
       setIsRunning(Boolean(isRunningState));
     });
 
@@ -150,8 +155,8 @@ const CodeEditor = forwardRef(({
             // Add the input to output with a newline
             setOutput(prev => prev + inputBufferRef.current + '\n');
             inputBufferRef.current = '';
-            setIsWaitingForInput(false);
-            isInputActiveRef.current = false;
+            // setIsWaitingForInput(false); // Keep input active
+            isInputActiveRef.current = true; // Keep active
           }
         }
       } else if (e.key === 'Backspace') {
@@ -197,20 +202,20 @@ const CodeEditor = forwardRef(({
   // Use proper execution language mapping
   const handleRunCode = useCallback((codeToRun) => {
     if (!socketRef.current || !socketService.isConnected) {
-        setOutput('Compiler service is disconnected. Check network.');
-        return;
+      setOutput('Compiler service is disconnected. Check network.');
+      return;
     }
 
     setIsRunning(true);
     setIsWaitingForInput(false);
     isInputActiveRef.current = false;
-    setOutput('Executing...\n');
+    setOutput('Running...\n');
     setError('');
     inputBufferRef.current = '';
-    
+
     // Use the correct execution language mapping
     const executionLanguage = EXECUTION_LANGUAGE_MAP[language] || language.toLowerCase();
-    
+
     try {
       sendCodeForExecution(socketRef.current, codeToRun, executionLanguage);
     } catch (error) {
@@ -231,22 +236,22 @@ const CodeEditor = forwardRef(({
 
   // Expose methods to the parent component
   useImperativeHandle(ref, () => ({
-      runCode: handleRunCode,
-      stopCode: handleStopExecution,
-      getCode: () => editorRef.current?.getValue() || code,
+    runCode: handleRunCode,
+    stopCode: handleStopExecution,
+    getCode: () => editorRef.current?.getValue() || code,
   }));
 
   // --- UI Handlers (Only active in Freeform mode) ---
   const handleInternalRunCode = () => {
     if (!isProblemSolver) {
-        if (isRunning) {
-            handleStopExecution();
-        } else {
-            handleRunCode(code);
-        }
+      if (isRunning) {
+        handleStopExecution();
+      } else {
+        handleRunCode(code);
+      }
     }
   };
-  
+
   const handleReset = () => {
     setCode(DEFAULT_CODE[language] || '');
     setOutput('Output will appear here.');
@@ -256,12 +261,12 @@ const CodeEditor = forwardRef(({
     inputBufferRef.current = '';
     isInputActiveRef.current = false;
   };
-  
+
   const handleCopyCode = () => {
     const codeToCopy = editorRef.current?.getValue() || code;
     navigator.clipboard.writeText(codeToCopy);
   };
-  
+
   const handleEditorChange = (value) => {
     setCode(value || '');
   };
@@ -276,18 +281,18 @@ const CodeEditor = forwardRef(({
     // Code will be updated automatically via useEffect
   };
 
-  const showControls = !isProblemSolver; 
+  const showControls = !isProblemSolver;
   const finalLanguage = language;
   const finalTheme = theme;
 
   // --- Terminal Output Rendering Logic ---
   const renderTerminalOutput = () => {
     if (error) {
-        return <pre className={`${errorTextClass} font-mono text-sm whitespace-pre-wrap text-left`}>{error}</pre>;
+      return <pre className={`${errorTextClass} font-mono text-sm whitespace-pre-wrap text-left`}>{error}</pre>;
     }
-    
+
     let displayOutput = output;
-    
+
     return (
       <pre className={`font-mono text-sm whitespace-pre-wrap ${outputTextClass} text-left`}>
         {displayOutput}
@@ -307,7 +312,7 @@ const CodeEditor = forwardRef(({
 
   return (
     <div className={`flex flex-col h-full ${ioBodyBg} ${showControls ? `rounded-lg border ${borderClass}` : 'border-none'} overflow-hidden`}>
-      
+
       {/* Toolbar (Only visible in Freeform Playground) */}
       {showControls && (
         <div className={`flex items-center justify-between px-4 py-3 ${toolbarBg} border-b ${borderClass}`}>
@@ -338,11 +343,10 @@ const CodeEditor = forwardRef(({
             > 🔄 Reset </button>
             <button
               onClick={handleInternalRunCode}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
-                isRunning 
-                  ? 'bg-red-600 hover:bg-red-700 text-white' 
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${isRunning
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
             >
               {isRunning ? '⏹️ Stop' : '▶️ Run Code'}
             </button>
@@ -375,38 +379,36 @@ const CodeEditor = forwardRef(({
       {showControls && (
         <div className={`h-64 border-t ${borderClass} flex flex-col`}>
           <div className={`flex border-b ${borderClass} h-full`}>
-            
+
             {/* Terminal View */}
             <div className="flex-1 flex flex-col">
               <div className={`px-4 py-2 ${ioHeaderBg} font-semibold text-sm ${textMain}`}>
                 Terminal
                 {(error || isRunning || isWaitingForInput) && (
-                  <span className={`ml-2 ${
-                    error ? errorTextClass : 
+                  <span className={`ml-2 ${error ? errorTextClass :
                     isWaitingForInput ? inputPromptClass : textSecondary
-                  }`}>
+                    }`}>
                     ({error ? 'Error' : isWaitingForInput ? 'Waiting for input' : 'Live'})
                   </span>
                 )}
               </div>
               <div className={`h-full flex flex-col`}>
-                  
-                  {/* Terminal Display - Clickable and focusable */}
-                  <div 
-                    ref={terminalRef}
-                    tabIndex={0}
-                    onClick={handleTerminalClick}
-                    className={`flex-1 px-4 py-2 ${ioBodyBg} overflow-auto font-mono text-sm whitespace-pre-wrap outline-none cursor-text text-left ${
-                      isWaitingForInput ? 'ring-1 ring-yellow-500' : ''
+
+                {/* Terminal Display - Clickable and focusable */}
+                <div
+                  ref={terminalRef}
+                  tabIndex={0}
+                  onClick={handleTerminalClick}
+                  className={`flex-1 px-4 py-2 ${ioBodyBg} overflow-auto font-mono text-sm whitespace-pre-wrap outline-none cursor-text text-left ${isWaitingForInput ? 'ring-1 ring-yellow-500' : ''
                     }`}
-                    style={{ 
-                      caretColor: isWaitingForInput ? (isDarkTheme ? '#fbbf24' : '#d97706') : 'transparent',
-                      textAlign: 'left'
-                    }}
-                  >
-                    {renderTerminalOutput()}
-                  </div>
-                  
+                  style={{
+                    caretColor: isWaitingForInput ? (isDarkTheme ? '#fbbf24' : '#d97706') : 'transparent',
+                    textAlign: 'left'
+                  }}
+                >
+                  {renderTerminalOutput()}
+                </div>
+
               </div>
             </div>
           </div>

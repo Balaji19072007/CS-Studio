@@ -1,7 +1,7 @@
 // src/components/problems/CodeEditorForSolvePage.jsx
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
-import { API_CONFIG } from '../../config/api.js'; 
+import { API_CONFIG } from '../../config/api.js';
 import { sendInputToProgram, setupCompilerSocket, sendCodeForExecution, stopCodeExecution } from '../../api/problemApi.js';
 import socketService from '../../services/socketService.js';
 
@@ -26,11 +26,11 @@ const DEFAULT_CODE = {
 };
 
 const CodeEditorForSolvePage = forwardRef(({
-    initialCode = DEFAULT_CODE['Python'],
-    language: propLanguage = 'Python',
-    theme: propTheme = 'vs-dark',
-    onOutputReceived,
-    onCodeChange,
+  initialCode = DEFAULT_CODE['Python'],
+  language: propLanguage = 'Python',
+  theme: propTheme = 'vs-dark',
+  onOutputReceived,
+  onCodeChange,
 }, ref) => {
 
   const [code, setCode] = useState(initialCode);
@@ -62,13 +62,13 @@ const CodeEditorForSolvePage = forwardRef(({
 
     // Set up compiler socket with the centralized service
     socketRef.current = setupCompilerSocket((output, isError, isRunningState, isWaitingInput) => {
-        if (isWaitingInput !== undefined) {
-            setIsWaitingForInput(isWaitingInput);
-        }
-        if (onOutputReceived) {
-            // Pass all state info (including isWaitingInput) to parent
-            onOutputReceived(output, isError, isRunningState, isWaitingInput);
-        }
+      if (isWaitingInput !== undefined) {
+        setIsWaitingForInput(isWaitingInput);
+      }
+      if (onOutputReceived) {
+        // Pass all state info (including isWaitingInput) to parent
+        onOutputReceived(output, isError, isRunningState, isWaitingInput);
+      }
     });
 
     return () => {
@@ -98,16 +98,16 @@ const CodeEditorForSolvePage = forwardRef(({
 
       if (e.key === 'Enter') {
         const inputToSend = inputBufferRef.current;
-        
+
         // 1. Send the input via the problemApi helper
         sendInputToProgram(socketRef.current, inputToSend);
-        
+
         // 2. Notify parent to append a newline after the echoed input
         if (onOutputReceived) onOutputReceived('\n', false, true);
 
-        // 3. Reset buffer and switch state
+        // 3. Reset buffer but KEEP waiting for input (for multi-line inputs)
         inputBufferRef.current = '';
-        setIsWaitingForInput(false);
+        // setIsWaitingForInput(false); // <-- REMOVED to allow continuous input
         return;
       }
 
@@ -165,9 +165,11 @@ const CodeEditorForSolvePage = forwardRef(({
       console.error('Error stopping execution:', error);
     }
 
-    setIsWaitingForInput(false);
     inputBufferRef.current = '';
-  }, []);
+
+    // Explicitly update parent state to stop running
+    if (onOutputReceived) onOutputReceived('\nExecution stopped by user.\n', true, false, false);
+  }, [onOutputReceived]);
 
   const handleEditorChange = (value) => {
     setCode(value || '');

@@ -7,6 +7,12 @@ const authMiddleware = require('../middleware/authMiddleware'); // NEW: Import a
 // @route   GET /api/problems
 router.get('/', problemController.getProblems);
 
+// @route   GET /api/problems/daily
+router.get('/daily', problemController.getDailyProblem);
+
+// @route   GET /api/problems/recommended
+router.get('/recommended', authMiddleware, problemController.getRecommendedProblems);
+
 // @route   GET /api/problems/:id
 router.get('/:id', problemController.getProblemById);
 

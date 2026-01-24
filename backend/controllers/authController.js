@@ -283,7 +283,7 @@ const isStrongPassword = (password) => {
 // --- Utility: Generate and Store OTP ---
 const generateAndStoreOTP = (email) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  
+
   // Store OTP with expiration (2 minutes)
   otpStore.set(email, {
     otp,
@@ -299,7 +299,7 @@ const generateAndStoreOTP = (email) => {
 // --- Utility: Verify OTP ---
 const verifyStoredOTP = (email, otp) => {
   const otpData = otpStore.get(email);
-  
+
   if (!otpData) {
     return { success: false, msg: 'Verification code not found. Please request a new one.' };
   }
@@ -320,11 +320,11 @@ const verifyStoredOTP = (email, otp) => {
   if (otpData.otp !== otp) {
     otpData.attempts += 1;
     otpStore.set(email, otpData);
-    
+
     const remainingAttempts = OTP_CONFIG.MAX_ATTEMPTS - otpData.attempts;
-    return { 
-      success: false, 
-      msg: `Invalid verification code. ${remainingAttempts} attempt(s) remaining.` 
+    return {
+      success: false,
+      msg: `Invalid verification code. ${remainingAttempts} attempt(s) remaining.`
     };
   }
 
@@ -369,15 +369,16 @@ exports.sendOTP = async (req, res) => {
 
     // Generate and store OTP
     const otp = generateAndStoreOTP(email);
+    console.log(`OTP for ${email}: ${otp}`);
 
     try {
       // Send OTP via email
       await sendOTPEmail(email, otp, firstName);
-      
+
       console.log(`✅ Verification code sent to ${email}`);
       console.log(`⏰ Code expires at: ${new Date(otpStore.get(email).expiresAt).toLocaleTimeString()}`);
-      
-      res.json({ 
+
+      res.json({
         msg: `Verification code sent successfully to ${email}. It will expire in ${OTP_CONFIG.EXPIRY_MINUTES} minutes.`,
         // For development/testing only
         debugOtp: process.env.NODE_ENV === 'development' ? otp : undefined,
@@ -386,13 +387,13 @@ exports.sendOTP = async (req, res) => {
 
     } catch (emailError) {
       console.error('❌ Failed to send verification email:', emailError);
-      
+
       // Fallback: Still return success but log OTP to console
       console.log(`📧 Verification code for ${email}: ${otp} (Email failed, using console fallback)`);
       console.log(`User details: ${firstName} ${lastName}`);
       console.log(`⏰ Code expires at: ${new Date(otpStore.get(email).expiresAt).toLocaleTimeString()}`);
-      
-      res.json({ 
+
+      res.json({
         msg: `Verification code generated successfully. Check your email. If not received, please try again.`,
         debugOtp: process.env.NODE_ENV === 'development' ? otp : undefined,
         expiresIn: OTP_CONFIG.EXPIRY_MINUTES * 60 * 1000,
@@ -420,12 +421,12 @@ exports.verifyOTP = async (req, res) => {
     }
 
     const result = verifyStoredOTP(email, otp);
-    
+
     if (!result.success) {
       return res.status(400).json({ msg: result.msg });
     }
 
-    res.json({ 
+    res.json({
       msg: result.msg,
       verified: true
     });
@@ -455,8 +456,8 @@ exports.signUpUser = async (req, res) => {
     }
 
     if (!isStrongPassword(password)) {
-      return res.status(400).json({ 
-        msg: 'Password must be at least 8 characters long' 
+      return res.status(400).json({
+        msg: 'Password must be at least 8 characters long'
       });
     }
 
@@ -603,8 +604,11 @@ exports.signInUser = async (req, res) => {
 exports.getCurrentUser = async (req, res) => {
   try {
     // req.user is set by authMiddleware
-    const user = await User.findById(req.user.id).select('-password');
-    
+    const user = await User.findById(req.user.id);
+
+    // Manually exclude password if needed, though our User class doesn't strictly need it as we select fields below
+    // if (user) delete user.password;
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
@@ -637,7 +641,7 @@ exports.updateProfile = async (req, res) => {
   // Fields sent from the frontend (via req.body, even if FormData is used)
   const { firstName, lastName, bio, removeProfilePicture } = req.body;
   const file = req.file; // File data from multer (only present if an image was sent)
-  
+
   try {
     const user = await User.findById(req.user.id);
 
@@ -668,54 +672,54 @@ exports.updateProfile = async (req, res) => {
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
     // Note: Bio can be an empty string, so we check for undefined
-    if (bio !== undefined) user.bio = bio; 
-    
+    if (bio !== undefined) user.bio = bio;
+
     // --- 3. Handle Profile Picture Upload (if file is present) ---
     if (file) {
-        const cloudinary = req.app.get('cloudinary');
+      const cloudinary = req.app.get('cloudinary');
 
-        if (cloudinary) {
-            // Use Cloudinary if available
-            const uploadStream = () => {
-                return new Promise((resolve, reject) => {
-                    // Set up the writable stream to pipe the buffer into
-                    const bufferStream = new stream.PassThrough();
-                    bufferStream.end(file.buffer);
+      if (cloudinary) {
+        // Use Cloudinary if available
+        const uploadStream = () => {
+          return new Promise((resolve, reject) => {
+            // Set up the writable stream to pipe the buffer into
+            const bufferStream = new stream.PassThrough();
+            bufferStream.end(file.buffer);
 
-                    const cld_upload_stream = cloudinary.uploader.upload_stream(
-                        {
-                            // Use the user's ID as the folder and a unique name
-                            folder: `cs_studio_profiles/${user.id}`,
-                            public_id: `profile_${Date.now()}`,
-                            tags: ['profile_picture', user.username],
-                            resource_type: 'image',
-                            quality: "auto:good", // Auto-optimize image quality
-                            fetch_format: "auto"    // Auto-optimize image format
-                        },
-                        (error, result) => {
-                            if (error) {
-                                console.error('Cloudinary Upload Error:', error);
-                                reject(new Error('Failed to upload image to storage.'));
-                            } else {
-                                resolve(result);
-                            }
-                        }
-                    );
+            const cld_upload_stream = cloudinary.uploader.upload_stream(
+              {
+                // Use the user's ID as the folder and a unique name
+                folder: `cs_studio_profiles/${user.id}`,
+                public_id: `profile_${Date.now()}`,
+                tags: ['profile_picture', user.username],
+                resource_type: 'image',
+                quality: "auto:good", // Auto-optimize image quality
+                fetch_format: "auto"    // Auto-optimize image format
+              },
+              (error, result) => {
+                if (error) {
+                  console.error('Cloudinary Upload Error:', error);
+                  reject(new Error('Failed to upload image to storage.'));
+                } else {
+                  resolve(result);
+                }
+              }
+            );
 
-                    bufferStream.pipe(cld_upload_stream);
-                });
-            };
+            bufferStream.pipe(cld_upload_stream);
+          });
+        };
 
-            const result = await uploadStream();
+        const result = await uploadStream();
 
-            // Update the user's photoUrl with the secure URL from Cloudinary
-            user.photoUrl = result.secure_url;
-        } else {
-            // Fallback: Convert to base64 data URL for development
-            console.log('⚠️ Cloudinary not configured, using base64 fallback for profile picture');
-            const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-            user.photoUrl = base64Data;
-        }
+        // Update the user's photoUrl with the secure URL from Cloudinary
+        user.photoUrl = result.secure_url;
+      } else {
+        // Fallback: Convert to base64 data URL for development
+        console.log('⚠️ Cloudinary not configured, using base64 fallback for profile picture');
+        const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+        user.photoUrl = base64Data;
+      }
     }
 
     // Update the timestamp to force cache refresh
@@ -728,7 +732,7 @@ exports.updateProfile = async (req, res) => {
       msg: 'Profile updated successfully',
       user: {
         id: user.id,
-        name: `${user.firstName} ${user.lastName}`.trim(), 
+        name: `${user.firstName} ${user.lastName}`.trim(),
         firstName: user.firstName,
         lastName: user.lastName,
         username: user.username,

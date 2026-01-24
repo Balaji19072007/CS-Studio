@@ -1,59 +1,53 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { db } = require('../config/firebase');
+const {
+    collection, doc, getDoc, getDocs,
+    setDoc, updateDoc, addDoc, query, where
+} = require('firebase/firestore');
 
-// Define the structure for a single test case
-const ExampleSchema = new Schema({
-    input: {
-        type: String,
-        required: true
-    },
-    output: {
-        type: String,
-        required: true
-    },
-    explanation: {
-        type: String
+class Problem {
+    constructor(data) {
+        this.id = data.id || null;
+        this.problemId = data.problemId;
+        this.title = data.title;
+        this.language = data.language;
+        this.difficulty = data.difficulty;
+        this.problemStatement = data.problemStatement;
+        this.inputFormat = data.inputFormat;
+        this.outputFormat = data.outputFormat;
+        this.examples = data.examples || [];
+        this.solution = data.solution || {};
+        this.hints = data.hints || [];
+        this.testCases = data.testCases || [];
+        this.category = data.category || 'Algorithms';
     }
-}, { _id: false }); // Don't create a separate ID for subdocuments
 
-// Define the Problem Schema
-const ProblemSchema = new Schema({
-    // Matches the ID in problemData.json
-    problemId: {
-        type: Number,
-        required: true,
-        unique: true,
-        alias: 'id'
-    },
-    title: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    language: {
-        type: String, // e.g., 'C', 'Python', 'Java'
-        required: true
-    },
-    difficulty: {
-        type: String, // e.g., 'Easy', 'Medium', 'Hard'
-        required: true
-    },
-    problemStatement: {
-        type: String,
-        required: true
-    },
-    inputFormat: String,
-    outputFormat: String,
-    // Store examples directly in the problem document
-    examples: [ExampleSchema],
-    // Store the solution code/explanation (used for teaching/evaluation)
-    solution: {
-        explanation: String,
-        code: String 
+    static async find(criteria = {}) {
+        try {
+            const problemsRef = collection(db, 'problems');
+            let q = problemsRef;
+
+            // Building query filters if needed
+            const constraints = [];
+            if (criteria.problemId) constraints.push(where('problemId', '==', parseInt(criteria.problemId)));
+            // Add other filters as needed
+
+            if (constraints.length > 0) {
+                q = query(problemsRef, ...constraints);
+            }
+
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(d => new Problem({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.error('Problem.find error:', error);
+            throw error;
+        }
     }
-    // In a full app, you'd add:
-    // testCases: [{ input: String, expectedOutput: String }], 
-    // initialCodeSnippet: String
-});
 
-module.exports = mongoose.model('Problem', ProblemSchema);
+    static async findOne(criteria) {
+        // Basic implementation using find
+        const results = await this.find(criteria);
+        return results.length > 0 ? results[0] : null;
+    }
+}
+
+module.exports = Problem;

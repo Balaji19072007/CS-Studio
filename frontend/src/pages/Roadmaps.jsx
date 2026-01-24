@@ -6,12 +6,12 @@ import * as feather from 'feather-icons';
 
 // --- MOCK HOOKS FOR DEMONSTRATION (REPLACE WITH REAL useTheme) ---
 const useTheme = () => {
-    const [theme, setTheme] = useState('dark');
-    return { 
-        theme, 
-        toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
-        isDark: theme === 'dark'
-    };
+  const [theme, setTheme] = useState('dark');
+  return {
+    theme,
+    toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
+    isDark: theme === 'dark'
+  };
 };
 // -----------------------------------------------------------------
 
@@ -60,7 +60,7 @@ const ROADMAP_DATA = {
         },
         {
           "id": "backend-dev",
-          "title": "Backend", 
+          "title": "Backend",
           "short_description": "Node.js/Python, Express/Django, REST APIs, authentication - Weeks 6–12",
           "prerequisites": ["Basic programming", "Understanding of web concepts"],
           "estimated_hours": 120
@@ -209,7 +209,7 @@ const ROADMAP_DATA = {
     },
     {
       "id": "ai-ml",
-      "title": "AI / Machine Learning", 
+      "title": "AI / Machine Learning",
       "description": "From math foundations to building ML models and deploying them.",
       "children": [
         {
@@ -307,7 +307,7 @@ const ROADMAP_GRADIENTS = {
 const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (typeof feather !== 'undefined') {
       feather.replace();
@@ -321,107 +321,53 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
 
   const handleViewRoadmap = (e, roadmap, child = null) => {
     e.stopPropagation();
-    
+
+    // ... (keep navigation logic same as before, simplified for brevity in this view, 
+    // strictly copying the switch case logic is fine, but for clean code I'll assume the original switch is preserved 
+    // or I'll just copy the important mapping part if I was replacing the whole file. 
+    // SINCE I AM REPLACING CONTENT, I MUST INCLUDE THE NAVIGATION LOGIC OR IT WILL BE LOST. 
+    // I will include the full switch case again to be safe.)
+
     if (child) {
-      switch(child.id) {
-        case 'c-lang':
-          navigate('/roadmaps/c-programming');
-          break;
-        case 'python-lang':
-          navigate('/roadmaps/python-programming');
-          break;
-        case 'java-lang':
-          navigate('/roadmaps/java-programming'); 
-          break;
-        case 'frontend-dev':
-          navigate('/roadmaps/frontend-development');
-          break;
-        case 'backend-dev':
-          navigate('/roadmaps/backend-development');
-          break;
-        case 'database-dev':
-          navigate('/roadmaps/database-development');
-          break;
-        case 'deployment-dev':
-          navigate('/roadmaps/deployment-development');
-          break;
-        case 'fullstack-dev':
-          navigate('/roadmaps/fullstack-development');
-          break;
-        case 'android-dev':
-          navigate('/roadmaps/android-development');
-          break;
-        case 'ios-dev':
-          navigate('/roadmaps/ios-development');
-          break;
-        case 'crossplatform-dev':
-          navigate('/roadmaps/cross-development');
-          break;
-        case 'backend-mobile':
-          navigate('/roadmaps/backend-apis-mobile-development');
-          break;
-        case 'publishing-mobile':
-          navigate('/roadmaps/publishing-mobile-development');
-          break;
-        case 'foundations-sec':
-          navigate('/roadmaps/cyber-security-foundations');
-          break;
-        case 'defensive-sec':
-          navigate('/roadmaps/cyber-security-defensive');
-          break;
-        case 'webapp-sec':
-          navigate('/roadmaps/cyber-security-webapp');
-          break;
-        case 'offensive-sec':
-          navigate('/roadmaps/cyber-security-offensive');
-          break;
-        case 'forensics-sec':
-          navigate('/roadmaps/cyber-security-forensics');
-          break;
-        case 'fundamentals-devops':
-          navigate('/roadmaps/devops-fundamentals');
-          break;
-        case 'container-devops':
-          navigate('/roadmaps/devops-container');
-          break;
-        case 'orchestration-devops':
-          navigate('/roadmaps/devops-orchestration');
-          break;
-        case 'observability-devops':
-          navigate('/roadmaps/devops-observability');
-          break;
-        case 'math-ai':
-          navigate('/roadmaps/ai-ml-math');
-          break;
-        case 'coreml-ai':
-          navigate('/roadmaps/ai-ml-core');
-          break;
-        case 'deeplearning-ai':
-          navigate('/roadmaps/ai-ml-deeplearning');
-          break;
-        case 'production-ai':
-          navigate('/roadmaps/ai-ml-production');
-          break;
-        case 'python-ds':
-          navigate('/roadmaps/data-science-python');
-          break;
-        case 'wrangling-ds':
-          navigate('/roadmaps/data-science-wrangling');
-          break;
-        case 'modeling-ds':
-          navigate('/roadmaps/data-science-modeling');
-          break;
-        case 'bigdata-ds':
-          navigate('/roadmaps/data-science-bigdata');
-          break;
-        default: {
+      switch (child.id) {
+        case 'c-lang': navigate('/roadmaps/c-programming'); break;
+        case 'python-lang': navigate('/roadmaps/python-programming'); break;
+        case 'java-lang': navigate('/roadmaps/java-programming'); break;
+        case 'frontend-dev': navigate('/roadmaps/frontend-development'); break;
+        case 'backend-dev': navigate('/roadmaps/backend-development'); break;
+        case 'database-dev': navigate('/roadmaps/database-development'); break;
+        case 'deployment-dev': navigate('/roadmaps/deployment-development'); break;
+        case 'fullstack-dev': navigate('/roadmaps/fullstack-development'); break;
+        case 'android-dev': navigate('/roadmaps/android-development'); break;
+        case 'ios-dev': navigate('/roadmaps/ios-development'); break;
+        case 'crossplatform-dev': navigate('/roadmaps/cross-development'); break;
+        case 'backend-mobile': navigate('/roadmaps/backend-apis-mobile-development'); break;
+        case 'publishing-mobile': navigate('/roadmaps/publishing-mobile-development'); break;
+        case 'foundations-sec': navigate('/roadmaps/cyber-security-foundations'); break;
+        case 'defensive-sec': navigate('/roadmaps/cyber-security-defensive'); break;
+        case 'webapp-sec': navigate('/roadmaps/cyber-security-webapp'); break;
+        case 'offensive-sec': navigate('/roadmaps/cyber-security-offensive'); break;
+        case 'forensics-sec': navigate('/roadmaps/cyber-security-forensics'); break;
+        case 'fundamentals-devops': navigate('/roadmaps/devops-fundamentals'); break;
+        case 'container-devops': navigate('/roadmaps/devops-container'); break;
+        case 'orchestration-devops': navigate('/roadmaps/devops-orchestration'); break;
+        case 'observability-devops': navigate('/roadmaps/devops-observability'); break;
+        case 'math-ai': navigate('/roadmaps/ai-ml-math'); break;
+        case 'coreml-ai': navigate('/roadmaps/ai-ml-core'); break;
+        case 'deeplearning-ai': navigate('/roadmaps/ai-ml-deeplearning'); break;
+        case 'production-ai': navigate('/roadmaps/ai-ml-production'); break;
+        case 'python-ds': navigate('/roadmaps/data-science-python'); break;
+        case 'wrangling-ds': navigate('/roadmaps/data-science-wrangling'); break;
+        case 'modeling-ds': navigate('/roadmaps/data-science-modeling'); break;
+        case 'bigdata-ds': navigate('/roadmaps/data-science-bigdata'); break;
+        default:
           const roadmapName = child.title;
-          alert(`Viewing roadmap for: ${roadmapName}`);
-        }
+          // Fallback for demo
+          console.log(`Navigating to ${roadmapName}`);
       }
     } else {
       const roadmapName = roadmap.title;
-      alert(`Viewing roadmap for: ${roadmapName}`);
+      // alert(`Viewing roadmap for: ${roadmapName}`);
     }
   };
 
@@ -433,99 +379,115 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
   };
 
   return (
-    <div className={`my-4 rounded-xl overflow-hidden border transition-all duration-300 ${
-      isDark ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'
-    } ${isExpanded ? 'shadow-lg' : 'shadow-md'}`}>
-      
+    <div className={`mb-6 rounded-xl transition-all duration-300 border group ${isDark
+      ? 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
+      : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-lg'
+      } ${isExpanded ? 'ring-1 ring-primary-500/20 border-primary-500/30' : ''}`}>
+
       {/* Header - Clickable */}
-      <div 
-        className="cursor-pointer p-6"
+      <div
+        className="cursor-pointer p-6 sm:p-8"
         onClick={handleCardClick}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-4 flex-1">
-            <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${ROADMAP_GRADIENTS[roadmap.id]} flex items-center justify-center flex-shrink-0`}>
-              <i data-feather={ROADMAP_ICONS[roadmap.id]} className="w-6 h-6 text-white"></i>
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {roadmap.title}
-              </h3>
-              <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                {roadmap.description}
-              </p>
-              
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className={`flex items-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <i data-feather="clock" className="w-4 h-4 mr-1 text-primary-400"></i>
-                  <span>NaN weeks + hours</span>
-                </div>
-                
-                {roadmap.children && (
-                  <div className={`flex items-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    <i data-feather="layers" className="w-4 h-4 mr-1 text-primary-400"></i>
-                    <span>{roadmap.children.length} specializations</span>
-                  </div>
-                )}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+          {/* Icon Box */}
+          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${ROADMAP_GRADIENTS[roadmap.id]} flex items-center justify-center flex-shrink-0 shadow-lg transform group-hover:scale-105 transition-transform duration-300`}>
+            <i data-feather={ROADMAP_ICONS[roadmap.id]} className="w-8 h-8 text-white stroke-[1.5]"></i>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h3 className={`text-2xl font-bold mb-2 tracking-tight ${isDark ? 'text-white' : 'text-gray-900 group-hover:text-primary-600'} transition-colors`}>
+              {roadmap.title}
+            </h3>
+            <p className={`text-base leading-relaxed mb-4 max-w-3xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {roadmap.description}
+            </p>
+
+            <div className="flex flex-wrap gap-4 text-sm font-medium">
+              <div className={`flex items-center px-3 py-1 rounded-full ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                <i data-feather="clock" className="w-4 h-4 mr-2 text-primary-500"></i>
+                <span>~6 Months</span>
               </div>
+
+              {roadmap.children && (
+                <div className={`flex items-center px-3 py-1 rounded-full ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                  <i data-feather="layers" className="w-4 h-4 mr-2 text-primary-500"></i>
+                  <span>{roadmap.children.length} Modules</span>
+                </div>
+              )}
             </div>
           </div>
-          
-          <button 
-            onClick={handleToggle}
-            className={`text-primary-400 hover:text-primary-500 p-2 rounded-full transition-transform duration-300 ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
-          >
-            <i data-feather="chevron-down" className="w-6 h-6"></i>
-          </button>
+
+          {/* Expand Toggle */}
+          <div className="flex items-center self-start sm:self-center">
+            <button
+              onClick={handleToggle}
+              className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-400'
+                } ${isExpanded ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 rotate-180' : ''}`}
+            >
+              <i data-feather="chevron-down" className="w-6 h-6"></i>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Expanded Content */}
-      {isExpanded && (
-        <div className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-          {/* Children Roadmaps (Specializations) */}
-          {roadmap.children && (
-            <div className="p-6">
-              <h4 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Change Your Specialization
-              </h4>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {roadmap.children.map((child) => (
-                  <div 
+      <div className={`grid transition-[grid-template-rows] duration-500 ease-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}>
+        <div className="overflow-hidden">
+          <div className={`p-6 sm:p-8 pt-0 border-t ${isDark ? 'border-gray-700/50' : 'border-gray-100'}`}>
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-6">
+                <h4 className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <i data-feather="map" className="w-4 h-4 text-primary-500"></i>
+                  <span>Specialization Tracks</span>
+                </h4>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {roadmap.children && roadmap.children.map((child, index) => (
+                  <div
                     key={child.id}
-                    className={`p-4 rounded-lg border transition-all duration-200 ${
-                      isDark 
-                        ? 'bg-gray-800 border-gray-700' 
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
+                    className={`relative group/card flex flex-col p-6 rounded-xl border transition-all duration-300 hover:-translate-y-1 ${isDark
+                      ? 'bg-gray-800 border-gray-700 hover:border-primary-500/50 hover:bg-gray-750'
+                      : 'bg-white border-gray-200 hover:border-primary-200 hover:shadow-xl'
+                      }`}
                   >
-                    <h5 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-600'
+                        }`}>
+                        {index + 1}
+                      </div>
+                      <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                        {Math.ceil(child.estimated_hours / 20)} Weeks
+                      </span>
+                    </div>
+
+                    <h5 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900 group-hover/card:text-primary-500'} transition-colors`}>
                       {child.title}
                     </h5>
-                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm mb-6 flex-grow leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {child.short_description}
                     </p>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                        {Math.ceil(child.estimated_hours / 20)} weeks
-                      </span>
-                      <button 
+
+                    <div className="pt-4 border-t border-dashed border-gray-200 dark:border-gray-700 mt-auto">
+                      <button
                         onClick={(e) => handleViewRoadmap(e, roadmap, child)}
-                        className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
+                        className="w-full group inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-800 border-2 border-primary-500 text-primary-600 dark:text-primary-400 rounded-lg font-semibold hover:bg-primary-500 hover:text-white dark:hover:bg-primary-500 dark:hover:text-white transition-all duration-300"
                       >
-                        View Roadmap
+                        <span>Start Path</span>
+                        <i data-feather="arrow-right" className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -555,53 +517,42 @@ const Roadmaps = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'dark-gradient-secondary' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen font-sans ${isDark ? 'bg-[#0f1117]' : 'bg-gray-50'}`}>
+
       {/* Hero Section */}
-      <div className="gradient-bg text-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hero-floating hidden lg:block">
-          <i data-feather="target" className="w-40 h-40 text-primary-500 opacity-20"></i>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl">
-              <span className="block text-white">Structured Learning</span>
-              <span className="block text-primary-400">Roadmaps</span>
-            </h1>
-            <p className="mt-4 max-w-3xl mx-auto text-xl text-gray-300">
-              Follow expert-designed paths to master in-demand skills. Each roadmap includes step-by-step guidance, projects, and clear outcomes.
-            </p>
-            <div className="mt-10 flex justify-center">
-              <button
-                onClick={() => document.getElementById('roadmaps-list').scrollIntoView({ behavior: 'smooth' })}
-                className="roadmap-button-primary inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.03]"
-              >
-                Explore Roadmaps
-                <i data-feather="arrow-down" className="w-5 h-5 ml-2"></i>
-              </button>
-            </div>
+      <div className={`relative overflow-hidden ${isDark ? 'bg-gray-900' : 'bg-white'} border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 dark:to-gray-900/50"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10 text-center">
+          <div className="inline-flex items-center justify-center p-2 mb-8 bg-primary-100 dark:bg-primary-900/30 rounded-full">
+            <span className="px-3 py-1 text-sm font-semibold text-primary-700 dark:text-primary-300 tracking-wide uppercase">
+              Interactive Learning Paths
+            </span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
+            <span className={`block ${isDark ? 'text-white' : 'text-gray-900'}`}>Master Your</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-500">Dream Career</span>
+          </h1>
+          <p className={`mt-4 max-w-2xl mx-auto text-xl md:text-2xl ${isDark ? 'text-gray-400' : 'text-gray-500'} font-light`}>
+            Step-by-step guides and curated resources to help you become an expert in your field.
+          </p>
+
+          <div className="mt-10 flex gap-4 justify-center">
+            <button
+              onClick={() => document.getElementById('roadmaps-list').scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-4 rounded-full bg-primary-600 hover:bg-primary-700 text-white font-bold text-lg shadow-lg hover:shadow-primary-500/30 transition-all transform hover:-translate-y-1"
+            >
+              Explore Paths
+            </button>
           </div>
         </div>
       </div>
 
       {/* Content Section */}
-      <div className="py-16" id="roadmaps-list">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-base text-primary-500 font-semibold tracking-wide uppercase">LEARNING PATHS</h2>
-            <p className={`mt-2 text-4xl leading-8 font-extrabold tracking-tight sm:text-5xl ${
-              isDark ? 'text-white' : 'text-gray-900'
-            }`}>
-              Choose Your Career Path
-            </p>
-            <p className={`mt-4 max-w-2xl text-xl ${
-              isDark ? 'text-gray-400' : 'text-gray-600'
-            } mx-auto`}>
-              Comprehensive roadmaps designed by industry experts with real-world projects
-            </p>
-          </div>
-
-          <div className="space-y-6">
+      <div className="py-20" id="roadmaps-list">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-8">
             {ROADMAP_DATA.roadmaps.map((roadmap) => (
               <RoadmapCategoryCard
                 key={roadmap.id}
@@ -615,51 +566,41 @@ const Roadmaps = () => {
       </div>
 
       {/* Final CTA */}
-      <div className={`py-20 ${isDark ? 'dark-gradient-secondary' : 'bg-gray-50'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-premium-lg relative overflow-hidden py-16 px-8">
-            <div className="relative">
-              <div className="lg:flex lg:items-center lg:justify-between text-center lg:text-left">
-                <div className="flex-1">
-                  <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                    <span className="block">Ready to start your journey?</span>
-                    <span className="block text-primary-100 mt-2 text-xl">
-                      Join thousands of learners building their careers
-                    </span>
-                  </h2>
-                </div>
-                <div className="mt-8 flex justify-center lg:mt-0 lg:flex-shrink-0">
-                  <Link 
-                    to={isLoggedIn ? "/problems" : "/signup"}
-                    className="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.03] bg-success-600 hover:bg-success-700 text-white"
-                  >
-                    {isLoggedIn ? 'Continue Learning' : 'Start Free Trial'}
-                    <i data-feather="arrow-right" className="ml-2 w-5 h-5"></i>
-                  </Link>
-                </div>
-              </div>
+      <div className="py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-primary-700"></div>
+            <div className="absolute inset-0 bg-grid-white/[0.2] bg-[length:16px_16px]"></div>
+
+            <div className="relative p-12 md:p-16 text-center">
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+                Stop planning, start coding.
+              </h2>
+              <p className="text-indigo-100 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                Join thousands of developers who are building the future with our comprehensive roadmaps.
+              </p>
+              <Link
+                to={isLoggedIn ? "/problems" : "/signup"}
+                className="inline-flex items-center px-10 py-5 border border-transparent text-lg font-bold rounded-xl text-primary-700 bg-white hover:bg-gray-50 transition-colors shadow-xl"
+              >
+                {isLoggedIn ? 'Go to Dashboard' : 'Get Started for Free'}
+                <i data-feather="arrow-right" className="ml-2 w-5 h-5"></i>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-
       {/* Floating Buttons */}
-      <Link 
-        to="/code" 
-        className="fixed bottom-20 sm:bottom-6 right-6 h-14 w-14 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl z-50"
-      >
-        <i data-feather="edit-3" className="h-6 w-6"></i>
-      </Link>
-
-      <button 
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-40 sm:bottom-24 right-6 h-12 w-12 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg z-50 ${
-          showBackToTop ? 'opacity-100 visible' : 'opacity-0 invisible'
-        }`}
-      >
-        <i data-feather="arrow-up" className="h-5 w-5"></i>
-      </button>
+      {/* Floating Buttons - Moved up for mobile bottom bar */}
+      <div className={`fixed bottom-24 sm:bottom-8 right-8 flex flex-col gap-4 z-50 transition-opacity duration-300 ${showBackToTop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="p-4 rounded-full bg-transparent hover:bg-gray-200/20 dark:hover:bg-gray-700/30 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+        >
+          <i data-feather="arrow-up" className="w-8 h-8 stroke-[2.5]"></i>
+        </button>
+      </div>
     </div>
   );
 };
