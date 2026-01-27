@@ -1,6 +1,7 @@
+
 // src/App.jsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
@@ -9,8 +10,13 @@ import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 import Navbar from './components/common/Navbar.jsx';
 import Footer from './components/common/Footer.jsx';
 
+import MobileTopBar from './components/common/MobileTopBar.jsx';
+import MobileBottomNav from './components/common/MobileBottomNav.jsx';
+import MobileQuickActions from './components/common/MobileQuickActions.jsx';
+
 // Page imports
 import Home from './pages/Home.jsx';
+
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
 import Problems from './pages/Problems.jsx';
@@ -59,6 +65,8 @@ import DataWranglingRoadmap from "./pages/roadmaps/DataWranglingRoadmap.jsx";
 import DataScienceModelingRoadmap from "./pages/roadmaps/DataScienceModelingRoadmap.jsx";
 import DataScienceRoadmap from "./pages/roadmaps/DataScienceRoadmap.jsx";
 import RatingPopup from './components/common/RatingPopup.jsx';
+import CSMentorWidget from './components/common/CSMentorWidget.jsx';
+import CodeEditorFloatingIcon from './components/common/CodeEditorFloatingIcon.jsx';
 import './App.css';
 
 function App() {
@@ -84,15 +92,26 @@ function App() {
 function AppContent() {
   const { isDark } = useTheme();
   const location = useLocation();
+  const { user } = useAuth();
+  const isLoggedIn = !!user; // Check if user is logged in
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Page refresh handling is now done in index.html for better reliability
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+
+      {/* Mobile Top Bar - Only visible on mobile when logged in - Hidden on Solve page */}
+      {isLoggedIn && !location.pathname.startsWith('/solve') && <MobileTopBar />}
+
+      {/* Main Navbar - Hidden on mobile if logged in (handled via CSS classes in Navbar component) */}
       <Navbar />
 
+      <main
+        className={`flex-grow ${location.pathname.startsWith('/solve') ? 'pt-0 lg:pt-16' : 'pt-16'} pb-20 sm:pb-0`}
+        style={{ minHeight: '60vh' }}
+      >
 
-      <main className="flex-grow pt-16" style={{ minHeight: '60vh' }}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -150,15 +169,48 @@ function AppContent() {
       </main>
 
       <RatingPopup />
+      {/* Hide icons on public home (when not logged in), signin, signup, solve, and learn pages */}
+      {!location.pathname.startsWith('/solve') &&
+        !location.pathname.startsWith('/learn') &&
+        location.pathname !== '/signin' &&
+        location.pathname !== '/signup' &&
+        location.pathname !== '/code' &&
+        !(location.pathname === '/' && !isLoggedIn) &&
+        <CodeEditorFloatingIcon />}
+      {!location.pathname.startsWith('/solve') &&
+        !location.pathname.startsWith('/learn') &&
+        location.pathname !== '/signin' &&
+        location.pathname !== '/signup' &&
+        location.pathname !== '/code' &&
+        !(location.pathname === '/' && !isLoggedIn) && (
+          <>
+            <CSMentorWidget isOpen={isChatOpen} onToggle={setIsChatOpen} />
+            <MobileQuickActions onOpenChat={() => setIsChatOpen(true)} />
+          </>
+        )}
 
-      {!location.pathname.startsWith('/solve') && <Footer />}
+      {!location.pathname.startsWith('/solve') && !location.pathname.startsWith('/learn') && <Footer />}
+
+      {/* Mobile Bottom Navigation - Only visible on mobile when logged in */}
+      {isLoggedIn && <MobileBottomNav />}
     </div>
+
   );
 }
 
 // Protected Route Component using useAuth hook
+// Protected Route Component using useAuth hook
 const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
+
+  if (loading) {
+    // You can replace this with a proper loading spinner
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <Navigate to="/signin" replace />;

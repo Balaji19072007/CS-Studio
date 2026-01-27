@@ -10,21 +10,37 @@ const TestEvaluationService = require('../util/testEvaluationService');
 // @route   GET /api/problems
 // @desc    Get all problems with filters (for problems.html list)
 // @access  Public
+// @route   GET /api/problems
+// @desc    Get all problems with filters (for problems.html list)
+// @access  Public
 exports.getProblems = async (req, res) => {
     try {
+        console.log('⚡ getProblems called. User:', req.user ? req.user.id : 'Guest');
         let problems = await Problem.find();
 
         // Manual Sort
         problems.sort((a, b) => a.problemId - b.problemId);
 
-        // Manual Select (Project fields)
+        // Fetch user progress if authenticated
+        let userProgressMap = {};
+        if (req.user && req.user.id) {
+            console.log(`🔎 Fetching progress for user ${req.user.id}`);
+            const progressDocs = await Progress.find({ userId: req.user.id });
+            console.log(`Found ${progressDocs.length} progress records for user.`);
+            progressDocs.forEach(p => {
+                userProgressMap[p.problemId] = p.status;
+            });
+        }
+
+        // Project and inject status
         const projected = problems.map(p => ({
             id: p.id,
             problemId: p.problemId,
             title: p.title,
             language: p.language,
             difficulty: p.difficulty,
-            category: p.category
+            category: p.category,
+            status: userProgressMap[p.problemId] || 'todo'
         }));
 
         res.json(projected);
@@ -50,14 +66,32 @@ exports.getDailyProblem = async (req, res) => {
 
         const problem = problems[dailyIndex];
 
-        // Return minimal fields
+        // Check if user is logged in and has already solved this problem
+        let isSolved = false;
+        if (req.user) {
+            const userId = req.user.id;
+            console.log(`🔍 [Daily Debug] User ID: ${userId}, Daily Problem ID: ${problem.problemId}`);
+
+            const progress = await Progress.findOne({
+                userId,
+                problemId: problem.problemId
+            });
+
+            // Check if solved
+            if (progress && progress.status === 'solved') {
+                isSolved = true;
+            }
+        }
+
+        // Return problem (including solved status)
         res.json({
             id: problem.id,
             problemId: problem.problemId,
             title: problem.title,
             language: problem.language,
             difficulty: problem.difficulty,
-            category: problem.category
+            category: problem.category,
+            solved: isSolved // Frontend can use this to show "Completed" state
         });
     } catch (err) {
         console.error('Error fetching daily problem:', err.message);
@@ -312,12 +346,14 @@ exports.runTestCases = async (req, res) => {
             // Don't fail the entire request if progress update fails
         }
 
+        console.log('✅ [runTestCases] Sending response to client...');
         res.json({
             success: true,
             passed: accuracy === 100,
             accuracy: Math.floor(accuracy),
             results: results // Return detailed results
         });
+        console.log('✅ [runTestCases] Response sent successfully!');
 
     } catch (err) {
         console.error('💥 Catastrophic error running test cases:', err.message);
@@ -390,11 +426,22 @@ exports.submitProblem = async (req, res) => {
             progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
             if (isSolved) {
                 progress.status = 'solved';
+                // Set solvedAt only if this is the FIRST time solving
+                if (!wasPreviouslySolved && !progress.solvedAt) {
+                    progress.solvedAt = new Date().toISOString();
+                    console.log('🎉 Problem solved for the first time! Setting solvedAt:', progress.solvedAt);
+                }
             } else if (progress.status !== 'solved') {
                 progress.status = 'attempted';
             }
 
-            progress.lastSubmission = new Date();
+            // Validate timeSpent is a positive number
+            const timeSpent = req.body.timeSpent;
+            if (timeSpent && !isNaN(timeSpent) && timeSpent > 0) {
+                progress.timeSpent = parseInt(timeSpent);
+            }
+
+            progress.lastSubmission = new Date().toISOString();
             await progress.save();
             console.log('✅ Progress saved successfully');
         } catch (progErr) {

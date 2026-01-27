@@ -73,6 +73,7 @@ const Code = () => {
     }, []);
 
     const handleGoBack = () => {
+        // Use navigate(-1) to preserve scroll position/history state
         navigate(-1);
     };
 
@@ -96,33 +97,40 @@ const Code = () => {
         <div className="min-h-screen flex flex-col dark-gradient-secondary p-4 sm:p-6 lg:p-8 relative">
 
             {/* --- GO BACK BUTTON (TOP LEFT) --- */}
+            {/* --- GO BACK BUTTON (TOP LEFT) - Hidden on Mobile --- */}
             <button
                 onClick={handleGoBack}
-                className={`absolute top-10 left-4 sm:left-6 lg:left-8 dark-btn-secondary inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium z-40 border ${cardBorder} ${cardBg} ${textSecondary} hover:${textPrimary}`}
+                className={`hidden lg:inline-flex absolute top-10 left-4 sm:left-6 lg:left-8 dark-btn-secondary items-center px-4 py-2 rounded-lg text-sm font-medium z-40 border ${cardBorder} ${cardBg} ${textSecondary} hover:${textPrimary}`}
             >
                 <i data-feather="arrow-left" className="w-4 h-4 mr-2"></i> Go Back
             </button>
 
-            <div className="max-w-7xl mx-auto w-full flex-grow flex flex-col pt-12">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 flex items-center">
-                    <i data-feather="terminal" className="w-7 h-7 mr-3 text-primary-500"></i>
-                    Freeform Code Playground
+            <div className="max-w-7xl mx-auto w-full flex-grow flex flex-col pt-0 lg:pt-12">
+                <h1 className="text-xl sm:text-3xl font-bold text-white mb-4 lg:mb-6 flex items-center">
+                    <button onClick={handleGoBack} className="lg:hidden mr-3 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 18L8 12L14 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                    <i data-feather="terminal" className="w-6 h-6 sm:w-7 sm:h-7 mr-2 sm:mr-3 text-primary-500"></i>
+                    <span className="lg:hidden">Freehand Coding</span>
+                    <span className="hidden lg:inline">Freehand Coding Playground</span>
                 </h1>
-                <p className="text-gray-400 mb-4">Run quick tests and experiments across supported languages (C, Python, Java...) using our real-time compiler service.</p>
+                <p className="hidden lg:block text-gray-400 mb-4">Run quick tests and experiments across supported languages (C, Python, Java...) using our real-time compiler service.</p>
 
-                {/* Connection Status Indicator */}
-                <div className="mb-4 flex items-center">
+                {/* Connection Status Indicator - Hidden on Mobile */}
+                <div className="hidden lg:flex mb-4 items-center">
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${connectionStatus === 'connected'
-                            ? 'bg-green-600/30 text-green-300'
-                            : connectionStatus === 'connecting'
-                                ? 'bg-yellow-600/30 text-yellow-300'
-                                : 'bg-red-600/30 text-red-300'
+                        ? 'bg-green-600/30 text-green-300'
+                        : connectionStatus === 'connecting'
+                            ? 'bg-yellow-600/30 text-yellow-300'
+                            : 'bg-red-600/30 text-red-300'
                         }`}>
                         <div className={`w-2 h-2 rounded-full mr-2 ${connectionStatus === 'connected'
-                                ? 'bg-green-400 animate-pulse'
-                                : connectionStatus === 'connecting'
-                                    ? 'bg-yellow-400 animate-pulse'
-                                    : 'bg-red-400'
+                            ? 'bg-green-400 animate-pulse'
+                            : connectionStatus === 'connecting'
+                                ? 'bg-yellow-400 animate-pulse'
+                                : 'bg-red-400'
                             }`}></div>
                         {connectionStatus === 'connected'
                             ? 'Compiler Connected'

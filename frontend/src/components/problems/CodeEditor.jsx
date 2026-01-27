@@ -242,11 +242,14 @@ const CodeEditor = forwardRef(({
   }));
 
   // --- UI Handlers (Only active in Freeform mode) ---
+  const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'output'
+
   const handleInternalRunCode = () => {
     if (!isProblemSolver) {
       if (isRunning) {
         handleStopExecution();
       } else {
+        if (window.innerWidth < 1024) setMobileTab('output');
         handleRunCode(code);
       }
     }
@@ -313,9 +316,9 @@ const CodeEditor = forwardRef(({
   return (
     <div className={`flex flex-col h-full ${ioBodyBg} ${showControls ? `rounded-lg border ${borderClass}` : 'border-none'} overflow-hidden`}>
 
-      {/* Toolbar (Only visible in Freeform Playground) */}
+      {/* --- DESKTOP TOOLBAR (Hidden on Mobile) --- */}
       {showControls && (
-        <div className={`flex items-center justify-between px-4 py-3 ${toolbarBg} border-b ${borderClass}`}>
+        <div className={`hidden lg:flex items-center justify-between px-4 py-3 ${toolbarBg} border-b ${borderClass}`}>
           <div className="flex items-center gap-4">
             {/* Language Selector */}
             <select
@@ -354,8 +357,75 @@ const CodeEditor = forwardRef(({
         </div>
       )}
 
+      {/* --- MOBILE TOOLBAR (Visible Only on Mobile) --- */}
+      {showControls && (
+        <div className="lg:hidden flex flex-col border-b border-gray-200 dark:border-gray-700">
+          {/* Row 1: Tabs and Run Button */}
+          <div className={`flex items-center justify-between p-2 ${toolbarBg}`}>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMobileTab('editor')}
+                className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${mobileTab === 'editor'
+                  ? 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                  }`}
+              >
+                Main
+              </button>
+              <button
+                onClick={() => setMobileTab('output')}
+                className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${mobileTab === 'output'
+                  ? 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                  }`}
+              >
+                Output
+              </button>
+            </div>
+            <button
+              onClick={handleInternalRunCode}
+              className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${isRunning
+                ? 'bg-red-600 text-white'
+                : 'bg-green-600 text-white'
+                }`}
+            >
+              {isRunning ? (
+                <div className="w-3 h-3 bg-white rounded-sm" />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M8 5v14l11-7z" /></svg>
+              )}
+            </button>
+          </div>
+
+          {/* Row 2: Controls (Language, Copy, Reset) - Only visible in Editor Tab */}
+          {mobileTab === 'editor' && (
+            <div className={`flex items-center justify-between px-3 py-2 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800`}>
+              {/* Language Selector */}
+              <select
+                value={finalLanguage}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                className={`text-xs font-medium bg-transparent border-none focus:ring-0 ${textMain} p-0 cursor-pointer`}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang} className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white"> {lang} </option>
+                ))}
+              </select>
+
+              <div className="flex gap-4">
+                <button onClick={handleCopyCode} className={`${textSecondary} hover:${textMain}`} title="Copy">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+                <button onClick={handleReset} className={`${textSecondary} hover:${textMain}`} title="Reset">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className={`flex-1 overflow-hidden ${mobileTab === 'editor' ? 'block' : 'hidden lg:block'}`}>
         <Editor
           height="100%"
           language={MONACO_LANGUAGE_MAP[finalLanguage]}
@@ -371,18 +441,24 @@ const CodeEditor = forwardRef(({
             automaticLayout: true,
             tabSize: 4,
             wordWrap: 'on',
+            scrollbar: {
+              alwaysConsumeMouseWheel: false,
+            }
           }}
         />
       </div>
 
       {/* Input/Output Section */}
       {showControls && (
-        <div className={`h-64 border-t ${borderClass} flex flex-col`}>
+        <div className={`
+          border-t ${borderClass} flex-col 
+          ${mobileTab === 'output' ? 'flex h-full' : 'hidden lg:flex lg:h-64'}
+        `}>
           <div className={`flex border-b ${borderClass} h-full`}>
 
             {/* Terminal View */}
             <div className="flex-1 flex flex-col">
-              <div className={`px-4 py-2 ${ioHeaderBg} font-semibold text-sm ${textMain}`}>
+              <div className={`px-4 py-2 ${ioHeaderBg} font-semibold text-sm ${textMain} lg:block hidden`}>
                 Terminal
                 {(error || isRunning || isWaitingForInput) && (
                   <span className={`ml-2 ${error ? errorTextClass :
@@ -392,6 +468,17 @@ const CodeEditor = forwardRef(({
                   </span>
                 )}
               </div>
+
+              {/* Mobile Terminal Header just to show status if needed, or hide it to maximize space */}
+              <div className={`px-4 py-2 ${ioHeaderBg} font-semibold text-sm ${textMain} lg:hidden flex justify-between`}>
+                <span>Console Output</span>
+                {(error || isRunning || isWaitingForInput) && (
+                  <span className={`${error ? errorTextClass : isWaitingForInput ? inputPromptClass : textSecondary}`}>
+                    {error ? 'Error' : isWaitingForInput ? 'Waiting for input' : 'Live'}
+                  </span>
+                )}
+              </div>
+
               <div className={`h-full flex flex-col`}>
 
                 {/* Terminal Display - Clickable and focusable */}

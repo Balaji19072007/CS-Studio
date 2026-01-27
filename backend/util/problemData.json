@@ -1391,15 +1391,15 @@
     },
     "testCases": [
       {
-        "input": "Enter a word: Python",
+        "input": "Python",
         "expected": "nohtyP\n"
       },
       {
-        "input": "Enter a word: Hello",
+        "input": "Hello",
         "expected": "olleH\n"
       },
       {
-        "input": "Enter a word: a",
+        "input": "a",
         "expected": "a\n"
       }
     ],

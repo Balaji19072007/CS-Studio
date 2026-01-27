@@ -1,0 +1,9 @@
+{
+    "ignore": [
+        "temp_exec",
+        "temp",
+        "*.log"
+    ],
+    "ext": "js,json",
+    "delay": 1000
+}

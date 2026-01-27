@@ -11,7 +11,7 @@ const axios = require('axios');
 const http = require('http');
 const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
-const { v2: cloudinary } = require('cloudinary'); 
+const { v2: cloudinary } = require('cloudinary');
 const multer = require('multer');
 const statsRoutes = require('../routes/statsRoutes');
 
@@ -90,7 +90,7 @@ if (
 }
 
 const upload = multer({
-  storage: multer.memoryStorage(), 
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
@@ -125,8 +125,8 @@ app.use('/predict', predictionRoutes);
 app.use('/api/stats', statsRoutes);
 // --- Health Check Endpoint ---
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
   });
@@ -170,7 +170,7 @@ function cleanupFiles(files) {
 // Test GCC and G++ availability on server start
 function testCompilers() {
   console.log('🔧 Testing compiler availability...');
-  
+
   // Test GCC
   const gccTest = spawn('gcc', ['--version']);
   gccTest.stdout.on('data', (data) => {
@@ -211,9 +211,9 @@ io.on('connection', (socket) => {
   // Execute code with interactive input
   socket.on('execute-code', async (data) => {
     const { language, code } = data;
-    
+
     console.log(`⚡ Executing ${language} code for socket ${socket.id}`);
-    
+
     try {
       // Clean previous session
       if (executionSessions.has(socket.id)) {
@@ -239,23 +239,23 @@ io.on('connection', (socket) => {
         case 'python':
           await executePython(cleanedCode, socket, sessionId, tempDir);
           break;
-        
+
         case 'c':
           await executeC(cleanedCode, socket, sessionId, tempDir);
           break;
-        
+
         case 'cpp':
           await executeCpp(cleanedCode, socket, sessionId, tempDir);
           break;
-        
+
         case 'java':
           await executeJava(cleanedCode, socket, sessionId, tempDir);
           break;
-        
+
         case 'javascript':
           await executeJavaScript(cleanedCode, socket, sessionId, tempDir);
           break;
-        
+
         default:
           throw new Error(`Unsupported language: ${language}`);
       }
@@ -274,13 +274,13 @@ io.on('connection', (socket) => {
     const session = executionSessions.get(socket.id);
     if (session && session.process && session.isRunning) {
       console.log(`📥 Input received for ${socket.id} (${session.language}): "${input}"`);
-      
+
       // Reset input expected flag
       session.inputExpected = false;
-      
+
       // Write input to the process's STDIN with newline
       session.process.stdin.write(input + '\n');
-      
+
     } else {
       socket.emit('execution-output', {
         output: '\n[Error: No active execution session]',
@@ -356,15 +356,15 @@ function executeC(code, socket, sessionId, tempDir) {
   return new Promise((resolve) => {
     const sourceFile = path.join(tempDir, `${sessionId}.c`);
     const executable = path.join(tempDir, `${sessionId}${process.platform === 'win32' ? '.exe' : ''}`);
-    
+
     console.log(`🔧 Compiling C: ${sourceFile} -> ${executable}`);
-    
+
     // Write the C code to file
     fs.writeFileSync(sourceFile, code);
 
     // Compile C code with basic flags
     const compileArgs = [sourceFile, '-o', executable];
-    
+
     const compileProcess = spawn('gcc', compileArgs, {
       timeout: 15000,
       cwd: tempDir
@@ -383,7 +383,7 @@ function executeC(code, socket, sessionId, tempDir) {
 
     compileProcess.on('close', (exitCode) => {
       console.log(`🔧 C compilation exited with code: ${exitCode}`);
-      
+
       if (exitCode !== 0) {
         console.error(`❌ C Compilation failed: ${compileError}`);
         socket.emit('execution-result', {
@@ -433,7 +433,7 @@ function executeC(code, socket, sessionId, tempDir) {
       });
 
       socket.emit('execution-output', { output: 'Executing C...\n' });
-      
+
       // Enhanced process handlers for C
       setupProcessHandlersForC(cProcess, socket, [sourceFile, executable]);
       resolve();
@@ -456,14 +456,14 @@ function executeCpp(code, socket, sessionId, tempDir) {
   return new Promise((resolve) => {
     const sourceFile = path.join(tempDir, `${sessionId}.cpp`);
     const executable = path.join(tempDir, `${sessionId}${process.platform === 'win32' ? '.exe' : ''}`);
-    
+
     console.log(`🔧 Compiling C++: ${sourceFile} -> ${executable}`);
-    
+
     fs.writeFileSync(sourceFile, code);
 
     // Compile C++ code
     const compileArgs = [sourceFile, '-o', executable];
-    
+
     const compileProcess = spawn('g++', compileArgs, {
       timeout: 15000,
       cwd: tempDir
@@ -482,7 +482,7 @@ function executeCpp(code, socket, sessionId, tempDir) {
 
     compileProcess.on('close', (exitCode) => {
       console.log(`🔧 C++ compilation exited with code: ${exitCode}`);
-      
+
       if (exitCode !== 0) {
         console.error(`❌ C++ Compilation failed: ${compileError}`);
         socket.emit('execution-result', {
@@ -551,8 +551,18 @@ function executeCpp(code, socket, sessionId, tempDir) {
 // Java Execution
 function executeJava(code, socket, sessionId, tempDir) {
   return new Promise((resolve) => {
-    const sourceFile = path.join(tempDir, 'Main.java');
-    
+    // Detect class name - prioritize public class
+    const publicClassMatch = code.match(/public\s+class\s+(\w+)/);
+    const anyClassMatch = code.match(/class\s+(\w+)/);
+
+    // If there's a public class, MUST use that name for the file
+    // Otherwise, use any class name found, or default to Main
+    let className = publicClassMatch ? publicClassMatch[1] :
+      (anyClassMatch ? anyClassMatch[1] : 'Main');
+
+    const sourceFile = path.join(tempDir, `${className}.java`);
+    const classFile = path.join(tempDir, `${className}.class`);
+
     fs.writeFileSync(sourceFile, code);
 
     // Compile Java code
@@ -583,7 +593,6 @@ function executeJava(code, socket, sessionId, tempDir) {
       }
 
       // Check if class file was created
-      const classFile = path.join(tempDir, 'Main.class');
       if (!fs.existsSync(classFile)) {
         socket.emit('execution-result', {
           success: false,
@@ -594,7 +603,7 @@ function executeJava(code, socket, sessionId, tempDir) {
       }
 
       // Execute Java program
-      const javaProcess = spawn('java', ['-cp', tempDir, 'Main'], {
+      const javaProcess = spawn('java', ['-cp', tempDir, className], {
         stdio: ['pipe', 'pipe', 'pipe'],
         timeout: 15000,
         cwd: tempDir
@@ -663,15 +672,15 @@ function setupProcessHandlersForC(process, socket, tempFiles) {
     const output = data.toString();
     console.log(`📤 C Output for ${socket.id}:`, JSON.stringify(output));
     outputBuffer += output;
-    
+
     // Send output to client
     socket.emit('execution-output', { output: output });
-    
+
     // Check for input patterns in the accumulated output
     const session = executionSessions.get(socket.id);
     if (session) {
       session.lastOutput = outputBuffer;
-      
+
       // Enhanced input detection for C programs without fflush
       const inputPatterns = [
         /Enter/i,
@@ -685,14 +694,14 @@ function setupProcessHandlersForC(process, socket, tempFiles) {
         /scanf/,
         /waiting/i
       ];
-      
+
       const hasInputPrompt = inputPatterns.some(pattern => outputBuffer.match(pattern));
       const endsWithPrompt = output.endsWith(':') || output.endsWith('?') || output.endsWith('>');
-      
+
       if ((hasInputPrompt || endsWithPrompt) && !session.inputExpected) {
         console.log(`🔍 C Program waiting for input detected`);
         session.inputExpected = true;
-        
+
         // Small delay to ensure the prompt is fully displayed
         clearTimeout(inputTimeout);
         inputTimeout = setTimeout(() => {
@@ -713,17 +722,17 @@ function setupProcessHandlersForC(process, socket, tempFiles) {
   process.on('close', (code) => {
     console.log(`✅ C Process closed for socket ${socket.id} with exit code ${code}`);
     clearTimeout(inputTimeout);
-    
+
     // Clean up temp files
     cleanupFiles(tempFiles);
-    
+
     const success = code === 0;
     socket.emit('execution-result', {
       success: success,
       output: `\n[Program ${success ? 'completed successfully' : 'finished with exit code ' + code}]`,
       exitCode: code
     });
-    
+
     executionSessions.delete(socket.id);
   });
 
@@ -731,7 +740,7 @@ function setupProcessHandlersForC(process, socket, tempFiles) {
   process.on('error', (err) => {
     console.error(`❌ C Process error for ${socket.id}:`, err);
     clearTimeout(inputTimeout);
-    
+
     // Clean up temp files
     cleanupFiles(tempFiles);
 
@@ -739,7 +748,7 @@ function setupProcessHandlersForC(process, socket, tempFiles) {
       success: false,
       error: `Execution error: ${err.message}`
     });
-    
+
     executionSessions.delete(socket.id);
   });
 }
@@ -754,13 +763,13 @@ function setupProcessHandlers(process, socket, tempFiles) {
     const output = data.toString();
     console.log(`📤 Output for ${socket.id}:`, JSON.stringify(output));
     outputBuffer += output;
-    
+
     socket.emit('execution-output', { output: output });
-    
+
     const session = executionSessions.get(socket.id);
     if (session) {
       session.lastOutput = outputBuffer;
-      
+
       // Universal input detection
       const inputPatterns = [
         /Enter/i,
@@ -777,14 +786,14 @@ function setupProcessHandlers(process, socket, tempFiles) {
         /prompt/i,
         /waiting/i
       ];
-      
+
       const hasInputPrompt = inputPatterns.some(pattern => outputBuffer.match(pattern));
       const endsWithPrompt = output.endsWith(':') || output.endsWith('?') || output.endsWith('>');
-      
+
       if ((hasInputPrompt || endsWithPrompt) && !session.inputExpected) {
         console.log(`🔍 Program waiting for input detected (${session.language})`);
         session.inputExpected = true;
-        
+
         clearTimeout(inputTimeout);
         inputTimeout = setTimeout(() => {
           socket.emit('waiting-for-input');
@@ -804,23 +813,23 @@ function setupProcessHandlers(process, socket, tempFiles) {
   process.on('close', (code) => {
     console.log(`✅ Process closed for socket ${socket.id} with exit code ${code}`);
     clearTimeout(inputTimeout);
-    
+
     cleanupFiles(tempFiles);
-    
+
     const success = code === 0;
     socket.emit('execution-result', {
       success: success,
       output: `\n[Program ${success ? 'completed successfully' : 'finished with exit code ' + code}]`,
       exitCode: code
     });
-    
+
     executionSessions.delete(socket.id);
   });
 
   process.on('error', (err) => {
     console.error(`❌ Process error for ${socket.id}:`, err);
     clearTimeout(inputTimeout);
-    
+
     cleanupFiles(tempFiles);
 
     let errorMessage = `Execution error: ${err.message}`;
@@ -833,7 +842,7 @@ function setupProcessHandlers(process, socket, tempFiles) {
       success: false,
       error: errorMessage
     });
-    
+
     executionSessions.delete(socket.id);
   });
 }
@@ -909,11 +918,19 @@ async function runCodeTest(language, code, input) {
         tempFiles.push(sourceFile, executable);
         break;
       }
-      
+
       case 'java': {
-        sourceFile = path.join(tempDir, 'Main.java');
-        const className = 'Main';
-        const classFile = path.join(tempDir, 'Main.class');
+        // Detect class name - prioritize public class
+        const publicClassMatch = cleanedCode.match(/public\s+class\s+(\w+)/);
+        const anyClassMatch = cleanedCode.match(/class\s+(\w+)/);
+
+        // If there's a public class, MUST use that name for the file
+        // Otherwise, use any class name found, or default to Main
+        let className = publicClassMatch ? publicClassMatch[1] :
+          (anyClassMatch ? anyClassMatch[1] : 'Main');
+
+        sourceFile = path.join(tempDir, `${className}.java`);
+        const classFile = path.join(tempDir, `${className}.class`);
 
         fs.writeFileSync(sourceFile, cleanedCode);
 
@@ -926,24 +943,24 @@ async function runCodeTest(language, code, input) {
         });
 
         await new Promise((resolve, reject) => {
-            compileProcess.on('error', (err) => reject(new Error(`javac not found. ${err.message}`)));
-            compileProcess.on('close', (code) => {
-                if (code !== 0) {
-                    reject(new Error(compileError || `Compilation failed with exit code ${code}`));
-                } else if (!fs.existsSync(classFile)) {
-                    reject(new Error('Compilation failed: Class file was not created'));
-                } else {
-                    resolve();
-                }
-            });
+          compileProcess.on('error', (err) => reject(new Error(`javac not found. ${err.message}`)));
+          compileProcess.on('close', (code) => {
+            if (code !== 0) {
+              reject(new Error(compileError || `Compilation failed with exit code ${code}`));
+            } else if (!fs.existsSync(classFile)) {
+              reject(new Error('Compilation failed: Class file was not created'));
+            } else {
+              resolve();
+            }
+          });
         });
-        
+
         runCommand = 'java';
         runArgs = ['-cp', tempDir, className];
         tempFiles.push(sourceFile, classFile);
         break;
       }
-      
+
       case 'javascript':
         sourceFile = path.join(tempDir, `${sessionId}.js`);
         fs.writeFileSync(sourceFile, cleanedCode);
@@ -951,7 +968,7 @@ async function runCodeTest(language, code, input) {
         runArgs = [sourceFile];
         tempFiles.push(sourceFile);
         break;
-      
+
       default:
         throw new Error(`Unsupported language: ${language}`);
     }
@@ -972,7 +989,7 @@ async function runCodeTest(language, code, input) {
       process.stdin.write(input);
       process.stdin.end();
     }
-    
+
     process.stdout.on('data', (data) => {
       stdout += data.toString();
     });
@@ -986,8 +1003,8 @@ async function runCodeTest(language, code, input) {
         resolve({ stdout, stderr, exitCode: code });
       });
       process.on('error', (err) => {
-          stderr += `Execution error: ${err.message}`;
-          resolve({ stdout: '', stderr, exitCode: 1 });
+        stderr += `Execution error: ${err.message}`;
+        resolve({ stdout: '', stderr, exitCode: 1 });
       });
       process.on('timeout', () => {
         timedOut = true;
@@ -996,17 +1013,17 @@ async function runCodeTest(language, code, input) {
         resolve({ stdout: '', stderr, exitCode: 1 });
       });
     });
-    
+
     if (timedOut) {
-        result.stderr = 'Execution timed out. Try to optimize your solution.';
-        result.exitCode = 1;
+      result.stderr = 'Execution timed out. Try to optimize your solution.';
+      result.exitCode = 1;
     }
 
     // CRITICAL: Throw an error if compilation or execution failed to be caught by problemController
     if (result.exitCode !== 0 && result.stderr) {
-        throw new Error(result.stderr);
+      throw new Error(result.stderr);
     }
-    
+
     return result;
 
   } catch (error) {
@@ -1022,7 +1039,7 @@ async function runCodeTest(language, code, input) {
 // --- Static File Serving (for production) ---
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/dist')));
-  
+
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
   });
@@ -1031,7 +1048,7 @@ if (process.env.NODE_ENV === 'production') {
 // --- Enhanced 404 Handler ---
 app.use('*', (req, res) => {
   console.log(`❌ Route not found: ${req.method} ${req.originalUrl}`);
-  res.status(404).json({ 
+  res.status(404).json({
     success: false,
     msg: 'Route not found',
     method: req.method,
@@ -1042,7 +1059,7 @@ app.use('*', (req, res) => {
 // --- Global Error Handler ---
 app.use((err, req, res, next) => {
   console.error('❌ Server Error:', err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     success: false,
     msg: 'Internal server error',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined

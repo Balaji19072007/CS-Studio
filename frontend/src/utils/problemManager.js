@@ -6,8 +6,19 @@ export class ProblemManager {
   static TOTAL_PROBLEMS = 1000;
 
   // Key generators 
+  // Key generators 
   static getProblemKey(problemId, suffix) {
-    return `problem_${problemId}_${suffix}`;
+    let userId = 'guest';
+    try {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const user = JSON.parse(userData);
+        userId = user.id || user.userId || 'guest';
+      }
+    } catch (e) {
+      // Ignore error
+    }
+    return `user_${userId}_problem_${problemId}_${suffix}`;
   }
 
   static getStartTimeKey(problemId) { // Used for current session's start time
@@ -414,5 +425,6 @@ for (let i = 1; i <= ProblemManager.TOTAL_PROBLEMS; i++) {
 }
 
 // Initialize all problems on first load (uses safe check inside the method)
-ProblemManager.initializeAllProblems();
+// Initialize all problems on first load (uses safe check inside the method)
+// ProblemManager.initializeAllProblems(); // DISABLED: Lazy init is better for performance and multi-user storage management
 

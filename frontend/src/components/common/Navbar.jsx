@@ -456,8 +456,8 @@ const Navbar = () => {
                                 <Link
                                     to="/notifications"
                                     className={`block text-center text-sm font-medium transition-colors ${isDark
-                                            ? 'text-primary-400 hover:text-primary-300'
-                                            : 'text-primary-600 hover:text-primary-700'
+                                        ? 'text-primary-400 hover:text-primary-300'
+                                        : 'text-primary-600 hover:text-primary-700'
                                         }`}
                                     onClick={() => setIsNotificationsOpen(false)}
                                 >
@@ -491,7 +491,8 @@ const Navbar = () => {
         <>
 
             {/* 1. TOP NAVBAR (STATIC) */}
-            <nav className={`${isDark ? 'dark-gradient' : 'bg-white shadow-lg'} fixed top-0 left-0 w-full z-50 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+            <nav className={`${isDark ? 'dark-gradient' : 'bg-white shadow-lg'} fixed top-0 left-0 w-full z-50 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} ${isLoggedIn ? 'hidden sm:block' : ''}`}>
+
                 {/* Main Flex Container */}
                 <div className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
 
@@ -576,9 +577,23 @@ const Navbar = () => {
                                             >
                                                 {user && (
                                                     <>
-                                                        <div className="px-4 py-3 rounded-t-2xl" style={{ backgroundColor: isDark ? 'rgba(55, 65, 81, 0.5)' : '#f9fafb' }}>
-                                                            <p className="text-sm font-medium">{user.name}</p>
-                                                            <p className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>{user.email}</p>
+                                                        <div className="flex items-center gap-3 px-4 py-3 rounded-t-2xl" style={{ backgroundColor: isDark ? 'rgba(55, 65, 81, 0.5)' : '#f9fafb' }}>
+                                                            {/* Theme Toggle Icon in Header */}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleThemeToggle();
+                                                                }}
+                                                                className={`p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-gray-700 text-yellow-500' : 'hover:bg-gray-200 text-gray-500'}`}
+                                                                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                                            >
+                                                                <i data-feather={isDark ? 'sun' : 'moon'} className="w-5 h-5"></i>
+                                                            </button>
+
+                                                            <div>
+                                                                <p className="text-sm font-medium">{user.name}</p>
+                                                                <p className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>{user.email}</p>
+                                                            </div>
                                                         </div>
                                                         <div className="py-1">
                                                             <Link
@@ -698,9 +713,20 @@ const Navbar = () => {
                                                 <div className="h-12 w-12 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white overflow-hidden shadow-lg">
                                                     {renderAvatar()}
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className={`text-base font-semibold truncate ${mobileTextClass}`}>{user.name}</p>
-                                                    <p className={`text-sm truncate ${mobileSecondaryTextClass}`}>{user.email}</p>
+                                                <div className="flex-1 min-w-0 flex items-center gap-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleThemeToggle();
+                                                        }}
+                                                        className={`p-1.5 rounded-lg transition-all active:scale-95 flex-shrink-0 ${isDark ? 'bg-gray-800 text-yellow-400' : 'bg-gray-100 text-gray-500'}`}
+                                                    >
+                                                        <i data-feather={isDark ? 'sun' : 'moon'} className="w-4 h-4"></i>
+                                                    </button>
+                                                    <div className="min-w-0">
+                                                        <p className={`text-base font-semibold truncate ${mobileTextClass}`}>{user.name}</p>
+                                                        <p className={`text-sm truncate ${mobileSecondaryTextClass}`}>{user.email}</p>
+                                                    </div>
                                                 </div>
                                                 {/* Mobile Notification Bell */}
                                                 {isLoggedIn && (
@@ -764,26 +790,6 @@ const Navbar = () => {
                                         </div>
                                     )}
 
-                                    {/* Theme Toggle */}
-                                    <div className={`p-4 border-t ${mobileBorderClass}`}>
-                                        <button
-                                            onClick={handleThemeToggle}
-                                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors duration-200 group ${mobileCardBgClass} ${mobileHoverBgClass}`}
-                                        >
-                                            <div className="flex items-center">
-                                                <i data-feather={themeIcon} className={`w-5 h-5 mr-3 ${isDark ? 'text-yellow-400' : 'text-yellow-500'}`}></i>
-                                                <span className={`group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
-                                                    }`}>
-                                                    {isDark ? 'Light Mode' : 'Dark Mode'}
-                                                </span>
-                                            </div>
-                                            <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${isDark ? 'bg-primary-500' : 'bg-gray-300'
-                                                }`}>
-                                                <div className={`w-5 h-5 bg-white rounded-full transform transition-transform duration-200 ${isDark ? 'translate-x-7' : 'translate-x-1'
-                                                    }`}></div>
-                                            </div>
-                                        </button>
-                                    </div>
                                 </div>
 
                                 {/* Footer Actions */}

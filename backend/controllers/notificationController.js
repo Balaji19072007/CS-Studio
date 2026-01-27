@@ -3,32 +3,26 @@ const Notification = require('../models/Notification');
 const NotificationService = require('../util/notificationService');
 
 // Get all notifications for authenticated user
+// Get all notifications for authenticated user
 exports.getNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
 
-    const query = { user: userId };
-    if (unreadOnly === 'true') {
-      query.read = false;
-    }
-
-    const notifications = await Notification.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .lean();
-
-    const total = await Notification.countDocuments(query);
+    const result = await Notification.getNotifications(userId, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      unreadOnly: unreadOnly === 'true'
+    });
 
     res.json({
       success: true,
-      data: notifications,
+      data: result.notifications,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
+        total: result.total,
+        pages: Math.ceil(result.total / limit)
       }
     });
   } catch (error) {
@@ -41,14 +35,15 @@ exports.getNotifications = async (req, res) => {
   }
 };
 
+
 // Get unread notifications count
 exports.getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    const count = await Notification.countDocuments({ 
-      user: userId, 
-      read: false 
+
+    const count = await Notification.countDocuments({
+      user: userId,
+      read: false
     });
 
     res.json({

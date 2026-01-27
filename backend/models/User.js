@@ -96,6 +96,33 @@ class User {
         }
     }
 
+    static async countDocuments(criteria = {}) {
+        return this.count(criteria);
+    }
+
+    static async findByIdAndUpdate(id, update, options = {}) {
+        try {
+            if (!id) return null;
+            const docRef = doc(db, 'users', id);
+
+            // Filter undefined
+            Object.keys(update).forEach(key => update[key] === undefined && delete update[key]);
+
+            await updateDoc(docRef, update);
+
+            // If new: true is requested, return updated doc
+            if (options && options.new) {
+                const d = await getDoc(docRef);
+                return new User({ id: d.id, ...d.data() });
+            }
+            return null;
+        } catch (error) {
+            console.error('User.findByIdAndUpdate error:', error);
+            return null;
+        }
+    }
+
+
     async save() {
         const data = { ...this };
         delete data.id;

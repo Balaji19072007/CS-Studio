@@ -55,7 +55,9 @@ module.exports = (io) => {
 
                 socket.emit('waiting-for-input');
 
-                const child = spawn(cmd, args, { cwd: TEMP_DIR });
+                // For Java, we need to run from the java directory
+                const execCwd = language.toLowerCase() === 'java' ? path.dirname(srcFile) : TEMP_DIR;
+                const child = spawn(cmd, args, { cwd: execCwd });
 
                 // Store process for input/stop handling
                 activeExecutions.set(socket.id, { process: child, tempFiles });
@@ -131,6 +133,7 @@ function prepareExecution(language, code, sessionId) {
             break;
 
         case 'javascript':
+        case 'js':
             srcFile = path.join(TEMP_DIR, `${sessionId}.js`);
             fs.writeFileSync(srcFile, cleanedCode);
             cmd = 'node';
@@ -182,18 +185,20 @@ function prepareExecution(language, code, sessionId) {
 
         case 'java':
             // Java is tricky because class name must match file name. 
-            // We assume public class Main or we parse it. For simplicity, force Main.
-            // But multiple concurrent users can't overwrite Main.java. 
-            // Solution: Create a unique directory for Java execution.
+            // Detect the class name from the code
+            const classMatch = cleanedCode.match(/(?:public\s+)?class\s+(\w+)/);
+            const className = classMatch ? classMatch[1] : 'Main';
+
+            // Create a unique directory for Java execution
             const javaDir = path.join(TEMP_DIR, sessionId);
             fs.mkdirSync(javaDir);
-            srcFile = path.join(javaDir, 'Main.java');
-            fs.writeFileSync(srcFile, cleanedCode); // User must use "public class Main"
+            srcFile = path.join(javaDir, `${className}.java`);
+            fs.writeFileSync(srcFile, cleanedCode);
 
-            // We run inside the unique directory
+            // We run inside the unique directory with proper classpath
             cmd = 'java';
-            // Classpath is . 
-            args = ['Main'];
+            // Add -cp argument to specify classpath as current directory
+            args = ['-cp', '.', className];
 
             // Special return for Java to indicate explicit files/dirs to cleanup
             return {

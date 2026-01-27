@@ -24,25 +24,25 @@ class CodeExecutionService {
 
     try {
       console.log(`⚡ Executing ${language} code (${sessionId})`);
-      
+
       switch (language.toLowerCase()) {
         case 'python':
           return await this.executePython(code, input, sessionId);
-        
+
         case 'c':
           return await this.executeC(code, input, sessionId);
-        
+
         case 'cpp':
         case 'c++':
           return await this.executeCpp(code, input, sessionId);
-        
+
         case 'java':
           return await this.executeJava(code, input, sessionId);
-        
+
         case 'javascript':
         case 'js':
           return await this.executeJavaScript(code, input, sessionId);
-        
+
         default:
           throw new Error(`Unsupported language: ${language}`);
       }
@@ -80,7 +80,7 @@ class CodeExecutionService {
     return new Promise((resolve) => {
       const sourceFile = path.join(this.tempDir, `${sessionId}.c`);
       const executable = path.join(this.tempDir, `${sessionId}${process.platform === 'win32' ? '.exe' : ''}`);
-      
+
       fs.writeFileSync(sourceFile, code);
 
       // Compile C code
@@ -129,7 +129,7 @@ class CodeExecutionService {
     return new Promise((resolve) => {
       const sourceFile = path.join(this.tempDir, `${sessionId}.cpp`);
       const executable = path.join(this.tempDir, `${sessionId}${process.platform === 'win32' ? '.exe' : ''}`);
-      
+
       fs.writeFileSync(sourceFile, code);
 
       // Compile C++ code
@@ -176,13 +176,34 @@ class CodeExecutionService {
    */
   async executeJava(code, input, sessionId) {
     return new Promise((resolve) => {
-      const sourceFile = path.join(this.tempDir, 'Main.java');
+      // Use standard temp directory for the service
+      if (!fs.existsSync(this.tempDir)) {
+        fs.mkdirSync(this.tempDir, { recursive: true });
+      }
+
+      const runDir = path.join(this.tempDir, sessionId);
+      if (!fs.existsSync(runDir)) {
+        fs.mkdirSync(runDir, { recursive: true });
+      }
+
+      // Detect class name - prioritize public class
+      const publicClassMatch = code.match(/public\s+class\s+(\w+)/);
+      const anyClassMatch = code.match(/class\s+(\w+)/);
+
+      // If there's a public class, MUST use that name for the file
+      // Otherwise, use any class name found, or default to Main
+      let className = publicClassMatch ? publicClassMatch[1] :
+        (anyClassMatch ? anyClassMatch[1] : 'Main');
+
+      const sourceFile = path.join(runDir, `${className}.java`);
+      const classFile = path.join(runDir, `${className}.class`);
+
       fs.writeFileSync(sourceFile, code);
 
       // Compile Java code
       const compileProcess = spawn('javac', [sourceFile], {
         timeout: 15000,
-        cwd: this.tempDir
+        cwd: runDir
       });
 
       let compileError = '';
@@ -193,7 +214,7 @@ class CodeExecutionService {
 
       compileProcess.on('close', (exitCode) => {
         if (exitCode !== 0) {
-          this.cleanupFiles([sourceFile]);
+          // Cleanup handled by caller or final cleanup
           return resolve({
             success: false,
             output: '',
@@ -202,28 +223,35 @@ class CodeExecutionService {
           });
         }
 
-        const classFile = path.join(this.tempDir, 'Main.class');
         if (!fs.existsSync(classFile)) {
-          this.cleanupFiles([sourceFile]);
-          return resolve({
-            success: false,
-            output: '',
-            error: 'Java Compilation failed: Class file was not created',
-            executionTime: 0
-          });
+          // Try to find ANY .class file if the specific one is missing
+          const generatedClass = fs.readdirSync(runDir).find(f => f.endsWith('.class'));
+          if (generatedClass) {
+            className = path.basename(generatedClass, '.class');
+          } else {
+            return resolve({
+              success: false,
+              output: '',
+              error: 'Java Compilation failed: Class file was not created. Ensure your class name matches the filename or use public class Main.',
+              executionTime: 0
+            });
+          }
         }
 
         // Execute Java program
-        const javaProcess = spawn('java', ['-cp', this.tempDir, 'Main'], {
+        const javaProcess = spawn('java', ['-cp', runDir, className], {
           timeout: 10000,
-          cwd: this.tempDir
+          cwd: runDir
         });
 
-        this.handleProcessExecution(javaProcess, input, sessionId, [sourceFile, classFile], resolve);
+        this.handleProcessExecution(javaProcess, input, sessionId, [sourceFile, runDir], resolve, {
+          runDir,
+          runCommand: 'java',
+          runArgs: ['-cp', runDir, className]
+        });
       });
 
       compileProcess.on('error', (err) => {
-        this.cleanupFiles([sourceFile]);
         resolve({
           success: false,
           output: '',
@@ -253,7 +281,7 @@ class CodeExecutionService {
   /**
    * Common process execution handler
    */
-  handleProcessExecution(process, input, sessionId, tempFiles, resolve) {
+  handleProcessExecution(process, input, sessionId, tempFiles, resolve, debugInfo = null) {
     const startTime = Date.now();
     let output = '';
     let errorOutput = '';
@@ -272,15 +300,27 @@ class CodeExecutionService {
       errorOutput += data.toString();
     });
 
-    process.on('close', (exitCode) => {
+    process.on('close', (code) => {
       const executionTime = Date.now() - startTime;
-      this.cleanupFiles(tempFiles);
+      // DISABLED CLEANUP FOR DEBUGGING
+      // this.cleanupFiles(tempFiles);
+      console.log('Skipping cleanup for debug');
 
-      if (exitCode !== 0 || errorOutput) {
+      if (code !== 0 || errorOutput) {
+        // INJECT DEBUG INFO HERE if available
+        let debugStr = '';
+        if (debugInfo && debugInfo.runDir) {
+          try {
+            const files = fs.existsSync(debugInfo.runDir) ? fs.readdirSync(debugInfo.runDir).join(', ') : 'N/A';
+            debugStr = `\n[DEBUG Info]\nRunDir: ${debugInfo.runDir}\nFiles: ${files}\nCommand: ${debugInfo.runCommand} ${debugInfo.runArgs.join(' ')}\n`;
+          } catch (e) {
+            debugStr = `\n[DEBUG Info]\nError reading debug info: ${e.message}\n`;
+          }
+        }
         resolve({
           success: false,
           output: output,
-          error: errorOutput || `Process exited with code ${exitCode}`,
+          error: (errorOutput || `Process exited with code ${code}`) + debugStr,
           executionTime: executionTime
         });
       } else {

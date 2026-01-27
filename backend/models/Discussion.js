@@ -22,10 +22,11 @@ class Discussion {
         try {
             const discussionsRef = collection(db, 'discussions');
             const snapshot = await getDocs(discussionsRef);
+            if (snapshot.empty) return [];
             return snapshot.docs.map(d => new Discussion({ id: d.id, ...d.data() }));
         } catch (error) {
             console.error('Discussion.find error:', error);
-            throw error;
+            return [];
         }
     }
 

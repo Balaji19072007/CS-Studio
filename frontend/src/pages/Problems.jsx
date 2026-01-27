@@ -50,12 +50,24 @@ const Problems = () => {
             try {
                 const data = await fetchAllProblems();
                 if (isMounted) {
+                    // Backend now provides 'status' based on user progress. 
+                    // We trust backend for status to ensure multi-user isolation.
+                    // ProblemManager (local storage) is secondary/cache but can be stale or wrong across users.
+
                     const problemsWithStatus = data.map(p => ({
                         ...p,
-                        status: getStatus(p)
+                        // Use backend status if available and not 'todo' (or always if we trust it completely)
+                        // If backend says 'todo' but local says 'solved', we have a conflict.
+                        // Given the requirement, BACKEND IS TRUTH.
+                        status: p.status || 'todo'
                     }));
 
-                    setAllProblems(problemsWithStatus);
+                    // Deduplicate problems just in case backend or strict mode causes issues
+                    const uniqueProblems = problemsWithStatus.filter((prob, index, self) =>
+                        index === self.findIndex((p) => p.problemId === prob.problemId)
+                    );
+
+                    setAllProblems(uniqueProblems);
                     setIsLoading(false);
                 }
             } catch (err) {
@@ -96,7 +108,12 @@ const Problems = () => {
         return problems.filter(problem => {
             const matchesDifficulty = currentFilters.difficulty === 'All' || problem.difficulty === currentFilters.difficulty;
             const matchesLanguage = currentFilters.language === 'All' || problem.language === currentFilters.language;
-            const matchesSearch = problem.title.toLowerCase().includes(currentFilters.search.toLowerCase());
+
+            const searchLower = currentFilters.search.toLowerCase();
+            const matchesSearch = !searchLower ||
+                problem.title.toLowerCase().includes(searchLower) ||
+                (problem.tags && problem.tags.some(tag => tag.toLowerCase().includes(searchLower))) ||
+                (problem.difficulty && problem.difficulty.toLowerCase().includes(searchLower));
 
             return matchesDifficulty && matchesLanguage && matchesSearch;
         });
@@ -166,78 +183,77 @@ const Problems = () => {
 
     return (
         <div className="min-h-screen dark-gradient-secondary">
-            {/* Hero Section */}
-            <div className="gradient-bg text-white relative overflow-hidden">
-                <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{
-                    backgroundImage: 'radial-gradient(circle at center, #0ea5e940 0%, transparent 70%)',
-                }}></div>
+            {/* Hero Section - Minimal */}
+            <div className="pt-24 pb-12 relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 className="text-4xl font-bold tracking-tight text-white mb-6">
+                        Sharpen Your <span className="text-primary-500">Coding Skills</span>
+                    </h1>
+                    <p className="max-w-2xl mx-auto text-lg text-gray-400 mb-10">
+                        Tackle our collection of {allProblems.length} language-agnostic coding challenges.
+                    </p>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-                    <div className="text-center">
-                        <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl">
-                            <span className="block">Sharpen Your</span>
-                            <span className="block text-primary-400">Coding Skills</span>
-                        </h1>
-                        <p className="mt-4 text-xl max-w-3xl mx-auto text-gray-300">
-                            Tackle our collection of {allProblems.length} language-agnostic coding challenges. Filter by difficulty, topic, or language to find your next goal!
-                        </p>
-                        <div className="mt-10 flex justify-center">
-                            <div className="inline-flex rounded-md shadow-xl">
-                                <Link
-                                    to="/solve?problemId=1"
-                                    onClick={(e) => handleSolveClick(1, e)}
-                                    className="dark-btn inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white transition-all duration-300 transform hover:scale-105"
-                                >
-                                    <i data-feather="terminal" className="w-5 h-5 mr-2"></i>
-                                    Try First Problem
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
+                    <Link
+                        to="/solve?problemId=1"
+                        onClick={(e) => handleSolveClick(1, e)}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 hover:bg-gray-100 rounded-full font-semibold transition-all duration-300 transform hover:scale-105"
+                    >
+                        <i data-feather="terminal" className="w-4 h-4 text-gray-900"></i>
+                        Try First Problem
+                    </Link>
                 </div>
             </div>
 
-            {/* Main Content & Filters - REMOVED Progress Overview Box - ADJUSTED MARGIN */}
-            {/* The -mt-16 needs to be removed/adjusted since the large component is gone */}
+            {/* Main Content & Filters */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-20">
 
-                {/* --- REMOVED: Your Progress Overview Box --- */}
+                {/* Filters and Search - Minimal */}
+                <div className="mb-10 flex flex-col md:flex-row items-end md:items-center justify-between gap-6 pb-6 border-b border-gray-800">
 
-                {/* Filters and Search - ADDED mb-6 for spacing */}
-                <div className="mb-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
-                    <div className="lg:col-span-2">
-                        <SearchBar onSearch={handleSearch} placeholder="Search by problem title..." />
+                    {/* Search Box - Minimal Underline */}
+                    <div className="relative w-full md:w-96 order-2 md:order-1">
+                        <input
+                            type="text"
+                            placeholder="Search problems..."
+                            className="w-full bg-transparent border-b border-gray-700 px-0 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
+                            value={filters.search}
+                            onChange={(e) => handleSearch(e.target.value)}
+                        />
+                        <i data-feather="search" className="absolute right-0 top-2.5 w-4 h-4 text-gray-500"></i>
                     </div>
 
-                    {/* Difficulty Filter */}
-                    <div className="relative group">
-                        <select
-                            className="filter-dropdown"
-                            value={filters.difficulty}
-                            onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-                        >
-                            {FILTER_OPTIONS.difficulty.map(option => (
-                                <option key={option} value={option}>{option} Difficulty</option>
-                            ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400 group-hover:text-primary-400 transition-colors">
-                            <i data-feather="chevron-down" className="w-5 h-5"></i>
+                    {/* Filters */}
+                    <div className="flex items-center gap-4 w-full md:w-auto order-1 md:order-2 overflow-x-auto pb-2 md:pb-0">
+                        {/* Difficulty Filter */}
+                        <div className="relative">
+                            <select
+                                className="appearance-none bg-transparent text-gray-300 py-2 pl-3 pr-8 rounded-lg cursor-pointer focus:outline-none hover:text-white transition-colors text-sm font-medium"
+                                value={filters.difficulty}
+                                onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+                            >
+                                {FILTER_OPTIONS.difficulty.map(option => (
+                                    <option key={option} value={option} className="bg-gray-800 text-white">{option === 'All' ? 'All Difficulties' : option}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                                <i data-feather="chevron-down" className="w-4 h-4"></i>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Language Filter */}
-                    <div className="relative group">
-                        <select
-                            className="filter-dropdown"
-                            value={filters.language}
-                            onChange={(e) => handleFilterChange('language', e.target.value)}
-                        >
-                            {FILTER_OPTIONS.language.map(option => (
-                                <option key={option} value={option}>{option} Language</option>
-                            ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400 group-hover:text-primary-400 transition-colors">
-                            <i data-feather="chevron-down" className="w-5 h-5"></i>
+                        {/* Language Filter */}
+                        <div className="relative">
+                            <select
+                                className="appearance-none bg-transparent text-gray-300 py-2 pl-3 pr-8 rounded-lg cursor-pointer focus:outline-none hover:text-white transition-colors text-sm font-medium"
+                                value={filters.language}
+                                onChange={(e) => handleFilterChange('language', e.target.value)}
+                            >
+                                {FILTER_OPTIONS.language.map(option => (
+                                    <option key={option} value={option} className="bg-gray-800 text-white">{option === 'All' ? 'All Languages' : option}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                                <i data-feather="chevron-down" className="w-4 h-4"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -248,10 +264,20 @@ const Problems = () => {
                 ) : error ? (
                     <div className="text-center text-red-400 mt-10 p-8 bg-gray-800 rounded-xl border border-red-900/50">{error}</div>
                 ) : filteredProblems.length === 0 ? (
-                    <div className="text-center text-gray-400 mt-10 p-8 bg-gray-800 rounded-xl border border-gray-700/50">
-                        <i data-feather="search" className="w-8 h-8 mx-auto mb-4"></i>
-                        <p className="text-lg font-semibold">No problems found matching your criteria.</p>
-                        <p className="text-sm">Try resetting your filters or adjusting your search term.</p>
+                    <div className="text-center py-20">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-800 mb-4">
+                            <i data-feather="search" className="w-8 h-8 text-gray-500"></i>
+                        </div>
+                        <h3 className="text-xl font-medium text-white mb-2">No problems found</h3>
+                        <p className="text-gray-400 max-w-sm mx-auto">
+                            We couldn't find any problems matches "{filters.search}". Try adjusting your filters or search terms.
+                        </p>
+                        <button
+                            onClick={() => setFilters({ difficulty: 'All', language: 'All', search: '' })}
+                            className="mt-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-white transition-colors"
+                        >
+                            Clear all filters
+                        </button>
                     </div>
                 ) : (
                     <div className="space-y-4">

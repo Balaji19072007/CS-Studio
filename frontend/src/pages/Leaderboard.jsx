@@ -143,13 +143,13 @@ const LeaderboardTableRow = ({ user, index }) => {
     const isCurrentUser = currentUser && user._id === currentUser.id;
 
     const rowClass = isCurrentUser
-        ? 'bg-primary-500/20 border-l-4 border-primary-400'
-        : 'hover:bg-gray-800/50';
+        ? 'bg-primary-50 border-l-4 border-primary-500 dark:bg-primary-900/20 dark:border-primary-400'
+        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50';
 
     const rank = user.rank || index + 1; // Correct rank passed from parent
 
     return (
-        <tr className={`bg-gray-900 border-b border-gray-700/50 transition-colors duration-200 ${rowClass}`}>
+        <tr className={`bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700/50 transition-colors duration-200 ${rowClass}`}>
             <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium">
                 <div className={`flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full ${rank <= 3 ? 'bg-yellow-500 text-black font-bold' :
                     'bg-gray-700 text-gray-300'
@@ -184,7 +184,7 @@ const LeaderboardTableRow = ({ user, index }) => {
                         </div>
                     )}
                     <div>
-                        <div className={`font-medium ${isCurrentUser ? 'text-primary-400' : 'text-white'}`}>
+                        <div className={`font-medium ${isCurrentUser ? 'text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white'}`}>
                             {user.name || user.username}
                         </div>
                         {user.username && (
@@ -218,48 +218,53 @@ const LeaderboardMobileCard = ({ user, rank }) => {
     const initials = generateInitials(user.name || user.username);
 
     return (
-        <div className={`p-4 rounded-xl border ${isCurrentUser
-            ? 'bg-primary-900/20 border-primary-500/50'
-            : 'bg-gray-800/50 border-gray-700/50'
-            } flex items-center gap-4`}>
-            {/* Rank */}
-            <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${rank <= 3 ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-gray-300'
-                }`}>
-                {rank}
-            </div>
+        <div className={`flex items-center justify-between p-3 rounded-lg border mb-2 transition-all ${isCurrentUser
+            ? 'bg-primary-900/10 border-primary-500/30'
+            : 'bg-gray-800/40 border-gray-700/30'
+            }`}>
 
-            {/* Avatar */}
-            <div className="flex-shrink-0 relative">
-                {user.photoUrl ? (
-                    <img
-                        src={user.photoUrl}
-                        alt={user.name}
-                        className="w-10 h-10 rounded-full object-cover border border-gray-600"
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                            const fallback = e.target.parentElement.querySelector('.avatar-fallback');
-                            if (fallback) fallback.classList.remove('hidden');
-                        }}
-                    />
-                ) : null}
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm avatar-fallback ${user.photoUrl ? 'hidden' : ''
-                    } ${isCurrentUser ? 'bg-primary-900/50 text-primary-200' : 'bg-gray-700 text-gray-300'}`}>
-                    {initials}
+            <div className="flex items-center gap-3 overflow-hidden">
+                {/* Rank */}
+                <span className={`flex-shrink-0 w-6 text-center font-bold text-sm ${rank <= 3 ? 'text-yellow-500' : 'text-gray-500'}`}>
+                    #{rank}
+                </span>
+
+                {/* Avatar */}
+                <div className="flex-shrink-0 relative">
+                    {user.photoUrl ? (
+                        <img
+                            src={user.photoUrl}
+                            alt={user.name}
+                            className={`w-9 h-9 rounded-full object-cover border ${isCurrentUser ? 'border-primary-500' : 'border-gray-600'}`}
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                const fallback = e.target.parentElement.querySelector('.avatar-fallback');
+                                if (fallback) fallback.classList.remove('hidden');
+                            }}
+                        />
+                    ) : null}
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs avatar-fallback ${user.photoUrl ? 'hidden' : ''
+                        } ${isCurrentUser ? 'bg-primary-900/50 text-primary-200' : 'bg-gray-700 text-gray-300'}`}>
+                        {initials}
+                    </div>
                 </div>
-            </div>
 
-            {/* Info */}
-            <div className="flex-grow min-w-0">
-                <div className="flex items-center gap-2">
-                    <h3 className={`font-medium truncate ${isCurrentUser ? 'text-primary-400' : 'text-white'}`}>
+                {/* Name */}
+                <div className="min-w-0 pr-2">
+                    <h3 className={`text-sm font-semibold truncate ${isCurrentUser ? 'text-primary-400' : 'text-white'}`}>
                         {user.name || user.username}
                     </h3>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
-                    <span>{user.problemsSolved || 0} Solved</span>
-                    <span>•</span>
-                    <span className="text-yellow-500">{user.totalPoints || 0} Pts</span>
-                </div>
+            </div>
+
+            {/* Stats - Right Aligned */}
+            <div className="flex flex-col items-end flex-shrink-0">
+                <span className="text-sm font-bold text-yellow-500">
+                    {user.totalPoints || user.points || 0}
+                </span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wide">
+                    {user.problemsSolved || user.solved || 0} Solved
+                </span>
             </div>
         </div>
     );
@@ -406,10 +411,10 @@ const Leaderboard = () => {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-6 md:py-12 pb-24 md:pb-12">
                 {/* Controls and Stats */}
-                <div className="bg-gray-900 rounded-xl shadow-lg p-4 md:p-6 mb-8 border border-gray-700/50">
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4 md:p-6 mb-8 border border-gray-200 dark:border-gray-700/50">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="mb-2 md:mb-0">
-                            <h2 className="text-xl md:text-2xl font-bold text-white">Global Rankings</h2>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Global Rankings</h2>
                         </div>
                         <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto">
                             <div className="relative flex-1 group">
@@ -497,13 +502,13 @@ const Leaderboard = () => {
                 {!isLoading && !error && usersToList.length > 0 && (
                     <>
                         {/* Desktop Table View */}
-                        <div className="hidden md:block bg-gray-900 rounded-xl shadow-lg overflow-hidden border border-gray-700/50">
-                            <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/50">
-                                <h3 className="text-lg md:text-xl font-bold text-white">Full Rankings</h3>
+                        <div className="hidden md:block bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700/50">
+                            <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-200 dark:border-gray-700/50">
+                                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Full Rankings</h3>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-700/50">
-                                    <thead className="bg-gray-800">
+                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50">
+                                    <thead className="bg-gray-50 dark:bg-gray-800">
                                         <tr>
                                             <th scope="col" className="px-2 md:px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
                                                 Rank
@@ -550,7 +555,7 @@ const Leaderboard = () => {
                         </div>
 
                         {/* Pagination Controls */}
-                        <div className="flex justify-end items-center mt-6 space-x-2">
+                        <div className="flex justify-center items-center mt-6 space-x-2">
                             <button
                                 onClick={prevPage}
                                 disabled={currentPage === 1}
@@ -580,15 +585,7 @@ const Leaderboard = () => {
             </div>
 
             {/* Footer */}
-            <footer className="dark-gradient mt-16 border-t border-gray-700/50">
-                <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <p className="text-base text-gray-400">
-                            &copy; 2023 CS Studio. All rights reserved.
-                        </p>
-                    </div>
-                </div>
-            </footer>
+
         </div>
     );
 };

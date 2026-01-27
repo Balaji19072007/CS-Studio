@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import * as feather from 'feather-icons';
+import {
+    Activity,
+    CheckCircle,
+    Flame,
+    Check,
+    Play,
+    PlayCircle,
+    ArrowRight,
+    BarChart2,
+    BookOpen,
+    Clock,
+    Target,
+    Compass,
+    ChevronRight
+} from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { fetchUserRank } from '../api/leaderboardApi.js';
 import { fetchDailyProblem, fetchRecommendedProblems } from '../api/problemApi.js';
@@ -22,8 +36,8 @@ const ActivityGraph = ({ history }) => {
 
     if (history) {
         history.forEach(item => {
-            if (item.status === 'solved' && item.lastSubmission) {
-                const dateObj = new Date(item.lastSubmission);
+            if (item.status === 'solved' && item.solvedAt) {
+                const dateObj = new Date(item.solvedAt);
                 if (!isNaN(dateObj.getTime())) {
                     const itemDate = dateObj.toISOString().split('T')[0];
                     const dayStat = last7Days.find(d => d.date === itemDate);
@@ -55,7 +69,7 @@ const ActivityGraph = ({ history }) => {
             <div className="flex justify-between items-center mb-6 relative z-10">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                     <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
-                        <i data-feather="activity" className="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                        <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     Activity
                 </h2>
@@ -133,41 +147,57 @@ const UserHomePage = () => {
     const [recommendedProblems, setRecommendedProblems] = useState([]);
     const [userHistory, setUserHistory] = useState([]);
 
-    // Mock Data for "Current Course"
-    const currentCourse = {
-        title: 'Full Stack Web Development',
-        progress: 35,
-        currentModule: 'React Hooks & Context',
-        coverImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' // React Image
-    };
+    // Mock Data for "Current Course" - DISABLED to prevent confusion
+    const currentCourse = null;
 
     useEffect(() => {
         const loadData = async () => {
             try {
                 const token = localStorage.getItem('token');
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const cacheKey = `dashboard_data_v2_${user.uid || user.id}`;
 
-                // 1. Fetch Rank
+                const shouldInvalidate = sessionStorage.getItem('invalidate_dashboard_cache');
+                if (shouldInvalidate) {
+                    sessionStorage.removeItem(cacheKey);
+                    sessionStorage.removeItem('invalidate_dashboard_cache');
+                }
+
+                const cachedData = sessionStorage.getItem(cacheKey);
+                if (cachedData && !shouldInvalidate) {
+                    const data = JSON.parse(cachedData);
+                    const now = new Date().getTime();
+                    if (now - data.timestamp < 5 * 60 * 1000) {
+                        setRankData(data.rankData);
+                        setUserStats(data.userStats);
+                        setDifficultyStats(data.difficultyStats);
+                        setDailyProblem(data.dailyProblem);
+                        setRecommendedProblems(data.recommendedProblems);
+                        setUserHistory(data.userHistory);
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                let rData = null;
                 try {
-                    const rData = await fetchUserRank();
+                    rData = await fetchUserRank();
                     setRankData(rData);
-                } catch (e) { console.log("Rank fetch failed usually means unranked or error", e); }
+                } catch (e) { }
 
-                // 2. Fetch User Stats
+                let sData = null;
                 if (token) {
                     const pStatsRes = await fetch('/api/progress/user-stats', { headers });
                     if (pStatsRes.ok) {
-                        const sData = await pStatsRes.json();
+                        sData = await pStatsRes.json();
                         if (sData.success) {
-                            setUserStats(sData.progressStats); // Contains summary counts
+                            setUserStats(sData.progressStats);
                             setDifficultyStats(sData.difficultyBreakdown);
-                            // Merge userStats summary (contains currentStreak)
                             setUserStats(prev => ({ ...prev, ...sData.userStats }));
                         }
                     }
                 }
 
-                // 3. Fetch Optimized Data (Daily & Recommended)
                 const [daily, recommended, historyRes] = await Promise.all([
                     fetchDailyProblem().catch(e => null),
                     fetchRecommendedProblems().catch(e => []),
@@ -177,13 +207,24 @@ const UserHomePage = () => {
                 setDailyProblem(daily);
                 setRecommendedProblems(recommended);
 
-                // History for Graph
+                let hDataList = [];
                 if (historyRes && historyRes.ok) {
                     const hData = await historyRes.json();
                     if (hData.success) {
-                        setUserHistory(hData.history);
+                        hDataList = hData.history;
+                        setUserHistory(hDataList);
                     }
                 }
+
+                sessionStorage.setItem(cacheKey, JSON.stringify({
+                    timestamp: new Date().getTime(),
+                    rankData: rData,
+                    userStats: sData ? { ...sData.progressStats, ...sData.userStats } : null,
+                    difficultyStats: sData ? sData.difficultyBreakdown : null,
+                    dailyProblem: daily,
+                    recommendedProblems: recommended,
+                    userHistory: hDataList
+                }));
 
             } catch (error) {
                 console.warn("Failed to load dashboard data:", error);
@@ -197,12 +238,6 @@ const UserHomePage = () => {
         }
     }, [user]);
 
-    useEffect(() => {
-        if (!loading && typeof feather !== 'undefined' && feather.replace) {
-            feather.replace();
-        }
-    });
-
     const getGreeting = () => {
         const hour = new Date().getHours();
         if (hour < 12) return 'Good Morning';
@@ -213,192 +248,250 @@ const UserHomePage = () => {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#0f111a] pt-6 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0f111a] pt-6 sm:pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
                 {/* --- HEADER --- */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
-                    <div>
-                        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight mb-2">
-                            {getGreeting()}, <span className="text-blue-600 dark:text-blue-500">{user.firstName || user.name || 'Developer'}</span>!
+                <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-3 sm:gap-4 pb-4 sm:pb-6 md:pb-8 border-b border-gray-200 dark:border-gray-800 text-center md:text-left">
+                    <div className="space-y-1 sm:space-y-2">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight">
+                            {getGreeting()}, <span className="text-blue-600 dark:text-blue-500">{user.name || (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName) || 'Developer'}</span>!
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-400 text-lg">Ready to push your limits today?</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Ready to push your limits today?</p>
                     </div>
-                    {/* Optional: Add a subtle stat or date here */}
                     <div className="hidden md:block text-right">
-                        <div className="text-sm text-gray-500 dark:text-gray-500 font-mono">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 font-mono italic">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
 
                     {/* --- LEFT COLUMN (8/12 - 2/3 roughly) --- */}
-                    <div className="lg:col-span-8 space-y-8">
+                    <div className="lg:col-span-8 space-y-6 sm:space-y-8">
 
-                        {/* 1. Daily Challenge Card - ALWAYS RENDER with Loading State if needed */}
+                        {/* 1. Daily Challenge Card */}
                         {loading ? (
-                            <div className="h-48 rounded-3xl bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
+                            <div className="h-40 sm:h-48 rounded-2xl sm:rounded-3xl bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
                         ) : dailyProblem ? (
-                            <Link to={`/solve?problemId=${dailyProblem.problemId}`} className="block relative group overflow-hidden rounded-3xl transition-all hover:scale-[1.01] hover:shadow-2xl hover:shadow-primary-900/20">
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-purple-700 opacity-90 transition-opacity group-hover:opacity-100"></div>
-                                {/* Abstract Shapes */}
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                                <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
+                            dailyProblem.solved ? (
+                                // Render COMPLETED State
+                                <div className="block relative group overflow-hidden rounded-2xl sm:rounded-3xl transition-all shadow-lg shadow-green-900/10">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-emerald-700 opacity-95 transition-opacity"></div>
+                                    <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
-                                <div className="relative p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                                    <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase px-3 py-1 rounded-full shadow-sm border border-white/10">
+                                    <div className="relative p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+                                        <div className="flex-1 space-y-3 sm:space-y-4 w-full">
+                                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                                <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase px-3 py-1 rounded-full shadow-sm border border-white/10 flex items-center gap-1.5">
+                                                    <CheckCircle className="w-3.5 h-3.5" />
+                                                    Completed
+                                                </span>
+                                                {/* Desktop Streak Badge */}
+                                                <div className="hidden md:flex items-center gap-1.5 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30">
+                                                    <Flame className="w-3.5 h-3.5 text-orange-200 fill-orange-200" />
+                                                    <span className="text-orange-100 font-bold text-xs">{userStats?.currentStreak || 0} Day Streak</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Mobile Streak Badge (Top Right) - No BG, Large Font, Tight Gap */}
+                                            <div className="md:hidden absolute top-5 right-5 flex items-center justify-end">
+                                                <span className="text-orange-100 font-extrabold text-2xl tracking-tighter mr-0.5">{userStats?.currentStreak || 0}</span>
+                                                <Flame className="w-5 h-5 text-orange-200 fill-orange-200" />
+                                            </div>
+
+                                            <div>
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
+                                                        Awesome! Challenge Completed.
+                                                    </h2>
+                                                    {/* Mobile Tick Icon (Inline with title) */}
+                                                    <div className="md:hidden flex-shrink-0 bg-white/20 backdrop-blur-md text-white w-10 h-10 rounded-xl flex items-center justify-center border border-white/20">
+                                                        <Check className="w-5 h-5 stroke-[3]" />
+                                                    </div>
+                                                </div>
+                                                <p className="hidden md:block text-green-50 text-xs sm:text-sm opacity-90 max-w-xl">
+                                                    You've crushed today's challenge. Come back tomorrow for a new problem to keep your streak alive!
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="hidden md:flex flex-shrink-0">
+                                            <div className="bg-white/20 backdrop-blur-md text-white w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/20">
+                                                <Check className="w-6 h-6 sm:w-8 sm:h-8 stroke-[3]" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Render ACTIVE State
+                                <Link to={`/solve?problemId=${dailyProblem.problemId}`} state={{ from: '/' }} className="block relative group overflow-hidden rounded-lg sm:rounded-xl transition-all hover:scale-[1.01] hover:shadow-2xl hover:shadow-primary-900/20">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-purple-700 opacity-90 transition-opacity group-hover:opacity-100"></div>
+                                    {/* Abstract Shapes */}
+                                    <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                                    <div className="absolute bottom-0 left-0 w-32 sm:w-48 h-32 sm:h-32 bg-black/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
+
+                                    <div className="relative p-5 md:p-8 flex flex-col gap-4">
+                                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                                            <span className="bg-white/20 backdrop-blur-md text-white text-[10px] md:text-xs font-bold uppercase px-2 py-1 md:px-3 rounded-full shadow-sm border border-white/10 whitespace-nowrap">
                                                 Daily Challenge
                                             </span>
-                                            <span className={`text-xs font-bold px-3 py-1 rounded-full bg-black/30 text-white border border-white/10 flex items-center gap-1`}>
-                                                {dailyProblem.difficulty === 'Easy' && <span className="w-2 h-2 rounded-full bg-green-400"></span>}
-                                                {dailyProblem.difficulty === 'Medium' && <span className="w-2 h-2 rounded-full bg-yellow-400"></span>}
-                                                {(dailyProblem.difficulty === 'Hard' || !['Easy', 'Medium'].includes(dailyProblem.difficulty)) && <span className="w-2 h-2 rounded-full bg-red-400"></span>}
+                                            <span className={`text-[10px] md:text-xs font-bold px-2 py-1 md:px-3 rounded-full bg-black/30 text-white border border-white/10 flex items-center gap-1 whitespace-nowrap`}>
+                                                {dailyProblem.difficulty === 'Easy' && <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span>}
+                                                {dailyProblem.difficulty === 'Medium' && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>}
+                                                {(dailyProblem.difficulty === 'Hard' || !['Easy', 'Medium'].includes(dailyProblem.difficulty)) && <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>}
                                                 {dailyProblem.difficulty || 'Medium'}
                                             </span>
-                                            {/* Streak Badge */}
-                                            <div className="flex items-center gap-1.5 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30">
-                                                <i data-feather="flame" className="w-3.5 h-3.5 text-orange-400"></i>
+
+                                            {/* MOBILE Streak Badge: Icon Only, Right Aligned */}
+                                            <div className="flex md:hidden items-center whitespace-nowrap ml-auto" title="Current Streak">
+                                                <span className="text-orange-50 font-extrabold text-sm shadow-sm">{userStats?.currentStreak || 0}</span>
+                                                <Flame className="w-4 h-4 text-orange-500 fill-orange-500 drop-shadow-sm" />
+                                            </div>
+
+                                            {/* DESKTOP Streak Badge: Full Text, Standard Layout */}
+                                            <div className="hidden md:flex items-center gap-1.5 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30 whitespace-nowrap">
+                                                <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
                                                 <span className="text-orange-100 font-bold text-xs">{userStats?.currentStreak || 0} Day Streak</span>
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <h2 className="text-3xl font-bold text-white mb-2 leading-tight">
-                                                {dailyProblem.title}
-                                            </h2>
-                                            <p className="text-green-50 text-sm opacity-90 line-clamp-2 max-w-xl">
-                                                Keep your streak alive! Solve today's challenge to earn bonus points and climb the leaderboard.
-                                            </p>
-                                        </div>
-                                    </div>
+                                        {/* 2. Title and Button Row */}
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex-1">
+                                                <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-white leading-tight">
+                                                    {dailyProblem.title}
+                                                </h2>
+                                                <p className="hidden md:block text-blue-50/80 text-sm max-w-2xl mt-2 line-clamp-2">
+                                                    Keep your streak alive! Solve today's challenge to earn bonus points and climb the leaderboard.
+                                                </p>
+                                            </div>
 
-                                    <div className="flex-shrink-0">
-                                        <div className="bg-white text-blue-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform">
-                                            <i data-feather="play" className="w-6 h-6 fill-current"></i>
+                                            <div className="flex-shrink-0">
+                                                <div className="bg-white text-blue-600 w-10 h-10 sm:w-12 sm:h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform">
+                                                    <Play className="w-4 h-4 sm:w-5 sm:h-5 md:w-8 md:h-8 fill-current" />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
+                            )
                         ) : (
-                            // Fallback if no daily problem found
-                            <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-200 dark:border-gray-700 text-center shadow-sm dark:shadow-none">
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Daily Challenge Today</h2>
-                                <p className="text-gray-500 dark:text-gray-400">Check back tomorrow for a new problem!</p>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700 text-center shadow-sm dark:shadow-none">
+                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">No Daily Challenge Today</h2>
+                                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Check back tomorrow for a new problem!</p>
                             </div>
                         )}
 
                         {/* 2. Stats & Actions Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                             {/* Activity Graph */}
-                            <ActivityGraph history={userHistory} />
+                            <div className="md:col-span-1">
+                                <ActivityGraph history={userHistory} />
+                            </div>
 
-                            {/* Quick Actions */}
-                            <div className="grid grid-rows-2 gap-4">
-                                <Link to="/my-courses" className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600 p-6 rounded-3xl transition-all group relative overflow-hidden flex items-center justify-between shadow-sm dark:shadow-none">
-                                    <div className="flex items-center gap-4 relative z-10">
-                                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-200 dark:border-purple-500/20 group-hover:scale-110 transition-transform">
-                                            <i data-feather="book-open" className="text-purple-600 dark:text-purple-400 w-6 h-6"></i>
+                            {/* Quick Actions Stacked Vertically */}
+                            <div className="flex flex-col gap-4 md:gap-6 justify-between">
+                                <Link to="/my-courses" className="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/60 border border-gray-200 dark:border-gray-700/50 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm dark:shadow-none transition-all group flex items-center justify-between h-full">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/10 rounded-xl flex items-center justify-center border border-purple-200 dark:border-purple-500/20 group-hover:scale-110 transition-transform">
+                                            <BookOpen className="text-purple-600 dark:text-purple-400 w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h3 className="text-gray-900 dark:text-white font-bold text-lg">My Courses</h3>
-                                            <p className="text-gray-500 text-xs">Continue learning</p>
+                                            <h3 className="text-gray-900 dark:text-white font-bold text-base sm:text-lg">My Courses</h3>
+                                            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">Continue learning</p>
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                                        <i data-feather="arrow-right" className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-white"></i>
-                                    </div>
+                                    <ChevronRight className="text-gray-400 dark:text-gray-600 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                                 </Link>
 
-                                <Link to="/problem-stats" className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600 p-6 rounded-3xl transition-all group relative overflow-hidden flex items-center justify-between shadow-sm dark:shadow-none">
-                                    <div className="flex items-center gap-4 relative z-10">
-                                        <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-200 dark:border-emerald-500/20 group-hover:scale-110 transition-transform">
-                                            <i data-feather="clock" className="text-emerald-600 dark:text-emerald-400 w-6 h-6"></i>
+                                <Link to="/problem-stats" className="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/60 border border-gray-200 dark:border-gray-700/50 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm dark:shadow-none transition-all group flex items-center justify-between h-full">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-emerald-500/20 group-hover:scale-110 transition-transform">
+                                            <Clock className="text-emerald-600 dark:text-emerald-400 w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h3 className="text-gray-900 dark:text-white font-bold text-lg">Detailed History</h3>
-                                            <p className="text-gray-500 text-xs">View past solutions</p>
+                                            <h3 className="text-gray-900 dark:text-white font-bold text-base sm:text-lg">Detailed History</h3>
+                                            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">View past solutions</p>
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                        <i data-feather="arrow-right" className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-white"></i>
-                                    </div>
+                                    <ChevronRight className="text-gray-400 dark:text-gray-600 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                                 </Link>
                             </div>
                         </div>
 
                         {/* 3. Current Course */}
-                        <div className="bg-white dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/50 rounded-3xl overflow-hidden hover:border-gray-300 dark:hover:border-gray-600 transition-colors shadow-sm dark:shadow-none">
-                            <div className="p-6 border-b border-gray-200 dark:border-gray-700/50 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                    <div className="p-1.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-md">
-                                        <i data-feather="play-circle" className="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
-                                    </div>
-                                    Jump Back In
-                                </h2>
-                            </div>
-                            <div className="p-6 flex flex-col md:flex-row gap-8">
-                                <div className="w-full md:w-64 aspect-video rounded-2xl overflow-hidden relative group cursor-pointer shadow-lg">
-                                    <img
-                                        src={currentCourse.coverImage}
-                                        alt={currentCourse.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
-                                            <i data-feather="play" className="w-5 h-5 text-white ml-1"></i>
+                        {currentCourse && (
+                            <div className="bg-white dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/50 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-gray-300 dark:hover:border-gray-600 transition-colors shadow-sm dark:shadow-none">
+                                <div className="p-5 sm:p-6 border-b border-gray-200 dark:border-gray-700/50 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
+                                    <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
+                                        <div className="p-1.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-md">
+                                            <PlayCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400" />
                                         </div>
-                                    </div>
+                                        Jump Back In
+                                    </h2>
                                 </div>
-                                <div className="flex-1 flex flex-col justify-center space-y-4">
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{currentCourse.title}</h3>
-                                        <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 font-medium">
-                                            <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">Full Stack Path</span>
-                                            <span>•</span>
-                                            <span>{currentCourse.currentModule}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                                            <span className="text-gray-500 dark:text-gray-400">{currentCourse.progress}% Complete</span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                                            <div
-                                                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-1000 relative"
-                                                style={{ width: `${currentCourse.progress}%` }}
-                                            >
-                                                <div className="absolute inset-0 bg-white/20 w-full h-full animate-shimmer"></div>
+                                <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 sm:gap-8">
+                                    <div className="w-full md:w-64 aspect-video rounded-xl sm:rounded-2xl overflow-hidden relative group cursor-pointer shadow-lg">
+                                        <img
+                                            src={currentCourse.coverImage}
+                                            alt={currentCourse.title}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                                                <Play className="w-5 h-5 text-white ml-1" />
                                             </div>
                                         </div>
                                     </div>
+                                    <div className="flex-1 flex flex-col justify-center space-y-4">
+                                        <div>
+                                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">{currentCourse.title}</h3>
+                                            <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                                <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">Full Stack Path</span>
+                                                <span>•</span>
+                                                <span>{currentCourse.currentModule}</span>
+                                            </div>
+                                        </div>
 
-                                    <button className="w-max px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 rounded-xl transition-all font-bold text-sm flex items-center gap-2 shadow-lg shadow-gray-900/10 dark:shadow-white/5 active:scale-95">
-                                        Resume Learning
-                                        <i data-feather="arrow-right" className="w-4 h-4"></i>
-                                    </button>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                                                <span className="text-gray-500 dark:text-gray-400">{currentCourse.progress}% Complete</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                                                <div
+                                                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-1000 relative"
+                                                    style={{ width: `${currentCourse.progress}%` }}
+                                                >
+                                                    <div className="absolute inset-0 bg-white/20 w-full h-full animate-shimmer"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button className="w-max px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 rounded-xl transition-all font-bold text-sm flex items-center gap-2 shadow-lg shadow-gray-900/10 dark:shadow-white/5 active:scale-95">
+                                            Resume Learning
+                                            <ArrowRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                     </div>
 
                     {/* --- RIGHT COLUMN (4/12 - 1/3 roughly) --- */}
-                    <div className="lg:col-span-4 space-y-8">
+                    <div className="lg:col-span-4 space-y-6 sm:space-y-8">
 
-                        {/* 1. Rank Card - Conditional Rendering with Fallback */}
+                        {/* 1. Rank Card */}
                         {loading ? (
-                            <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-3xl animate-pulse"></div>
+                            <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-2xl sm:rounded-3xl animate-pulse"></div>
                         ) : (
-                            // Render TopUserStats OR a fallback "Unranked" card
                             rankData ? (
                                 <TopUserStats rankData={rankData} />
                             ) : (
-                                <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200 dark:border-gray-700 text-center shadow-sm dark:shadow-none">
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-6 border border-gray-200 dark:border-gray-700 text-center shadow-sm dark:shadow-none">
                                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
-                                        <i data-feather="bar-chart-2" className="w-8 h-8 text-gray-400 dark:text-gray-500"></i>
+                                        <BarChart2 className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">No Rank Yet</h3>
                                     <p className="text-gray-500 dark:text-gray-400 mt-2 mb-4">Solve problems to enter the leaderboard!</p>
@@ -409,16 +502,16 @@ const UserHomePage = () => {
                             )
                         )}
 
-                        {/* 2. Mastery Widget */}
-                        <div className="bg-white dark:bg-gray-800/40 backdrop-blur-md rounded-3xl border border-gray-200 dark:border-gray-700/50 p-6 shadow-xl dark:shadow-xl">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+
+                        {/* 3. Mastery Widget */}
+                        <div className="bg-white dark:bg-gray-800/40 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-700/50 p-5 sm:p-6 shadow-xl dark:shadow-xl">
+                            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                                 <span className="p-1.5 bg-pink-100 dark:bg-pink-500/20 rounded-lg">
-                                    <i data-feather="target" className="w-4 h-4 text-pink-600 dark:text-pink-400"></i>
+                                    <Target className="w-4 h-4 text-pink-600 dark:text-pink-400" />
                                 </span>
                                 Mastery Progress
                             </h2>
-                            <div className="space-y-6">
-                                {/* Easy */}
+                            <div className="space-y-5 sm:space-y-6">
                                 <div className="space-y-2 group">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-green-600 dark:text-green-400 font-bold group-hover:text-green-500 dark:group-hover:text-green-300 transition-colors">Easy</span>
@@ -428,7 +521,6 @@ const UserHomePage = () => {
                                         <div className="bg-green-500 h-full rounded-full transition-all duration-1000 group-hover:shadow-[0_0_10px_rgba(34,197,94,0.4)]" style={{ width: `${Math.min(((difficultyStats?.Easy || 0) / 20) * 100, 100)}%` }}></div>
                                     </div>
                                 </div>
-                                {/* Medium */}
                                 <div className="space-y-2 group">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-yellow-600 dark:text-yellow-400 font-bold group-hover:text-yellow-500 dark:group-hover:text-yellow-300 transition-colors">Medium</span>
@@ -438,7 +530,6 @@ const UserHomePage = () => {
                                         <div className="bg-yellow-500 h-full rounded-full transition-all duration-1000 group-hover:shadow-[0_0_10px_rgba(234,179,8,0.4)]" style={{ width: `${Math.min(((difficultyStats?.Medium || 0) / 20) * 100, 100)}%` }}></div>
                                     </div>
                                 </div>
-                                {/* Hard */}
                                 <div className="space-y-2 group">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-red-600 dark:text-red-400 font-bold group-hover:text-red-500 dark:group-hover:text-red-300 transition-colors">Hard</span>
@@ -451,13 +542,13 @@ const UserHomePage = () => {
                             </div>
                         </div>
 
-                        {/* 3. Recommended Problems */}
+                        {/* 4. Recommended Problems */}
                         {recommendedProblems.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800/40 backdrop-blur-md rounded-3xl border border-gray-200 dark:border-gray-700/50 p-6 shadow-xl dark:shadow-xl">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <div className="bg-white dark:bg-gray-800/40 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-700/50 p-5 sm:p-6 shadow-xl dark:shadow-xl">
+                                <div className="flex justify-between items-center mb-5 sm:mb-6">
+                                    <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
                                         <span className="p-1.5 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg">
-                                            <i data-feather="compass" className="w-4 h-4 text-cyan-600 dark:text-cyan-400"></i>
+                                            <Compass className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                                         </span>
                                         For You
                                     </h2>
@@ -465,23 +556,23 @@ const UserHomePage = () => {
                                         View All
                                     </Link>
                                 </div>
-                                <div className="space-y-3">
+                                <div className="space-y-2 sm:space-y-3">
                                     {recommendedProblems.map(problem => (
-                                        <Link key={problem.problemId} to={`/solve?problemId=${problem.problemId}`} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-2xl transition-all group">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${problem.difficulty === 'Easy' ? 'bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-500' :
+                                        <Link key={problem.problemId} to={`/solve?problemId=${problem.problemId}`} state={{ from: '/' }} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl sm:rounded-2xl transition-all group">
+                                            <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                                                <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shadow-inner ${problem.difficulty === 'Easy' ? 'bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-500' :
                                                     problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-500' :
                                                         'bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-500'
                                                     }`}>
                                                     {problem.difficulty ? problem.difficulty[0] : '?'}
                                                 </div>
-                                                <div className="overflow-hidden">
-                                                    <h3 className="text-gray-900 dark:text-white font-bold text-sm truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors w-40">{problem.title}</h3>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-500">{problem.category || 'General'}</p>
+                                                <div className="overflow-hidden min-w-0">
+                                                    <h3 className="text-gray-900 dark:text-white font-bold text-sm truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{problem.title}</h3>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{problem.category || 'General'}</p>
                                                 </div>
                                             </div>
-                                            <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all border border-gray-100 dark:border-transparent">
-                                                <i data-feather="chevron-right" className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-white"></i>
+                                            <div className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all border border-gray-100 dark:border-transparent">
+                                                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 group-hover:text-white" />
                                             </div>
                                         </Link>
                                     ))}

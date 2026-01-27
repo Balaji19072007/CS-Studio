@@ -51,7 +51,9 @@ const MyProblemStats = () => {
 
     const formatDate = (dateString) => {
         if (!dateString) return '-';
-        return new Date(dateString).toLocaleDateString('en-US', {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '-';
+        return date.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
@@ -131,7 +133,7 @@ const MyProblemStats = () => {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <Link to={`/solve/${item.problemId}`} className="text-white font-medium hover:text-primary-400 transition-colors">
-                                                        {item.title}
+                                                        #{item.problemId}. {item.title}
                                                     </Link>
                                                     <span className={`text-xs mt-1 w-max px-2 py-0.5 rounded-full font-medium ${item.difficulty === 'Easy' ? 'bg-green-500/10 text-green-400' :
                                                         item.difficulty === 'Medium' ? 'bg-yellow-500/10 text-yellow-400' :
@@ -176,7 +178,7 @@ const MyProblemStats = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-400 text-right">
-                                                {formatDate(item.lastSubmission)}
+                                                {formatDate(item.status === 'solved' ? item.solvedAt : item.lastSubmission)}
                                             </td>
                                         </tr>
                                     ))}

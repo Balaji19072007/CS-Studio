@@ -1,25 +1,28 @@
 // frontend/src/pages/Settings.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import * as feather from 'feather-icons';
+import {
+    User,
+    Mail,
+    FileText,
+    Save,
+    Camera,
+    ArrowLeft,
+    Settings as SettingsIcon,
+    Loader,
+    CheckCircle,
+    AlertTriangle,
+    X,
+    Move,
+    Check
+} from 'lucide-react';
 import { updateProfile } from '../api/authApi.js';
 import { useSimpleImageCropper } from '../hooks/useSimpleImageCropper.js';
 
 const Settings = () => {
     const { user, updateUserProfile, isLoggedIn, logout } = useAuth();
     const navigate = useNavigate();
-
-    // Local form state
-    const [firstName, setFirstName] = useState(user?.firstName || user?.name?.split(' ')[0] || '');
-    const [lastName, setLastName] = useState(user?.lastName || user?.name?.split(' ').slice(1).join(' ') || '');
-    const [bio, setBio] = useState(user?.bio || '');
-    const [loading, setLoading] = useState(false);
-    const [alertMessage, setAlertMessage] = useState(null);
-
-    // Profile picture states
-    const [profilePicture, setProfilePicture] = useState(user?.photoUrl || '');
-    const [isUploading, setIsUploading] = useState(false);
 
     // Simple image cropper hook
     const {
@@ -40,12 +43,48 @@ const Settings = () => {
         handleResizeMouseDown,
         handleResizeMouseMove,
         handleResizeMouseUp,
+        // Touch versions
+        handleTouchMove,
+        handleTouchEnd,
+        handleTouchResizeMove,
+        handleTouchResizeEnd,
         canvasRef,
         imageRef
     } = useSimpleImageCropper();
 
+    // Local form state
+    const [firstName, setFirstName] = useState(user?.firstName || user?.name?.split(' ')[0] || '');
+    const [lastName, setLastName] = useState(user?.lastName || user?.name?.split(' ').slice(1).join(' ') || '');
+    const [bio, setBio] = useState(user?.bio || '');
+    const [loading, setLoading] = useState(false);
+    const [alertMessage, setAlertMessage] = useState(null);
+
     // Mobile navigation state
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [containerScale, setContainerScale] = useState(1);
+    const cropperContainerRef = useRef(null);
+
+    // Update container scale on resize
+    useEffect(() => {
+        const updateScale = () => {
+            if (cropperContainerRef.current) {
+                const width = cropperContainerRef.current.clientWidth;
+                setContainerScale(Math.min(1, width / 400));
+            }
+        };
+
+        if (isCropModalOpen) {
+            // Wait for modal to render
+            setTimeout(updateScale, 50);
+            window.addEventListener('resize', updateScale);
+            return () => window.removeEventListener('resize', updateScale);
+        }
+    }, [isCropModalOpen]);
+
+    // Profile picture states
+    const [profilePicture, setProfilePicture] = useState(user?.photoUrl || '');
+    const [isUploading, setIsUploading] = useState(false);
+
+
 
     // Update local state when user changes
     useEffect(() => {
@@ -62,23 +101,31 @@ const Settings = () => {
         if (isCropModalOpen) {
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd);
             return () => {
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
+                document.removeEventListener('touchmove', handleTouchMove);
+                document.removeEventListener('touchend', handleTouchEnd);
             };
         }
-    }, [isCropModalOpen, handleMouseMove, handleMouseUp]);
+    }, [isCropModalOpen, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
     useEffect(() => {
         if (isResizing) {
             document.addEventListener('mousemove', handleResizeMouseMove);
             document.addEventListener('mouseup', handleResizeMouseUp);
+            document.addEventListener('touchmove', handleTouchResizeMove, { passive: false });
+            document.addEventListener('touchend', handleTouchResizeEnd);
             return () => {
                 document.removeEventListener('mousemove', handleResizeMouseMove);
                 document.removeEventListener('mouseup', handleResizeMouseUp);
+                document.removeEventListener('touchmove', handleTouchResizeMove);
+                document.removeEventListener('touchend', handleTouchResizeEnd);
             };
         }
-    }, [isResizing, handleResizeMouseMove, handleResizeMouseUp]);
+    }, [isResizing, handleResizeMouseMove, handleResizeMouseUp, handleTouchResizeMove, handleTouchResizeEnd]);
 
     // Redirect if not logged in
     useEffect(() => {
@@ -87,10 +134,6 @@ const Settings = () => {
         }
     }, [isLoggedIn, loading, navigate]);
 
-    // Sync icons
-    useEffect(() => {
-        feather.replace();
-    }, [user, isCropModalOpen, alertMessage, profilePicture]);
 
     // --- Utility Functions ---
     const showAlert = (message, type = 'success') => {
@@ -247,7 +290,7 @@ const Settings = () => {
 
                         {/* Hover Overlay */}
                         <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <i data-feather="camera" className="w-8 h-8 text-white"></i>
+                            <Camera className="w-8 h-8 text-white" />
                         </div>
                     </div>
 
@@ -256,29 +299,29 @@ const Settings = () => {
                         type="button"
                         onClick={handlePhotoChange}
                         disabled={isUploading || loading}
-                        className="absolute -bottom-2 -right-2 bg-primary-500 hover:bg-primary-600 text-white p-4 rounded-full shadow-2xl transition-all duration-200 disabled:opacity-50 group-hover:scale-110"
+                        className="absolute -bottom-2 -right-2 bg-primary-500 hover:bg-primary-600 text-white p-3.5 rounded-full shadow-2xl transition-all duration-200 disabled:opacity-50 group-hover:scale-110 flex items-center justify-center"
                         title="Change profile picture"
                     >
-                        <i data-feather="camera" className="w-5 h-5"></i>
+                        <Camera className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Profile Picture Actions */}
-                <div className="flex flex-col space-y-3 w-full max-w-xs">
+                <div className="flex flex-col space-y-3 w-full max-w-xs px-2">
                     <div className="text-center">
-                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                            {profilePicture ? 'Update your profile photo' : 'Add a profile photo'}
+                        <p className="text-gray-900 dark:text-white font-bold text-base">
+                            {profilePicture ? 'Profile Photo' : 'Add Photo'}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            JPG, PNG or WebP (max 5MB)
+                            Click the camera icon to upload a new one
                         </p>
                     </div>
 
                     {/* Upload Progress */}
                     {(isUploading || loading) && (
-                        <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                            <i data-feather="loader" className="w-4 h-4 animate-spin"></i>
-                            <span>{isUploading ? 'Uploading...' : 'Saving...'}</span>
+                        <div className="flex items-center justify-center space-x-2 text-sm text-primary-500">
+                            <Loader className="w-4 h-4 animate-spin" />
+                            <span className="font-medium">{isUploading ? 'Uploading...' : 'Saving...'}</span>
                         </div>
                     )}
                 </div>
@@ -290,7 +333,7 @@ const Settings = () => {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <i data-feather="loader" className="w-8 h-8 animate-spin text-primary-500 mx-auto mb-4"></i>
+                    <Loader className="w-8 h-8 animate-spin text-primary-500 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">Loading...</p>
                 </div>
             </div>
@@ -309,48 +352,53 @@ const Settings = () => {
                 onChange={handleFileInputChange}
             />
 
-            {/* Mobile Header */}
-            <div className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center">
+            {/* Mobile Header - Native-like */}
+            <div className="lg:hidden sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 mr-3"
+                        className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:scale-95 transition-all"
                     >
-                        <i data-feather="arrow-left" className="w-5 h-5 text-gray-600 dark:text-gray-400"></i>
+                        <ArrowLeft className="w-5 h-5" />
                     </button>
-                    <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Settings</h1>
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">Settings</h1>
                 </div>
-                <button
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700"
-                >
-                    <i data-feather={isMobileMenuOpen ? "x" : "menu"} className="w-5 h-5 text-gray-600 dark:text-gray-400"></i>
-                </button>
+                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-500/10 flex items-center justify-center">
+                    <SettingsIcon className="w-5 h-5 text-primary-500" />
+                </div>
             </div>
 
             <main className="flex-grow py-6 md:py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     {/* Desktop Header */}
-                    <div className="hidden lg:flex items-center mb-8">
-                        <button onClick={() => navigate(-1)} className="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
-                            <i data-feather="arrow-left" className="w-5 h-5 text-gray-600 dark:text-gray-400"></i>
-                        </button>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center">
-                            <i data-feather="settings" className="w-6 h-6 md:w-8 md:h-8 mr-3 text-primary-500"></i> Account Settings
-                        </h1>
+                    <div className="hidden lg:flex items-center justify-between mb-10">
+                        <div className="flex items-center">
+                            <button onClick={() => navigate(-1)} className="mr-5 p-3 rounded-2xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 transition-all active:scale-95">
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <div className="space-y-1">
+                                <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                                    Account Settings
+                                </h1>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Manage your profile and account preferences</p>
+                            </div>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-primary-500/10 border border-primary-500/20 text-primary-500">
+                            <SettingsIcon className="w-8 h-8" />
+                        </div>
                     </div>
 
                     <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-2xl rounded-2xl overflow-hidden border border-gray-200/50 dark:border-gray-700/50">
                         <div className="p-6 lg:p-8">
                             {/* Alert Message */}
                             {alertMessage && (
-                                <div className={`p-4 mb-6 rounded-lg border ${alertMessage.type === 'error'
-                                        ? 'bg-red-100 dark:bg-red-500/20 border-red-300 dark:border-red-500 text-red-700 dark:text-red-100'
-                                        : 'bg-green-100 dark:bg-primary-500/20 border-green-300 dark:border-primary-500 text-green-700 dark:text-primary-100'
+                                <div className={`p-4 mb-8 rounded-2xl border ${alertMessage.type === 'error'
+                                    ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/50 text-red-700 dark:text-red-400'
+                                    : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400'
                                     }`}>
                                     <div className="flex items-center">
-                                        <i data-feather={alertMessage.type === 'error' ? 'alert-triangle' : 'check-circle'} className="w-5 h-5 mr-3"></i>
-                                        <p className="text-sm font-medium">{alertMessage.message}</p>
+                                        {alertMessage.type === 'error' ? <AlertTriangle className="w-5 h-5 mr-3 shrink-0" /> : <CheckCircle className="w-5 h-5 mr-3 shrink-0" />}
+                                        <p className="text-sm font-bold">{alertMessage.message}</p>
                                     </div>
                                 </div>
                             )}
@@ -371,75 +419,95 @@ const Settings = () => {
                                     <div className="lg:w-2/3">
                                         <form onSubmit={handleProfileUpdate} className="space-y-6">
                                             {/* Full Name */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
-                                                    <input
-                                                        type="text"
-                                                        id="firstName"
-                                                        value={firstName}
-                                                        onChange={(e) => setFirstName(e.target.value)}
-                                                        placeholder="Coder"
-                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                                                        disabled={loading}
-                                                    />
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <label htmlFor="firstName" className="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">First Name</label>
+                                                    <div className="relative group/input">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary-500 transition-colors">
+                                                            <User className="w-5 h-5" />
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            id="firstName"
+                                                            value={firstName}
+                                                            onChange={(e) => setFirstName(e.target.value)}
+                                                            placeholder="Coder"
+                                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-700 border-2 border-transparent focus:border-primary-500 dark:focus:border-primary-500 rounded-2xl text-gray-900 dark:text-white font-medium transition-all outline-none"
+                                                            disabled={loading}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
-                                                    <input
-                                                        type="text"
-                                                        id="lastName"
-                                                        value={lastName}
-                                                        onChange={(e) => setLastName(e.target.value)}
-                                                        placeholder="User"
-                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                                                        disabled={loading}
-                                                    />
+                                                <div className="space-y-2">
+                                                    <label htmlFor="lastName" className="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Last Name</label>
+                                                    <div className="relative group/input">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary-500 transition-colors">
+                                                            <User className="w-5 h-5" />
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            id="lastName"
+                                                            value={lastName}
+                                                            onChange={(e) => setLastName(e.target.value)}
+                                                            placeholder="User"
+                                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-700 border-2 border-transparent focus:border-primary-500 dark:focus:border-primary-500 rounded-2xl text-gray-900 dark:text-white font-medium transition-all outline-none"
+                                                            disabled={loading}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             {/* Email */}
-                                            <div>
-                                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
-                                                <input
-                                                    type="email"
-                                                    id="email"
-                                                    value={user.email}
-                                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                                    disabled
-                                                />
-                                                <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">Your registered email address (cannot be changed)</p>
+                                            <div className="space-y-2">
+                                                <label htmlFor="email" className="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Email Address</label>
+                                                <div className="relative">
+                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                                        <Mail className="w-5 h-5" />
+                                                    </div>
+                                                    <input
+                                                        type="email"
+                                                        id="email"
+                                                        value={user.email}
+                                                        className="w-full pl-12 pr-4 py-3.5 bg-gray-100/50 dark:bg-gray-800/50 border-2 border-transparent rounded-2xl text-gray-500 dark:text-gray-500 font-medium cursor-not-allowed"
+                                                        disabled
+                                                    />
+                                                </div>
+                                                <p className="ml-1 text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-500">Registered Email (Cannot be changed)</p>
                                             </div>
 
                                             {/* Bio */}
-                                            <div>
-                                                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
-                                                <textarea
-                                                    id="bio"
-                                                    value={bio}
-                                                    onChange={(e) => setBio(e.target.value)}
-                                                    rows="4"
-                                                    placeholder="Tell us about yourself..."
-                                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none transition-colors"
-                                                    disabled={loading}
-                                                ></textarea>
+                                            <div className="space-y-2">
+                                                <label htmlFor="bio" className="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Bio</label>
+                                                <div className="relative group/input">
+                                                    <div className="absolute left-4 top-6 text-gray-400 group-focus-within/input:text-primary-500 transition-colors">
+                                                        <FileText className="w-5 h-5" />
+                                                    </div>
+                                                    <textarea
+                                                        id="bio"
+                                                        value={bio}
+                                                        onChange={(e) => setBio(e.target.value)}
+                                                        rows="4"
+                                                        placeholder="Tell us about yourself..."
+                                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-700 border-2 border-transparent focus:border-primary-500 dark:focus:border-primary-500 rounded-2xl text-gray-900 dark:text-white font-medium transition-all outline-none resize-none"
+                                                        disabled={loading}
+                                                    ></textarea>
+                                                </div>
                                             </div>
 
                                             {/* Save Button */}
-                                            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                            <div className="pt-8 border-t border-gray-100 dark:border-gray-700/50 flex justify-end">
                                                 <button
                                                     type="submit"
                                                     disabled={loading || isUploading}
-                                                    className="bg-primary-500 hover:bg-primary-600 text-white py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-medium transition-colors duration-200 disabled:opacity-50 flex items-center"
+                                                    className="w-full sm:w-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 px-10 rounded-2xl shadow-xl text-base font-bold transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                                                 >
                                                     {loading ? (
                                                         <>
-                                                            <i data-feather="loader" className="animate-spin mr-2 w-4 h-4"></i>
+                                                            <Loader className="animate-spin w-5 h-5" />
                                                             Saving...
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <i data-feather="save" className="mr-2 w-4 h-4"></i>
+                                                            <Save className="w-5 h-5" />
                                                             Save Changes
                                                         </>
                                                     )}
@@ -455,70 +523,94 @@ const Settings = () => {
                 </div>
             </main>
 
-            {/* Simple Cropper Modal */}
+            {/* Premium Cropper Modal */}
             {isCropModalOpen && originalImage && (
-                <div className="fixed inset-0 flex items-center justify-center p-4 z-50 bg-black/80">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-300 dark:border-gray-600">
+                <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 z-[100] bg-black/95 backdrop-blur-xl">
+                    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-w-xl border border-white/20 dark:border-gray-800 overflow-hidden animate-in fade-in zoom-in duration-300">
                         {/* Header */}
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Crop Profile Picture</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    Drag the crop area to position or resize using the corner handle, then click Apply
+                        <div className="p-6 sm:p-8 flex justify-between items-center">
+                            <div className="space-y-1">
+                                <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Adjust Photo</h3>
+                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Pinch to resize, drag to position
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={cancelCrop}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors duration-200 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                                className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-red-500 transition-all active:scale-95"
                                 disabled={isUploading}
                             >
-                                <i data-feather="x" className="w-5 h-5"></i>
+                                <X className="w-6 h-6" />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="p-6">
-                            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                <div className="h-[400px] w-[400px] flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-                                    {/* Full image with circular mask */}
-                                    <div className="relative w-full h-full overflow-hidden rounded">
-                                        <img
-                                            ref={imageRef}
-                                            src={originalImage}
-                                            alt="Crop preview"
-                                            className="absolute max-w-none max-h-none"
-                                            style={{
-                                                left: `${(400 - imageDimensions.width * scale) / 2}px`,
-                                                top: `${(400 - imageDimensions.height * scale) / 2}px`,
-                                                transform: `scale(${scale})`,
-                                                transformOrigin: 'top left'
-                                            }}
-                                            draggable={false}
-                                        />
-                                        {/* Circular mask overlay */}
-                                        <div className="absolute inset-0 rounded">
-                                            <div
-                                                className="absolute border-2 border-white shadow-lg rounded-full cursor-move"
+                        <div className="px-4 pb-8 sm:px-8 sm:pb-10 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                            <div className="flex justify-center mb-8">
+                                <div
+                                    ref={cropperContainerRef}
+                                    className="relative aspect-square w-full max-w-[400px] bg-gray-100 dark:bg-gray-950 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-gray-100 dark:ring-gray-800"
+                                >
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div
+                                            className="relative w-[400px] h-[400px] origin-center transition-transform duration-200"
+                                            style={{ transform: `scale(${containerScale})` }}
+                                        >
+                                            <img
+                                                ref={imageRef}
+                                                src={originalImage}
+                                                alt="Crop preview"
+                                                className="absolute max-w-none max-h-none select-none"
                                                 style={{
-                                                    left: `${(400 - imageDimensions.width * scale) / 2 + crop.x * scale}px`,
-                                                    top: `${(400 - imageDimensions.height * scale) / 2 + crop.y * scale}px`,
-                                                    width: `${crop.width * scale}px`,
-                                                    height: `${crop.width * scale}px`,
-                                                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)'
+                                                    left: `${(400 - imageDimensions.width * scale) / 2}px`,
+                                                    top: `${(400 - imageDimensions.height * scale) / 2}px`,
+                                                    transform: `scale(${scale})`,
+                                                    transformOrigin: 'top left'
                                                 }}
-                                                onMouseDown={handleMouseDown}
-                                            >
-                                            </div>
-                                            {/* Resize handle */}
-                                            <div
-                                                className="absolute w-4 h-4 bg-white border border-gray-400 cursor-se-resize rounded-sm"
-                                                style={{
-                                                    left: `${(400 - imageDimensions.width * scale) / 2 + crop.x * scale + crop.width * scale - 8}px`,
-                                                    top: `${(400 - imageDimensions.height * scale) / 2 + crop.y * scale + crop.width * scale - 8}px`
-                                                }}
-                                                onMouseDown={handleResizeMouseDown}
-                                            >
+                                                draggable={false}
+                                            />
+                                            {/* Circular mask overlay */}
+                                            <div className="absolute inset-0">
+                                                <div
+                                                    className="absolute border-4 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] rounded-full cursor-move z-10"
+                                                    style={{
+                                                        left: `${(400 - imageDimensions.width * scale) / 2 + crop.x * scale}px`,
+                                                        top: `${(400 - imageDimensions.height * scale) / 2 + crop.y * scale}px`,
+                                                        width: `${crop.width * scale}px`,
+                                                        height: `${crop.width * scale}px`
+                                                    }}
+                                                    onMouseDown={handleMouseDown}
+                                                    onTouchStart={(e) => {
+                                                        const touch = e.touches[0];
+                                                        handleMouseDown({
+                                                            clientX: touch.clientX,
+                                                            clientY: touch.clientY,
+                                                            preventDefault: () => { }
+                                                        });
+                                                    }}
+                                                >
+                                                    {/* Visual Corner Resize Handle */}
+                                                    <div
+                                                        className="absolute -right-1 -bottom-1 w-10 h-10 bg-white border-4 border-primary-500 cursor-se-resize rounded-full shadow-2xl flex items-center justify-center text-primary-500 active:scale-125 transition-transform z-20"
+                                                        onMouseDown={(e) => {
+                                                            e.stopPropagation();
+                                                            handleResizeMouseDown(e);
+                                                        }}
+                                                        onTouchStart={(e) => {
+                                                            e.stopPropagation();
+                                                            const touch = e.touches[0];
+                                                            handleResizeMouseDown({
+                                                                clientX: touch.clientX,
+                                                                clientY: touch.clientY,
+                                                                preventDefault: () => { },
+                                                                stopPropagation: () => { }
+                                                            });
+                                                        }}
+                                                    >
+                                                        <Move className="w-5 h-5 pointer-events-none" />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -529,43 +621,33 @@ const Settings = () => {
                             <canvas ref={canvasRef} className="hidden" />
 
                             {/* Controls */}
-                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-                                <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <div className="flex items-center space-x-2">
-                                        <i data-feather="move" className="w-4 h-4"></i>
-                                        <span>Drag the circle to move or resize</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex space-x-3">
-                                    <button
-                                        type="button"
-                                        onClick={cancelCrop}
-                                        disabled={isUploading}
-                                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50 flex items-center"
-                                    >
-                                        <i data-feather="x" className="w-4 h-4 mr-2"></i>
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={applyCrop}
-                                        disabled={isUploading}
-                                        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 border border-transparent text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 flex items-center"
-                                    >
-                                        {isUploading ? (
-                                            <>
-                                                <i data-feather="loader" className="animate-spin mr-2 w-4 h-4"></i>
-                                                Processing...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i data-feather="check" className="w-4 h-4 mr-2"></i>
-                                                Apply
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                            <div className="flex flex-col gap-4">
+                                <button
+                                    type="button"
+                                    onClick={applyCrop}
+                                    disabled={isUploading}
+                                    className="w-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white py-5 rounded-[1.5rem] text-xl font-bold shadow-xl shadow-blue-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-50"
+                                >
+                                    {isUploading ? (
+                                        <>
+                                            <Loader className="animate-spin w-6 h-6" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="w-6 h-6" />
+                                            Set Profile Photo
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={cancelCrop}
+                                    disabled={isUploading}
+                                    className="w-full py-5 rounded-[1.5rem] text-lg font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
+                                >
+                                    Cancel
+                                </button>
                             </div>
                         </div>
                     </div>

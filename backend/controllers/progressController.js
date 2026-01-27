@@ -94,8 +94,9 @@ exports.getHistory = async (req, res) => {
             difficulty: problemMap[h.problemId]?.difficulty || 'Medium',
             status: h.status,
             bestAccuracy: h.bestAccuracy,
-            timeTaken: h.timer?.duration || 0,
-            lastSubmission: h.lastSubmission
+            timeTaken: h.timeSpent !== undefined ? h.timeSpent : 0,
+            lastSubmission: h.lastSubmission,
+            solvedAt: h.solvedAt  // NEW: Include solvedAt for date display
         }));
 
         res.json({
@@ -114,9 +115,12 @@ exports.getHistory = async (req, res) => {
 // @access  Private
 exports.getUserStats = async (req, res) => {
     try {
+        console.log('⚡ getUserStats called for:', req.user.id);
         const userId = req.user.id;
 
         const user = await User.findById(userId);
+        if (!user) console.warn('⚠️ User not found in DB for stats:', userId);
+
         const userStats = user ? {
             problemsSolved: user.problemsSolved,
             totalPoints: user.totalPoints,
@@ -126,12 +130,12 @@ exports.getUserStats = async (req, res) => {
 
         // Basic Counts from Progress
         const userProgress = await Progress.find({ userId });
+        console.log(`Found ${userProgress.length} progress records for stats.`);
 
         const stats = {
             solved: userProgress.filter(p => p.status === 'solved').length,
             attempted: userProgress.filter(p => p.status === 'attempted').length,
-            todo: 0 // 'todo' usually not saved in Progress unless explicitly started. Or logic is total - (solved+attempted). 
-            // But frontend might expect specific counts.
+            todo: 0
         };
 
         // Difficulty Breakdown (Solved Problems Only)

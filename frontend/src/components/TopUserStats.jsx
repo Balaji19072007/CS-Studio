@@ -1,16 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import * as feather from 'feather-icons';
+import { TrendingUp, Crown, Award } from 'lucide-react';
 
 // Top User Stats Component
 const TopUserStats = ({ rankData }) => {
-    // Re-run feather icons on mount/update
-    React.useEffect(() => {
-        if (typeof feather !== 'undefined' && feather.replace) {
-            feather.replace();
-        }
-    });
-
     if (!rankData || !rankData.user) return null;
     const { user, rank } = rankData;
     const hasParticipated = (user.problemsSolved || 0) > 0;
@@ -18,9 +11,9 @@ const TopUserStats = ({ rankData }) => {
     return (
         <div className="mb-8">
             {hasParticipated ? (
-                <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-md rounded-3xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-xl relative overflow-hidden group">
+                <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <i data-feather="trending-up" className="w-32 h-32 text-gray-900 dark:text-white"></i>
+                        <TrendingUp className="w-32 h-32 text-gray-900 dark:text-white" />
                     </div>
 
                     <div className="flex flex-col sm:flex-row lg:flex-col items-center justify-between gap-6 relative z-10 w-full">
@@ -31,7 +24,7 @@ const TopUserStats = ({ rankData }) => {
                                     <span className="text-3xl font-black text-gray-900 dark:text-white">#{rank}</span>
                                 </div>
                                 <div className="absolute -top-2 -right-2 bg-yellow-500 w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                    <i data-feather="crown" className="w-3 h-3 text-black fill-current"></i>
+                                    <Crown className="w-3 h-3 text-black fill-current" />
                                 </div>
                             </div>
                             <div className="text-center sm:text-left lg:text-center">
@@ -63,7 +56,7 @@ const TopUserStats = ({ rankData }) => {
             ) : (
                 <div className="bg-white dark:bg-gray-800/50 backdrop-blur rounded-3xl p-8 border border-dashed border-gray-200 dark:border-gray-600 text-center hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors">
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700/50 mb-4 text-blue-500 dark:text-blue-400">
-                        <i data-feather="award" className="w-7 h-7"></i>
+                        <Award className="w-7 h-7" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Join the Leaderboard</h3>
                     <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6 text-sm">

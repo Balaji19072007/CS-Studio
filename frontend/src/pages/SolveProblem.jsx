@@ -3,7 +3,7 @@
 // Now supports detailed test results from backend "runTestCases".
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import * as feather from 'feather-icons';
 import { fetchProblemById, submitSolution, runTestCases, fetchProblemTestCases } from '../api/problemApi.js';
 import { testAPI } from '../config/api.js';
@@ -101,6 +101,8 @@ const SolveProblem = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const fromPath = location.state?.from || '/problems';
 
   const rawId = searchParams.get('problemId');
   const problemId = rawId ? parseInt(rawId, 10) : NaN;
@@ -116,6 +118,7 @@ const SolveProblem = () => {
 
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('Run your code to see the output here.');
+  const [mobileSubTab, setMobileSubTab] = useState('code'); // 'code' | 'output'
   const [isRunning, setIsRunning] = useState(false);
   const [outputError, setOutputError] = useState(false);
 
@@ -210,7 +213,8 @@ const SolveProblem = () => {
         // Fetch test cases
         let fetchedTc = [];
         try {
-          fetchedTc = await fetchProblemTestCases(problemId);
+          const tcResponse = await fetchProblemTestCases(problemId);
+          fetchedTc = tcResponse.testCases || [];
         } catch (e) {
           console.warn("Could not fetch test cases", e);
         }
@@ -331,6 +335,10 @@ const SolveProblem = () => {
 
   // ---------- Execute / Stop ----------
   const handleRunCode = async () => {
+    if (window.innerWidth < 1024) {
+      setMobileSubTab('output');
+    }
+
     const currentCode = editorRef.current?.getCode() || code;
     if (!currentCode.trim()) {
       handleOutputReceived('Execution Failed: Please write some code first.\n', true, false);
@@ -453,7 +461,11 @@ const SolveProblem = () => {
     setOutputError(false);
 
     try {
-      const result = await submitSolution(problemId, currentCode, language);
+      // Calculate time spent
+      const prog = ProblemManager.getProblemProgress(problemId) || {};
+      const timeSpent = prog.timeElapsed + (prog.startTime > 0 ? (Date.now() - prog.startTime) : 0);
+
+      const result = await submitSolution(problemId, currentCode, language, timeSpent);
 
       const isSolved = Boolean(result.isSolved);
 
@@ -466,15 +478,23 @@ const SolveProblem = () => {
         setOutput('Solution Verified: Accepted!\nAll test cases passed.');
         ProblemManager.markAsSolved(problemId);
 
+        // Invalidate dashboard cache so it refreshes on next visit
+        sessionStorage.setItem('invalidate_dashboard_cache', 'true');
+        console.log('✅ Dashboard cache invalidation flag set');
+
         if (timerIntervalRef.current) {
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
         }
 
-        const scrollToId = `problem-${problemId}`;
-        setTimeout(() => {
-          navigate('/problems', { state: { scrollToId: scrollToId } });
-        }, 1500);
+        // const scrollToId = `problem-${problemId}`;
+        // setTimeout(() => {
+        //     if (fromPath === '/') {
+        //         navigate('/');
+        //     } else {
+        //         navigate('/problems', { state: { scrollToId: scrollToId } });
+        //     }
+        // }, 1500);
       } else {
         let statusMsg = `Submission failed: ${result.accuracy}% Accuracy.`;
         statusMsg += '\nPlease ensure your solution handles all edge cases.';
@@ -588,19 +608,20 @@ const SolveProblem = () => {
       <NotificationPopup />
 
       {/* Mobile header (Simplified) */}
-      <div className="lg:hidden flex-none bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm mt-16">
+      <div className="lg:hidden flex-none bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="flex items-center justify-between p-4">
-          <button onClick={() => navigate('/problems')} className={`text-gray-500`}><Icon name="arrow-left" /></button>
+          <button onClick={() => navigate(fromPath)} className={`text-gray-500`}><Icon name="arrow-left" /></button>
           <span className={`font-bold ${textPrimary}`}>#{displayId} {problem.title}</span>
           <StatusBadge />
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden max-w-screen-2xl mx-auto w-full px-0 lg:px-8 py-4 lg:py-6">
+      {/* Removed py-4 on mobile to attach content to header */}
+      <div className="flex-1 flex flex-col overflow-hidden max-w-screen-2xl mx-auto w-full px-0 lg:px-8 py-0 lg:py-6">
         {/* Desktop Header */}
         <div className="hidden lg:flex justify-between items-center mb-6 text-left">
-          <button onClick={() => navigate('/problems', { state: { scrollToId: `problem-${displayId}` } })} className={`inline-flex items-center px-4 py-2 border ${borderClass} rounded-lg text-sm font-medium ${isDark ? 'text-gray-200 bg-gray-700' : 'text-gray-700 bg-white'} ${linkHover} transition-colors`}>
-            <Icon name="arrow-left" className="w-4 h-4 mr-2" /> Back to Problems
+          <button onClick={() => navigate(fromPath, fromPath === '/problems' ? { state: { scrollToId: `problem-${displayId}` } } : {})} className={`inline-flex items-center px-4 py-2 border ${borderClass} rounded-lg text-sm font-medium ${isDark ? 'text-gray-200 bg-gray-700' : 'text-gray-700 bg-white'} ${linkHover} transition-colors`}>
+            <Icon name="arrow-left" className="w-4 h-4 mr-2" /> {fromPath === '/' ? 'Back to Dashboard' : 'Back to Problems'}
           </button>
           {ProblemManager.getProblemProgress(problemId)?.solved && nextProblemId && (
             <button onClick={() => navigate(`/solve?problemId=${nextProblemId}`)} className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
@@ -610,15 +631,34 @@ const SolveProblem = () => {
         </div>
 
         <div className="flex-1 flex flex-col lg:flex-row gap-0 lg:gap-6 overflow-hidden">
-          {/* LEFT COLUMN: Tabs (Description, Test Cases, Solution) */}
-          <div className="lg:w-1/2 flex flex-col h-full overflow-hidden">
+
+          {/* MOBILE TAB BAR (lg:hidden) */}
+          {/* Fixed at top of content area on mobile */}
+          <div className="lg:hidden flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            {['description', 'code', 'testcases', 'solution'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 transition-colors ${activeTab === tab
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+              >
+                {tab === 'testcases' ? 'Tests' : tab}
+              </button>
+            ))}
+          </div>
+
+          {/* LEFT COLUMN: Tabs (Description, Test Cases, Solution, [Desktop only: Code view is separate]) */}
+          {/* Logic: On Mobile, hide this column if activeTab is 'code'. On Desktop, always show. */}
+          <div className={`lg:w-1/2 flex flex-col h-full overflow-hidden ${activeTab === 'code' ? 'hidden lg:flex' : 'flex'}`}>
             <div className={`${cardBg} rounded-none lg:rounded-xl shadow-none lg:shadow-2xl h-full transition-colors border-b lg:border-b-0 ${borderClass} overflow-hidden flex flex-col`}>
 
-              {/* Tabs Header */}
-              <div className={`flex border-b ${borderClass} bg-gray-50 dark:bg-gray-800`}>
+              {/* Desktop Tabs Header (Hidden on Mobile) */}
+              <div className={`hidden lg:flex border-b ${borderClass} bg-gray-50 dark:bg-gray-800`}>
                 <button
                   onClick={() => setActiveTab('description')}
-                  className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'description' ? 'border-green-500 text-green-500 bg-white dark:bg-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                  className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'description' || activeTab === 'code' ? 'border-green-500 text-green-500 bg-white dark:bg-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                 >Description</button>
                 <button
                   onClick={() => setActiveTab('testcases')}
@@ -634,10 +674,11 @@ const SolveProblem = () => {
               <div className="p-4 lg:p-6 overflow-y-auto flex-1 custom-scrollbar">
 
                 {/* 1. DESCRIPTION TAB */}
-                {activeTab === 'description' && (
+                {/* Show if tab is description OR if tab is code (on desktop, left pane defaults to desc) */}
+                {(activeTab === 'description' || activeTab === 'code') && (
                   <div className={`${isDark ? 'text-gray-300' : 'text-gray-700'} space-y-6 text-left`}>
                     <div className="space-y-4">
-                      <h2 className={`text-2xl font-bold ${textPrimary}`}>{problem.title}</h2>
+                      <h2 className={`text-2xl font-bold ${textPrimary}`}>#{problem.problemId}. {problem.title}</h2>
                       <div className="flex gap-2">
                         <span className={`px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800`}>{language}</span>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${problem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{problem.difficulty}</span>
@@ -677,10 +718,15 @@ const SolveProblem = () => {
                         <Icon name="info" className="w-4 h-4 mr-2" /> How Test Cases Work
                       </h4>
                       <p className="text-xs text-blue-600 dark:text-blue-400">
-                        We run your code against multiple sets of inputs.
-                        <strong> Hidden test cases</strong> check for edge cases.
-                        If your output doesn't match the expected output exactly (including spaces/newlines), the test fails.
-                        Click "Run Test Cases" to verify your logic before submitting.
+                        <span className="lg:hidden">
+                          Your code runs against multiple inputs, including hidden ones. Outputs must match exactly.
+                        </span>
+                        <span className="hidden lg:inline">
+                          We run your code against multiple sets of inputs.
+                          <strong> Hidden test cases</strong> check for edge cases.
+                          If your output doesn't match the expected output exactly (including spaces/newlines), the test fails.
+                          Click "Run Test Cases" to verify your logic before submitting.
+                        </span>
                       </p>
                     </div>
 
@@ -714,10 +760,8 @@ const SolveProblem = () => {
                     )}
 
                     <div className="space-y-4">
-                      {/* If we have detailed results, show them. Otherwise fallback to just testCases list */}
-                      {(testResults?.details && testResults.details.length > 0 ? testResults.details : testCases).map((item, idx) => {
-                        // Determine if this item is a result or just a test case
-                        const isResult = typeof item.passed === 'boolean'; // check if 'passed' property exists and is boolean
+                      {(testResults?.details && testResults.details.length > 0 ? testResults.details : (testCases || [])).map((item, idx) => {
+                        const isResult = typeof item.passed === 'boolean';
                         const statusColor = isResult
                           ? (item.passed ? 'text-green-500' : 'text-red-500')
                           : 'text-gray-400';
@@ -741,7 +785,6 @@ const SolveProblem = () => {
                               </div>
                             </div>
 
-                            {/* Show actual output if failed */}
                             {isResult && !item.passed && (
                               <div className="mt-2 text-sm font-mono">
                                 <div className="text-xs text-red-400 mb-1">Your Output</div>
@@ -759,7 +802,7 @@ const SolveProblem = () => {
                           </div>
                         );
                       })}
-                      {testCases.length === 0 && <div className="text-gray-500 text-center py-8">No test cases available to display.</div>}
+                      {(!testCases || testCases.length === 0) && <div className="text-gray-500 text-center py-8">No test cases available to display.</div>}
                     </div>
                   </div>
                 )}
@@ -783,7 +826,6 @@ const SolveProblem = () => {
                       </div>
                     ) : (
                       <div className="space-y-6">
-                        {/* Solution Code & Import */}
                         <div className={`border ${borderClass} rounded-lg overflow-hidden`}>
                           <div className={`flex justify-between items-center p-3 border-b ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
                             <span className={`font-semibold text-sm ${textPrimary}`}>Solution Code</span>
@@ -799,7 +841,6 @@ const SolveProblem = () => {
                           </pre>
                         </div>
 
-                        {/* Explanation */}
                         <div className={`p-4 rounded-lg border-l-4 border-blue-500 ${isDark ? 'bg-blue-900/10' : 'bg-blue-50'}`}>
                           <h3 className="font-bold text-lg mb-2 text-blue-600 dark:text-blue-400">Explanation</h3>
                           <div className={`text-sm leading-relaxed ${textPrimary}`} dangerouslySetInnerHTML={{ __html: sanitizedSolutionExplanation }} />
@@ -808,17 +849,54 @@ const SolveProblem = () => {
                     )}
                   </div>
                 )}
-
               </div>
             </div>
           </div>
 
           {/* RIGHT COLUMN: Code Editor */}
-          <div className="lg:w-1/2 flex flex-col h-full overflow-hidden mt-6 lg:mt-0">
-            <div className={`${cardBg} rounded-none lg:rounded-xl shadow-none lg:shadow-2xl overflow-hidden flex flex-col flex-1 transition-colors border-b lg:border-b-0 ${borderClass}`}>
+          {/* Logic: On Mobile, only show if activeTab is 'code'. On Desktop, always show. */}
+          {/* Changed mt-6 to mt-0 to attach to the tab bar on mobile */}
+          <div className={`lg:w-1/2 flex flex-col h-full overflow-hidden mt-0 lg:mt-0 ${activeTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
+            <div className={`${cardBg} rounded-none lg:rounded-xl shadow-none lg:shadow-2xl overflow-hidden flex flex-col flex-1 transition-colors border-b lg:border-b ${borderClass}`}>
 
-              {/* Editor Toolbar */}
-              <div className={`flex justify-between items-center p-3 border-b ${borderClass}`}>
+              {/* MOBILE CODE TOPBAR (Replicating requested design) */}
+              <div className="lg:hidden flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                <div className="flex gap-2">
+                  {/* Main Tab */}
+                  <button
+                    onClick={() => setMobileSubTab('code')}
+                    className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${mobileSubTab === 'code'
+                      ? 'border border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border border-transparent text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
+                  >
+                    main.{language === 'Python' ? 'py' : language === 'JavaScript' ? 'js' : language === 'Java' ? 'java' : 'c'}
+                  </button>
+
+                  {/* Output Tab */}
+                  <button
+                    onClick={() => setMobileSubTab('output')}
+                    className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${mobileSubTab === 'output'
+                      ? 'border border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border border-transparent text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
+                  >
+                    Output
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleRunCode}
+                    disabled={isRunning}
+                    className="w-10 h-8 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                  >
+                    {isRunning ? <Loader size="xs" color="white" showText={false} /> : <Icon name="play" className="w-4 h-4 fill-current" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* DESKTOP TOOLBAR (Hidden on Mobile) */}
+              <div className={`hidden lg:flex justify-between items-center p-3 border-b ${borderClass}`}>
                 <h2 className={`font-semibold ${textPrimary} flex items-center`}>
                   <Icon name="code" className="w-4 h-4 mr-2" /> Editor ({language})
                 </h2>
@@ -832,8 +910,8 @@ const SolveProblem = () => {
                 </div>
               </div>
 
-              {/* Editor */}
-              <div className="flex-1 min-h-0 relative">
+              {/* Editor Container - Visible if Desktop OR (Mobile AND subTab is 'code') */}
+              <div className={`flex-1 min-h-0 relative ${mobileSubTab === 'code' ? 'block' : 'hidden lg:block'}`}>
                 <CodeEditorForSolvePage
                   ref={editorRef}
                   initialCode={code}
@@ -844,13 +922,13 @@ const SolveProblem = () => {
                 />
               </div>
 
-              {/* Actions */}
-              <div className={`p-4 border-t ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-50'} flex justify-between gap-4`}>
+              {/* Submit Button Area - Visible if Desktop OR (Mobile AND subTab is 'code') */}
+              <div className={`p-4 border-t ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-50'} flex justify-between gap-4 ${mobileSubTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
                 <button
                   onClick={isRunning ? handleStopCode : handleRunCode}
-                  className={`flex-1 py-3 rounded-lg font-bold text-white transition shadow-lg ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'}`}
+                  className={`flex-1 py-3 rounded-lg font-bold text-white transition shadow-lg lg:block hidden ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                 >
-                  {isRunning ? 'Stop' : 'Run Custom Code'}
+                  {isRunning ? 'Stop' : 'Run Code'}
                 </button>
                 <button
                   onClick={handleSubmitCode}
@@ -861,32 +939,37 @@ const SolveProblem = () => {
               </div>
             </div>
 
-            {/* Output Console */}
-            <div className={`mt-4 ${cardBg} rounded-lg shadow-lg border ${borderClass} overflow-hidden`}>
-              <div className="p-3 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            {/* Output Console Container */}
+            <div className={`
+              ${mobileSubTab === 'output' ? 'flex flex-1' : 'hidden lg:flex'} 
+              lg:mt-4 lg:rounded-xl lg:shadow-xl lg:border lg:flex-none ${borderClass} 
+              flex-col overflow-hidden bg-white dark:bg-gray-800
+              mt-0 rounded-t-none border-t-0
+            `}>
+              <div className={`p-3 border-b ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-100'} lg:block hidden`}>
                 <h4 className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Console Output</h4>
               </div>
+
               <div
-                className={`p-4 font-mono text-sm text-left h-40 overflow-y-auto whitespace-pre-wrap outline-none cursor-text ${isDark ? 'text-gray-300' : 'text-gray-800'} ${outputError ? 'text-red-400' : ''} ${isWaitingForInput ? 'ring-2 ring-yellow-500/50' : ''}`}
+                className={`p-4 font-mono text-sm text-left ${mobileSubTab === 'output' ? 'h-full' : 'h-40'} overflow-y-auto whitespace-pre-wrap outline-none cursor-text ${isDark ? 'text-gray-300' : 'text-gray-800'} ${outputError ? 'text-red-400' : ''} ${isWaitingForInput ? 'ring-2 ring-yellow-500/50' : ''}`}
                 ref={consoleRef}
                 tabIndex={0}
                 onClick={() => consoleRef.current?.focus()}
                 style={{
-                  caretColor: 'transparent' // Hide native caret to use custom blinking one
+                  caretColor: 'transparent'
                 }}
               >
-                {output}
+                {output.replace(/\\n/g, '\n')}
                 {isWaitingForInput && (
                   <span className="inline-block w-2 h-5 align-middle bg-yellow-500 animate-pulse ml-1"></span>
                 )}
               </div>
             </div>
-
           </div>
 
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -796,9 +796,38 @@ body.light-theme .dark-filter-default-style:hover {
   background: linear-gradient(135deg, #10b981, #059669);
 }
 
-.status-wrong-answer {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+
+/* ============================================ */
+/* MOBILE RESPONSIVENESS UTILITIES */
+/* ============================================ */
+
+/* SAFE AREA SPACING FOR BOTTOM NAV */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* HIDE/SHOW UTILITIES */
+@media (max-width: 639px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Adjustments for Mobile Bottom Nav spacing */
+@media (max-width: 639px) {
+  body {
+    padding-bottom: 4rem;
+    /* Height of bottom nav */
+  }
+}
+
+
 
 .status-pending {
   background: linear-gradient(135deg, #f59e0b, #d97706);

@@ -61,7 +61,7 @@ const CodeEditorForSolvePage = forwardRef(({
     }
 
     // Set up compiler socket with the centralized service
-    socketRef.current = setupCompilerSocket((output, isError, isRunningState, isWaitingInput) => {
+    setupCompilerSocket((output, isError, isRunningState, isWaitingInput) => {
       if (isWaitingInput !== undefined) {
         setIsWaitingForInput(isWaitingInput);
       }
@@ -74,12 +74,15 @@ const CodeEditorForSolvePage = forwardRef(({
     return () => {
       // Don't disconnect the socket service completely as it might be used elsewhere
       // Just remove the compiler-specific event listeners
-      if (socketRef.current) {
-        socketRef.current.off('execution-result');
-        socketRef.current.off('execution-output');
-        socketRef.current.off('waiting-for-input');
-        socketRef.current.off('connect_error');
-        socketRef.current.off('disconnect');
+      // socketService.removeCompilerListeners() would be cleaner if exposed, 
+      // but modifying existing method is safer.
+      const socket = socketService.socket;
+      if (socket) {
+        socket.off('execution-result');
+        socket.off('execution-output');
+        socket.off('waiting-for-input');
+        socket.off('connect_error');
+        socket.off('disconnect');
       }
     };
   }, [onOutputReceived]);
@@ -100,7 +103,7 @@ const CodeEditorForSolvePage = forwardRef(({
         const inputToSend = inputBufferRef.current;
 
         // 1. Send the input via the problemApi helper
-        sendInputToProgram(socketRef.current, inputToSend);
+        sendInputToProgram(inputToSend);
 
         // 2. Notify parent to append a newline after the echoed input
         if (onOutputReceived) onOutputReceived('\n', false, true);
@@ -139,7 +142,7 @@ const CodeEditorForSolvePage = forwardRef(({
 
 
   const handleRunCode = useCallback((codeToRun) => {
-    if (!socketRef.current || !socketService.isConnected) {
+    if (!socketService.isConnected) {
       if (onOutputReceived) onOutputReceived('Compiler service is disconnected. Check network.', true, false);
       return;
     }
@@ -150,7 +153,7 @@ const CodeEditorForSolvePage = forwardRef(({
 
     // FIX: Use imported sendCodeForExecution helper
     try {
-      sendCodeForExecution(socketRef.current, codeToRun, executionLanguage);
+      sendCodeForExecution(codeToRun, executionLanguage);
     } catch (error) {
       if (onOutputReceived) onOutputReceived(`Execution Error: ${error.message}`, true, false);
     }
@@ -160,7 +163,7 @@ const CodeEditorForSolvePage = forwardRef(({
   const handleStopExecution = useCallback(() => {
     // FIX: Use imported stopCodeExecution helper
     try {
-      stopCodeExecution(socketRef.current);
+      stopCodeExecution();
     } catch (error) {
       console.error('Error stopping execution:', error);
     }
@@ -215,7 +218,8 @@ const CodeEditorForSolvePage = forwardRef(({
             scrollbar: {
               vertical: 'visible',
               horizontal: 'visible',
-              useShadows: false
+              useShadows: false,
+              alwaysConsumeMouseWheel: false,
             }
           }}
         />

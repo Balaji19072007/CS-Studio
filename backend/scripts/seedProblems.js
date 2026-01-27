@@ -1,14 +1,12 @@
-const mongoose = require('mongoose');
+const { db } = require('../config/firebase');
+const { collection, doc, setDoc, writeBatch } = require('firebase/firestore');
 const fs = require('fs');
 const path = require('path');
-const Problem = require('../models/Problem');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const seedProblems = async () => {
     try {
-        console.log('Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('MongoDB Connected');
+        console.log('🔗 Connecting to Firestore...');
 
         // Read JSON file
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
@@ -16,28 +14,46 @@ const seedProblems = async () => {
 
         console.log(`Found ${problemData.length} problems to seed.`);
 
-        // Clear existing
-        await Problem.deleteMany({});
-        console.log('Cleared existing problems.');
+        const batch = writeBatch(db);
+        let count = 0;
 
-        // Insert new
-        // Rename 'id' to 'problemId' if necessary, or ensure schema matches.
-        // Schema has 'problemId' with alias 'id'.
-        // Mongoose might not automatically map 'id' in input to 'problemId' unless configured?
-        // Let's explicitly map it to be safe.
-        const docs = problemData.map(p => ({
-            ...p,
-            problemId: p.id, // Ensure problemId is set
-            // Remove 'id' if it causes conflicts, though alias usually handles getters.
-            // But for creation, it's safer to use the real field name.
-        }));
+        for (const p of problemData) {
+            // Use problemId as document ID if unique, or let Firestore generate.
+            // Problem model uses 'problemId' as a field.
+            // Let's use 'problemId' value as the Doc ID for easier lookup relative to integer ID?
+            // Or just a random ID. The Problem model query logic matches 'problemId' field.
+            // Let's use auto-id but ensure data is correct.
 
-        await Problem.insertMany(docs);
-        console.log('Seeded problems successfully.');
+            // Actually, for consistency, let's try to use the problem ID if it's a string, 
+            // but it's an integer in JSON (1, 2, 3...). 
+            // Firestore IDs must be strings.
+            const docRef = doc(collection(db, 'problems')); // Auto ID
+
+            const problemDoc = {
+                ...p,
+                problemId: p.id,
+                // Ensure array fields are arrays
+                examples: p.examples || [],
+                hints: p.hints || [],
+                testCases: p.testCases || [],
+                solution: p.solution || {},
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            // Remove 'id' if we want to stick to 'problemId'
+            delete problemDoc.id;
+
+            batch.set(docRef, problemDoc);
+            count++;
+        }
+
+        await batch.commit();
+        console.log(`✅ Seeded ${count} problems successfully into Firestore.`);
 
         process.exit(0);
     } catch (err) {
-        console.error('Seeding failed:', err);
+        console.error('❌ Seeding failed:', err);
         process.exit(1);
     }
 };

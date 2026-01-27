@@ -409,165 +409,174 @@ const Home = () => {
     return (
         <div className="min-h-screen dark-gradient-secondary">
 
-            <div id="hero-section" className="gradient-bg text-white relative overflow-hidden min-h-[90vh] flex items-center border-b border-gray-700">
+            <div id="hero-section" className="gradient-bg text-white relative overflow-hidden min-h-screen flex items-center border-b border-gray-700">
                 <AbstractBackground />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 relative z-20 w-full">
-                    <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-center">
-                        <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-                            <h1 className="text-4xl tracking-tight font-extrabold sm:text-6xl md:text-7xl">
-                                <span className="block text-white">Master Algorithms with</span>
-                                <span className="block text-primary-400">Interactive Visual Coding</span>
+                <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20 lg:py-24 relative z-20 w-full">
+                    <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
+                        {/* Text Content */}
+                        <div className="text-center lg:text-left lg:col-span-6 space-y-8">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+                                <span className="block text-white mb-2">Master Coding</span>
+                                <span className="block text-primary-400">The Visual Way</span>
                             </h1>
-                            <p className="mt-6 text-xl text-gray-300 max-w-xl">
-                                Instantly transform complex <strong>Data Structures</strong> and <strong>Algorithms</strong> into visual steps. Code, run, and see exactly <strong>why</strong> your solution works (or doesn't).
+
+                            <p className="text-base sm:text-lg text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                                Learn algorithms and data structures with interactive visualizations. See your code come to life.
                             </p>
-                            <div className="mt-10 sm:max-w-lg sm:mx-auto lg:text-left lg:mx-0">
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <Link
-                                        to={handleStartLearning()}
-                                        className="dark-btn w-full flex items-center justify-center px-8 py-4 text-lg rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.03]"
-                                    >
-                                        Start Your Free Trial
-                                    </Link>
-                                    <Link
-                                        to="/problems"
-                                        className="dark-btn-secondary w-full flex items-center justify-center px-8 py-4 text-lg rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.03]"
-                                    >
-                                        Browse Challenges
-                                    </Link>
-                                </div>
-                                <span className="text-primary-400 font-semibold">{userStats?.totalUsers?.toLocaleString() || 0}+</span> developers are currently accelerating their careers.
+
+                            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto lg:mx-0">
+                                <Link
+                                    to={handleStartLearning()}
+                                    className="dark-btn flex items-center justify-center px-6 py-3.5 text-base font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
+                                >
+                                    Start Free Trial
+                                </Link>
+                                <Link
+                                    to="/problems"
+                                    className="dark-btn-secondary flex items-center justify-center px-6 py-3.5 text-base font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
+                                >
+                                    Explore Problems
+                                </Link>
                             </div>
+
+                            <p className="text-sm text-gray-400">
+                                Join <span className="text-primary-400 font-semibold">{userStats?.totalUsers?.toLocaleString() || 0}+</span> developers
+                            </p>
                         </div>
 
-                        <div className="mt-16 lg:mt-0 lg:col-span-6 flex justify-center w-full">
-                            <div className="hidden lg:block w-full justify-center">
+                        {/* Visual Content */}
+                        <div className="mt-12 lg:mt-0 lg:col-span-6">
+                            {/* Desktop Demo */}
+                            <div className="hidden lg:block">
                                 <InteractiveDemo />
                             </div>
 
-                            <div className="lg:hidden w-full max-w-sm mx-auto grid grid-cols-2 gap-4">
-                                {FEATURE_DATA.slice(0, 4).map((feature, index) => (
-                                    <div
-                                        key={index}
-                                        className="dark-glass p-5 rounded-xl shadow-xl border border-gray-700 flex flex-col items-start space-y-2"
-                                    >
-                                        <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center text-white shadow-md">
-                                            <i data-feather={feature.icon} className="w-5 h-5 text-primary-400"></i>
+                            {/* Mobile Simplified View */}
+                            <div className="lg:hidden space-y-4">
+                                <div className="dark-glass p-6 rounded-2xl border border-gray-700">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                                            <i data-feather="code" className="w-6 h-6 text-primary-400"></i>
                                         </div>
-                                        <h3 className="text-base font-semibold text-white leading-tight">{feature.title}</h3>
-                                        <p className="text-gray-400 text-xs">{feature.description.split(',')[0]}</p>
+                                        <div>
+                                            <h3 className="text-white font-semibold">Interactive Learning</h3>
+                                            <p className="text-gray-400 text-sm">Visual code execution</p>
+                                        </div>
                                     </div>
-                                ))}
-                                <Link
-                                    to="/problems"
-                                    className="col-span-2 dark-btn w-full text-center mt-2 inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.03]"
-                                >
-                                    Try a Free Challenge
-                                </Link>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="dark-glass p-4 rounded-xl border border-gray-700 text-center">
+                                        <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center mx-auto mb-2">
+                                            <i data-feather="zap" className="w-5 h-5 text-primary-400"></i>
+                                        </div>
+                                        <p className="text-white text-sm font-medium">Fast Compiler</p>
+                                    </div>
+                                    <div className="dark-glass p-4 rounded-xl border border-gray-700 text-center">
+                                        <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center mx-auto mb-2">
+                                            <i data-feather="award" className="w-5 h-5 text-primary-400"></i>
+                                        </div>
+                                        <p className="text-white text-sm font-medium">Get Certified</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Enhanced Stats Section - Simple & Attractive */}
-            <div className="py-12 sm:py-16 dark-gradient-secondary border-b border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Elevated Stats Box */}
-                    <div className="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-8 lg:p-12">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-white mb-2">
+            {/* Stats Section - Clean & Spacious */}
+            <div className="py-12 sm:py-16 lg:py-20 dark-gradient-secondary border-b border-gray-700">
+                <div className="max-w-6xl mx-auto px-6 sm:px-8">
+                    <div className="bg-gray-800/50 rounded-3xl border border-gray-700 p-8 sm:p-10 lg:p-12">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+                            <div className="text-center space-y-2">
+                                <div className="text-3xl sm:text-4xl font-bold text-white">
                                     {userStats?.totalUsers?.toLocaleString() || 0}+
                                 </div>
-                                <div className="text-gray-400">Active Learners</div>
-
+                                <div className="text-sm sm:text-base text-gray-400">Active Learners</div>
                             </div>
 
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-white mb-2">500+</div>
-                                <div className="text-gray-400">Interactive Lessons</div>
-
+                            <div className="text-center space-y-2">
+                                <div className="text-3xl sm:text-4xl font-bold text-white">500+</div>
+                                <div className="text-sm sm:text-base text-gray-400">Lessons</div>
                             </div>
 
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-white mb-2">250+</div>
-                                <div className="text-gray-400">Coding Problems</div>
+                            <div className="text-center space-y-2">
+                                <div className="text-3xl sm:text-4xl font-bold text-white">250+</div>
+                                <div className="text-sm sm:text-base text-gray-400">Problems</div>
                             </div>
 
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-white mb-2">
+                            <div className="text-center space-y-2">
+                                <div className="text-3xl sm:text-4xl font-bold text-white">
                                     {userStats?.satisfactionRate || 100}%
                                 </div>
-                                <div className="text-gray-400">Satisfaction Rate</div>
-
+                                <div className="text-sm sm:text-base text-gray-400">Satisfaction</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Rest of your sections remain the same */}
-            <div className="py-12 sm:py-20 dark-gradient-secondary">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <h2 className="text-base text-primary-500 font-semibold tracking-wide uppercase">The CS Studio Advantage</h2>
-                        <p className="mt-2 text-4xl leading-8 font-extrabold tracking-tight text-white sm:text-5xl">
-                            Features Designed to Accelerate Mastery
+            {/* Features Section */}
+            <div className="py-16 sm:py-20 lg:py-24 dark-gradient-secondary">
+                <div className="max-w-6xl mx-auto px-6 sm:px-8">
+                    <div className="text-center mb-12 sm:mb-16 space-y-4">
+                        <h2 className="text-sm sm:text-base text-primary-500 font-semibold tracking-wide uppercase">Why Choose CS Studio</h2>
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
+                            Learn Faster with Visual Tools
                         </p>
-                        <p className="mt-4 max-w-2xl text-xl text-gray-400 mx-auto">
-                            Go beyond passive reading with the tools industry professionals use for deep understanding.
+                        <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto">
+                            Interactive features designed for deep understanding
                         </p>
                     </div>
 
-                    <div className="mt-16">
-                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                            {FEATURE_DATA.map((feature, index) => (
-                                <div key={index} className="dark-glass p-8 rounded-xl shadow-xl card-hover transition-all duration-500 hover:border-primary-500">
-                                    <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-primary-500 to-primary-400 flex items-center justify-center text-white shadow-lg mb-4">
-                                        <i data-feather={feature.icon} className="w-6 h-6"></i>
-                                    </div>
-                                    <h3 className="mt-4 text-xl font-semibold text-white">{feature.title}</h3>
-                                    <p className="mt-2 text-gray-400">
-                                        {feature.description}
-                                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                        {FEATURE_DATA.map((feature, index) => (
+                            <div key={index} className="dark-glass p-6 sm:p-8 rounded-2xl border border-gray-700 hover:border-primary-500/50 transition-all duration-300">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r from-primary-500 to-primary-400 flex items-center justify-center mb-4">
+                                    <i data-feather={feature.icon} className="w-6 h-6 text-white"></i>
                                 </div>
-                            ))}
-                        </div>
+                                <h3 className="text-lg sm:text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+                                    {feature.description}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
 
-            <div className="py-20 dark-gradient-secondary border-t border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <h2 className="text-base text-primary-500 font-semibold tracking-wide uppercase">Your Path to Employment</h2>
-                        <p className="mt-2 text-4xl leading-8 font-extrabold tracking-tight text-white sm:text-5xl">
-                            Structured Roadmaps for Job Readiness
+            {/* Learning Paths */}
+            <div className="py-16 sm:py-20 lg:py-24 dark-gradient-secondary border-t border-gray-700">
+                <div className="max-w-6xl mx-auto px-6 sm:px-8">
+                    <div className="text-center mb-12 sm:mb-16 space-y-4">
+                        <h2 className="text-sm sm:text-base text-primary-500 font-semibold tracking-wide uppercase">Your Learning Path</h2>
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
+                            Structured Roadmaps
                         </p>
-                        <p className="mt-4 max-w-2xl text-xl text-gray-400 mx-auto">
-                            Follow our complete learning paths—each step is designed to fill knowledge gaps and build a portfolio.
+                        <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto">
+                            Follow career-focused paths to build job-ready skills
                         </p>
                     </div>
 
-                    <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                         {PATHS_DATA.map((path, index) => (
-                            <div key={index} className="dark-glass p-6 rounded-2xl shadow-xl card-hover border border-gray-700">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-md">
-                                        <i data-feather={path.icon} className="w-6 h-6"></i>
+                            <div key={index} className="dark-glass p-6 sm:p-8 rounded-2xl border border-gray-700 hover:border-primary-500/50 transition-all duration-300">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center">
+                                        <i data-feather={path.icon} className="w-6 h-6 text-primary-400"></i>
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-semibold text-white">{path.title}</h3>
                                         <p className="text-sm text-primary-400">{path.subtitle}</p>
                                     </div>
                                 </div>
-                                <p className="mt-4 text-gray-400 text-sm">{path.description}</p>
+                                <p className="text-sm text-gray-400 leading-relaxed mb-6">{path.description}</p>
                                 <Link
                                     to="/roadmaps"
-                                    className="dark-btn-secondary w-full text-center mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:bg-gray-700"
+                                    className="dark-btn-secondary w-full text-center inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300"
                                 >
                                     Explore Roadmap
                                 </Link>
@@ -577,34 +586,33 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className="py-20 dark-gradient-secondary border-t border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-base text-primary-500 font-semibold tracking-wide uppercase">Trust & Results</h2>
-                        <p className="mt-2 text-4xl leading-8 font-extrabold tracking-tight text-white sm:text-5xl">
-                            What Our Developers Say
+            {/* Testimonials */}
+            <div className="py-16 sm:py-20 lg:py-24 dark-gradient-secondary border-t border-gray-700">
+                <div className="max-w-6xl mx-auto px-6 sm:px-8">
+                    <div className="text-center mb-12 sm:mb-16 space-y-4">
+                        <h2 className="text-sm sm:text-base text-primary-500 font-semibold tracking-wide uppercase">Success Stories</h2>
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
+                            Loved by Developers
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory hide-scrollbar">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                         {TESTIMONIALS_DATA.map((testimonial, index) => (
-                            <div key={index} className="dark-glass p-8 rounded-2xl shadow-xl border border-gray-700 card-hover min-w-[85vw] sm:min-w-0 snap-center">
-                                <div className="flex mb-4">
+                            <div key={index} className="dark-glass p-6 sm:p-8 rounded-2xl border border-gray-700">
+                                <div className="flex gap-1 mb-4">
                                     {Array(5).fill(0).map((_, i) => (
-                                        <i key={i} data-feather="star" className="w-5 h-5 text-yellow-400 fill-current"></i>
+                                        <i key={i} data-feather="star" className="w-4 h-4 text-yellow-400 fill-current"></i>
                                     ))}
                                 </div>
-                                <p className="text-gray-300 italic">
+                                <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-6">
                                     "{testimonial.quote}"
                                 </p>
-                                <div className="flex items-center mt-6">
-                                    <div className="flex-shrink-0">
-                                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-400 flex items-center justify-center text-white font-bold">
-                                            {testimonial.initials}
-                                        </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-400 flex items-center justify-center text-white font-bold text-sm">
+                                        {testimonial.initials}
                                     </div>
-                                    <div className="ml-4">
-                                        <h4 className="text-lg font-semibold text-white">{testimonial.name}</h4>
+                                    <div>
+                                        <h4 className="text-base font-semibold text-white">{testimonial.name}</h4>
                                         <p className="text-sm text-gray-400">{testimonial.title}</p>
                                     </div>
                                 </div>
@@ -614,51 +622,33 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className="py-20 dark-gradient-secondary">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-premium-lg relative overflow-hidden py-16 px-8">
-                        <div className="absolute inset-0 bg-black opacity-5"></div>
-
-                        <div className="relative">
-                            <div className="lg:flex lg:items-center lg:justify-between">
-                                <div className="flex-1">
-                                    <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                                        <span className="block">Ready to build your career?</span>
-                                        <span className="block text-primary-100 mt-2">Access the full library, free for 7 days.</span>
-                                    </h2>
-                                    <p className="mt-4 max-w-3xl text-lg text-primary-100">
-                                        No credit card required. Cancel anytime.
-                                    </p>
-                                </div>
-                                <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
-                                    <div className="inline-flex rounded-md shadow-lg">
-                                        <Link
-                                            to="/signup"
-                                            className="dark-btn inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-semibold text-white transition-all duration-300 transform hover:scale-105"
-                                        >
-                                            Start Free Trial Now
-                                            <i data-feather="arrow-right" className="ml-3 -mr-1 w-5 h-5"></i>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            {/* CTA Section */}
+            <div className="py-16 sm:py-20 lg:py-24 dark-gradient-secondary">
+                <div className="max-w-5xl mx-auto px-6 sm:px-8">
+                    <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-3xl p-8 sm:p-12 lg:p-16 text-center">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4">
+                            Ready to Start Learning?
+                        </h2>
+                        <p className="text-base sm:text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
+                            Join thousands of developers. Start your free trial today.
+                        </p>
+                        <Link
+                            to="/signup"
+                            className="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 rounded-lg text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                        >
+                            Start Free Trial
+                            <i data-feather="arrow-right" className="ml-2 w-5 h-5"></i>
+                        </Link>
                     </div>
                 </div>
             </div>
 
-            <Link
-                to="/code"
-                id="floating-action-button"
-                className="fixed bottom-20 sm:bottom-6 right-6 h-14 w-14 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl z-50"
-            >
-                <i data-feather="edit-3" className="h-6 w-6"></i>
-            </Link>
+
 
             <button
                 id="back-to-top"
                 onClick={scrollToTop}
-                className={`fixed bottom-40 sm:bottom-24 right-6 h-12 w-12 rounded-full dark-gradient-accent text-white flex items-center justify-center transition-all duration-300 shadow-lg z-50 ${isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'
+                className={`fixed bottom-40 sm:bottom-24 right-6 h-12 w-12 rounded-full dark-gradient-accent text-white hidden md:flex items-center justify-center transition-all duration-300 shadow-lg z-50 ${isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'
                     }`}
             >
                 <i data-feather="arrow-up" className="h-5 w-5"></i>

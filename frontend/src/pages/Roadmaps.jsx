@@ -4,16 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import * as feather from 'feather-icons';
 
-// --- MOCK HOOKS FOR DEMONSTRATION (REPLACE WITH REAL useTheme) ---
-const useTheme = () => {
-  const [theme, setTheme] = useState('dark');
-  return {
-    theme,
-    toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
-    isDark: theme === 'dark'
-  };
-};
-// -----------------------------------------------------------------
+import { useTheme } from '../hooks/useTheme.jsx';
 
 // Updated roadmap data with all parts for each roadmap
 const ROADMAP_DATA = {
@@ -379,41 +370,38 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
   };
 
   return (
-    <div className={`mb-6 rounded-xl transition-all duration-300 border group ${isDark
+    <div className={`mb-4 rounded-lg transition-all duration-300 border group ${isDark
       ? 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
-      : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-lg'
+      : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-md'
       } ${isExpanded ? 'ring-1 ring-primary-500/20 border-primary-500/30' : ''}`}>
 
       {/* Header - Clickable */}
       <div
-        className="cursor-pointer p-6 sm:p-8"
+        className="cursor-pointer p-4 sm:p-5"
         onClick={handleCardClick}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+        <div className="flex flex-row items-center gap-4">
           {/* Icon Box */}
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${ROADMAP_GRADIENTS[roadmap.id]} flex items-center justify-center flex-shrink-0 shadow-lg transform group-hover:scale-105 transition-transform duration-300`}>
-            <i data-feather={ROADMAP_ICONS[roadmap.id]} className="w-8 h-8 text-white stroke-[1.5]"></i>
+          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${ROADMAP_GRADIENTS[roadmap.id]} flex items-center justify-center flex-shrink-0 shadow-md transform group-hover:scale-105 transition-transform duration-300`}>
+            <i data-feather={ROADMAP_ICONS[roadmap.id]} className="w-6 h-6 text-white stroke-[1.5]"></i>
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className={`text-2xl font-bold mb-2 tracking-tight ${isDark ? 'text-white' : 'text-gray-900 group-hover:text-primary-600'} transition-colors`}>
+            <h3 className={`text-base sm:text-lg font-bold mb-2 truncate ${isDark ? 'text-white' : 'text-gray-900 group-hover:text-primary-600'} transition-colors`}>
               {roadmap.title}
             </h3>
-            <p className={`text-base leading-relaxed mb-4 max-w-3xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {roadmap.description}
-            </p>
 
-            <div className="flex flex-wrap gap-4 text-sm font-medium">
-              <div className={`flex items-center px-3 py-1 rounded-full ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                <i data-feather="clock" className="w-4 h-4 mr-2 text-primary-500"></i>
-                <span>~6 Months</span>
+            <div className="flex flex-row items-center gap-2 text-xs font-medium overflow-x-auto no-scrollbar">
+              <div className={`flex items-center flex-shrink-0 px-2.5 py-1 rounded-md ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                <i data-feather="clock" className="w-3 h-3 mr-1.5 text-primary-500"></i>
+                <span className="whitespace-nowrap">~6 Months</span>
               </div>
 
               {roadmap.children && (
-                <div className={`flex items-center px-3 py-1 rounded-full ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                  <i data-feather="layers" className="w-4 h-4 mr-2 text-primary-500"></i>
-                  <span>{roadmap.children.length} Modules</span>
+                <div className={`flex items-center flex-shrink-0 px-2.5 py-1 rounded-md ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                  <i data-feather="layers" className="w-3 h-3 mr-1.5 text-primary-500"></i>
+                  <span className="whitespace-nowrap">{roadmap.children.length} Modules</span>
                 </div>
               )}
             </div>
@@ -423,10 +411,10 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
           <div className="flex items-center self-start sm:self-center">
             <button
               onClick={handleToggle}
-              className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-400'
+              className={`p-1.5 rounded-md transition-all duration-300 ${isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-400'
                 } ${isExpanded ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 rotate-180' : ''}`}
             >
-              <i data-feather="chevron-down" className="w-6 h-6"></i>
+              <i data-feather="chevron-down" className="w-5 h-5"></i>
             </button>
           </div>
         </div>
@@ -445,42 +433,40 @@ const RoadmapCategoryCard = ({ roadmap, isExpanded, onToggleExpand }) => {
                 </h4>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="flex flex-col gap-3">
                 {roadmap.children && roadmap.children.map((child, index) => (
                   <div
                     key={child.id}
-                    className={`relative group/card flex flex-col p-6 rounded-xl border transition-all duration-300 hover:-translate-y-1 ${isDark
+                    className={`group/card flex items-center justify-between p-4 rounded-lg border transition-all duration-300 ${isDark
                       ? 'bg-gray-800 border-gray-700 hover:border-primary-500/50 hover:bg-gray-750'
-                      : 'bg-white border-gray-200 hover:border-primary-200 hover:shadow-xl'
+                      : 'bg-white border-gray-200 hover:border-primary-200 hover:shadow-md'
                       }`}
                   >
-                    <div className="flex justify-between items-start mb-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-600'
-                        }`}>
-                        {index + 1}
+                    <div className="flex-1 min-w-0 pr-4">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                          {index + 1}
+                        </span>
+                        <h5 className={`text-base font-bold truncate ${isDark ? 'text-white' : 'text-gray-900 group-hover/card:text-primary-600'} transition-colors`}>
+                          {child.title}
+                        </h5>
                       </div>
-                      <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'
-                        }`}>
-                        {Math.ceil(child.estimated_hours / 20)} Weeks
-                      </span>
+
+                      {/* Description - Hidden on Mobile */}
+                      <p className={`text-sm hidden sm:block line-clamp-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {child.short_description}
+                      </p>
                     </div>
 
-                    <h5 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900 group-hover/card:text-primary-500'} transition-colors`}>
-                      {child.title}
-                    </h5>
-                    <p className={`text-sm mb-6 flex-grow leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {child.short_description}
-                    </p>
-
-                    <div className="pt-4 border-t border-dashed border-gray-200 dark:border-gray-700 mt-auto">
-                      <button
-                        onClick={(e) => handleViewRoadmap(e, roadmap, child)}
-                        className="w-full group inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-800 border-2 border-primary-500 text-primary-600 dark:text-primary-400 rounded-lg font-semibold hover:bg-primary-500 hover:text-white dark:hover:bg-primary-500 dark:hover:text-white transition-all duration-300"
-                      >
-                        <span>Start Path</span>
-                        <i data-feather="arrow-right" className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"></i>
-                      </button>
-                    </div>
+                    <button
+                      onClick={(e) => handleViewRoadmap(e, roadmap, child)}
+                      className={`flex-shrink-0 inline-flex items-center justify-center px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${isDark
+                        ? 'bg-primary-900/20 text-primary-400 border border-primary-500/30 hover:bg-primary-600 hover:text-white'
+                        : 'bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-600 hover:text-white'}`}
+                    >
+                      <span className="hidden sm:inline mr-2">Start</span>
+                      <i data-feather="arrow-right" className="w-4 h-4"></i>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -519,33 +505,15 @@ const Roadmaps = () => {
   return (
     <div className={`min-h-screen font-sans ${isDark ? 'bg-[#0f1117]' : 'bg-gray-50'}`}>
 
-      {/* Hero Section */}
-      <div className={`relative overflow-hidden ${isDark ? 'bg-gray-900' : 'bg-white'} border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 dark:to-gray-900/50"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10 text-center">
-          <div className="inline-flex items-center justify-center p-2 mb-8 bg-primary-100 dark:bg-primary-900/30 rounded-full">
-            <span className="px-3 py-1 text-sm font-semibold text-primary-700 dark:text-primary-300 tracking-wide uppercase">
-              Interactive Learning Paths
-            </span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
-            <span className={`block ${isDark ? 'text-white' : 'text-gray-900'}`}>Master Your</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-500">Dream Career</span>
+      {/* Hero Section - Minimal */}
+      <div className={`pt-24 pb-10 relative z-10 px-4 text-center ${isDark ? 'bg-gray-900' : 'bg-white'} border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+        <div className="max-w-4xl mx-auto">
+          <h1 className={`text-4xl font-bold tracking-tight mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            Master Your <span className="text-primary-500">Dream Career</span>
           </h1>
-          <p className={`mt-4 max-w-2xl mx-auto text-xl md:text-2xl ${isDark ? 'text-gray-400' : 'text-gray-500'} font-light`}>
+          <p className={`text-lg max-w-2xl mx-auto mb-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
             Step-by-step guides and curated resources to help you become an expert in your field.
           </p>
-
-          <div className="mt-10 flex gap-4 justify-center">
-            <button
-              onClick={() => document.getElementById('roadmaps-list').scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 rounded-full bg-primary-600 hover:bg-primary-700 text-white font-bold text-lg shadow-lg hover:shadow-primary-500/30 transition-all transform hover:-translate-y-1"
-            >
-              Explore Paths
-            </button>
-          </div>
         </div>
       </div>
 
@@ -565,42 +533,30 @@ const Roadmaps = () => {
         </div>
       </div>
 
-      {/* Final CTA */}
-      <div className="py-24">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-primary-700"></div>
-            <div className="absolute inset-0 bg-grid-white/[0.2] bg-[length:16px_16px]"></div>
-
-            <div className="relative p-12 md:p-16 text-center">
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-                Stop planning, start coding.
-              </h2>
-              <p className="text-indigo-100 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-                Join thousands of developers who are building the future with our comprehensive roadmaps.
-              </p>
-              <Link
-                to={isLoggedIn ? "/problems" : "/signup"}
-                className="inline-flex items-center px-10 py-5 border border-transparent text-lg font-bold rounded-xl text-primary-700 bg-white hover:bg-gray-50 transition-colors shadow-xl"
-              >
-                {isLoggedIn ? 'Go to Dashboard' : 'Get Started for Free'}
-                <i data-feather="arrow-right" className="ml-2 w-5 h-5"></i>
-              </Link>
-            </div>
+      {/* Final CTA - Minimal & Professional */}
+      <div className="py-20 px-4">
+        <div className={`max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+          <div className="px-6 py-12 md:p-16 text-center">
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Stop planning, start coding.
+            </h2>
+            <p className={`text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Join thousands of developers building their future with our comprehensive paths.
+            </p>
+            <Link
+              to={isLoggedIn ? "/problems" : "/signup"}
+              className={`inline-flex items-center px-8 py-4 text-base font-semibold rounded-full transition-all duration-300 shadow-lg hover:transform hover:-translate-y-1 ${isDark
+                ? 'bg-primary-600 text-white hover:bg-primary-500 shadow-primary-900/30'
+                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-200'}`}
+            >
+              {isLoggedIn ? 'Go to Dashboard' : 'Get Started Now'}
+              <i data-feather="arrow-right" className="ml-2 w-4 h-4"></i>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Floating Buttons */}
-      {/* Floating Buttons - Moved up for mobile bottom bar */}
-      <div className={`fixed bottom-24 sm:bottom-8 right-8 flex flex-col gap-4 z-50 transition-opacity duration-300 ${showBackToTop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="p-4 rounded-full bg-transparent hover:bg-gray-200/20 dark:hover:bg-gray-700/30 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-        >
-          <i data-feather="arrow-up" className="w-8 h-8 stroke-[2.5]"></i>
-        </button>
-      </div>
+
     </div>
   );
 };

@@ -4,11 +4,56 @@ const router = express.Router();
 const problemController = require('../controllers/problemController');
 const authMiddleware = require('../middleware/authMiddleware'); // NEW: Import auth middleware
 
+const jwt = require('jsonwebtoken'); // NEW: Import jwt for manual verification
+
 // @route   GET /api/problems
-router.get('/', problemController.getProblems);
+// Use optional auth to populate req.user if token exists
+router.get('/', async (req, res, next) => {
+    // Optional Auth Logic
+    const token = req.header('x-auth-token') ||
+        req.header('Authorization')?.replace('Bearer ', '') ||
+        req.query.token;
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded.user) {
+                req.user = decoded.user;
+            }
+        } catch (err) {
+            // Token invalid/expired - proceed as guest
+            console.log('Optional auth failed for problems list (proceeding as guest):', err.message);
+            req.user = null;
+        }
+    } else {
+        req.user = null;
+    }
+    next();
+}, problemController.getProblems);
 
 // @route   GET /api/problems/daily
-router.get('/daily', problemController.getDailyProblem);
+router.get('/daily', async (req, res, next) => {
+    // Optional Auth Logic
+    const token = req.header('x-auth-token') ||
+        req.header('Authorization')?.replace('Bearer ', '') ||
+        req.query.token;
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded.user) {
+                req.user = decoded.user;
+            }
+        } catch (err) {
+            // Token invalid/expired - proceed as guest
+            console.log('Optional auth failed (proceeding as guest):', err.message);
+            req.user = null;
+        }
+    } else {
+        req.user = null;
+    }
+    next();
+}, problemController.getDailyProblem);
 
 // @route   GET /api/problems/recommended
 router.get('/recommended', authMiddleware, problemController.getRecommendedProblems);

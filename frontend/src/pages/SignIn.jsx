@@ -161,56 +161,56 @@ const SignIn = () => {
   // --- Component Render ---
 
   return (
-    <div className="min-h-screen dark-gradient-secondary flex items-center justify-center p-4 py-12">
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div className="min-h-screen dark-gradient-secondary flex items-center justify-center p-6 py-12">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
         {/* LEFT COLUMN: Informational Content */}
         <div className="hidden lg:block">
-          <div className="max-w-md">
-            <div className="flex items-center mb-8">
+          <div className="max-w-md space-y-8">
+            <div className="flex items-center gap-3">
               <div className="h-12 w-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
                 <i data-feather="code" className="text-white text-xl"></i>
               </div>
-              <span className="ml-3 text-3xl font-bold nav-user-text">CS Studio</span>
+              <span className="text-3xl font-bold nav-user-text">CS Studio</span>
             </div>
 
-            <h1 className="text-4xl font-extrabold text-white mb-6">
-              Continue Your<br />
-              <span className="block text-primary-400">Coding Journey</span>
-            </h1>
-
-            <p className="text-lg text-gray-400 mb-10">
-              Sign in to access your personalized learning path, track progress, and join our community of 15,000+ developers worldwide.
-            </p>
-
             <div className="space-y-4">
-              <div className="flex items-center text-gray-300">
-                <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center mr-4">
-                  <i data-feather="book-open" className="text-primary-400 w-5 h-5"></i>
+              <h1 className="text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                Welcome Back
+              </h1>
+              <p className="text-lg text-gray-400 leading-relaxed">
+                Continue your coding journey and track your progress
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <i data-feather="book-open" className="text-primary-400 w-6 h-6"></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Pick Up Where You Left Off</h3>
-                  <p className="text-gray-400 text-sm">Access saved progress and course bookmarks.</p>
+                  <h3 className="font-semibold text-white mb-1">Resume Learning</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">Pick up where you left off</p>
                 </div>
               </div>
 
-              <div className="flex items-center text-gray-300">
-                <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center mr-4">
-                  <i data-feather="award" className="text-primary-400 w-5 h-5"></i>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <i data-feather="award" className="text-primary-400 w-6 h-6"></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Track Progress & Ranks</h3>
-                  <p className="text-gray-400 text-sm">Monitor your skill growth and leaderboard position.</p>
+                  <h3 className="font-semibold text-white mb-1">Track Progress</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">Monitor your skill growth</p>
                 </div>
               </div>
 
-              <div className="flex items-center text-gray-300">
-                <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center mr-4">
-                  <i data-feather="users" className="text-primary-400 w-5 h-5"></i>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <i data-feather="users" className="text-primary-400 w-6 h-6"></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Community Support</h3>
-                  <p className="text-gray-400 text-sm">Connect with fellow learners and get help.</p>
+                  <h3 className="font-semibold text-white mb-1">Join Community</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">Connect with learners</p>
                 </div>
               </div>
             </div>
@@ -221,24 +221,24 @@ const SignIn = () => {
         <div className="w-full max-w-md mx-auto">
           {/* Mobile Logo Header */}
           <div className="lg:hidden flex justify-center mb-8">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-md">
                 <i data-feather="code" className="text-white"></i>
               </div>
-              <span className="ml-2 text-xl font-bold nav-user-text">CS Studio</span>
+              <span className="text-xl font-bold nav-user-text">CS Studio</span>
             </Link>
           </div>
 
-          <div className="dark-glass rounded-lg shadow-2xl p-8 border border-gray-700">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white">Sign In</h2>
-              <p className="mt-1 text-gray-400 text-sm">Access your personalized dashboard</p>
+          <div className="dark-glass rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700">
+            <div className="text-center mb-8 space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">Sign In</h2>
+              <p className="text-sm text-gray-400">Access your dashboard</p>
             </div>
 
             {/* Message Display */}
             {message.type && (
               <div
-                className={`mb-6 p-4 rounded-lg ${message.type === 'success'
+                className={`mb-6 p-4 rounded-lg text-sm ${message.type === 'success'
                   ? 'bg-green-500/20 border border-green-500 text-green-100'
                   : 'bg-red-500/20 border border-red-500 text-red-100'
                   }`}
@@ -249,9 +249,10 @@ const SignIn = () => {
 
             <form onSubmit={handleEmailSignIn} className="space-y-5">
               {/* Email Field */}
-              <div className="pt-3">
+              <div>
+                <label htmlFor="email" className="sr-only">Email</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-400">
                     <i data-feather="mail" className="w-5 h-5"></i>
                   </span>
                   <input
@@ -260,7 +261,7 @@ const SignIn = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="form-input w-full pl-10 pr-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="form-input w-full pl-12 pr-4 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                     placeholder="Email Address"
                     disabled={loading}
                     autoComplete="email"
@@ -269,9 +270,10 @@ const SignIn = () => {
               </div>
 
               {/* Password Field */}
-              <div className="pb-2">
+              <div>
+                <label htmlFor="password" className="sr-only">Password</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-400">
                     <i data-feather="lock" className="w-5 h-5"></i>
                   </span>
                   <input
@@ -280,7 +282,7 @@ const SignIn = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="form-input w-full pl-10 pr-12 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="form-input w-full pl-12 pr-12 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                     placeholder="Password"
                     disabled={loading}
                     autoComplete="current-password"
@@ -288,7 +290,7 @@ const SignIn = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                     disabled={loading}
                   >
                     <i
@@ -298,48 +300,48 @@ const SignIn = () => {
                   </button>
                 </div>
                 <div className="mt-3 flex justify-end">
-                  <a href="#" className="text-sm text-primary-400 hover:text-primary-300 font-medium transition duration-300">
+                  <a href="#" className="text-sm text-primary-400 hover:text-primary-300 transition-colors">
                     Forgot password?
                   </a>
                 </div>
               </div>
 
               {/* Submit Button */}
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center">
-                      <i data-feather="loader" className="w-5 h-5 animate-spin mr-2"></i>
-                      Signing in...
-                    </span>
-                  ) : (
-                    'Sign In'
-                  )}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <i data-feather="loader" className="w-5 h-5 animate-spin"></i>
+                    Signing in...
+                  </span>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
             </form>
 
-            {/* Divider and Google Sign In */}
-            <div className="my-6 flex items-center">
+            {/* Divider */}
+            <div className="my-6 flex items-center gap-4">
               <div className="flex-grow border-t border-gray-600"></div>
-              <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Or continue with</span>
+              <span className="text-gray-400 text-sm">Or</span>
               <div className="flex-grow border-t border-gray-600"></div>
             </div>
 
-            <div className="flex justify-center">
-              <button onClick={() => loginWithGoogle()} className="w-full py-3 bg-white text-gray-900 rounded-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center justify-center gap-3 border border-gray-200">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
-                <span>Sign in with Google</span>
-              </button>
-            </div>
+            {/* Google Sign In */}
+            <button
+              onClick={() => loginWithGoogle()}
+              className="w-full py-3.5 bg-white text-gray-900 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+              <span>Continue with Google</span>
+            </button>
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center">
-              <p className="text-gray-400">
+              <p className="text-gray-400 text-sm">
                 Don't have an account?{' '}
                 <Link
                   to="/signup"
@@ -352,11 +354,11 @@ const SignIn = () => {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-gray-400 text-sm mt-6">
+          <p className="text-center text-gray-500 text-xs mt-6">
             By signing in, you agree to our{' '}
-            <a href="#" className="underline hover:text-gray-300">Terms</a>{' '}
-            and{' '}
-            <a href="#" className="underline hover:text-gray-300">Privacy Policy</a>
+            <a href="#" className="underline hover:text-gray-400">Terms</a>
+            {' '}and{' '}
+            <a href="#" className="underline hover:text-gray-400">Privacy</a>
           </p>
         </div>
       </div>

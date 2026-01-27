@@ -11,7 +11,9 @@ class Progress {
         this.problemId = data.problemId;
         this.status = data.status || 'todo';
         this.bestAccuracy = data.bestAccuracy || 0;
-        this.lastSubmission = data.lastSubmission || new Date().toISOString();
+        this.lastSubmission = data.lastSubmission || null;
+        this.solvedAt = data.solvedAt || null; // NEW: Track when first solved
+        this.timeSpent = data.timeSpent || 0; // NEW: Track actual time spent (ms)
 
         const timer = data.timer || {};
         this.timer = {
@@ -47,7 +49,8 @@ class Progress {
                 userId,
                 problemId,
                 status: 'todo',
-                bestAccuracy: 0
+                bestAccuracy: 0,
+                timeSpent: 0
             });
             await progress.save();
         }
@@ -69,6 +72,59 @@ class Progress {
         }
 
         user.totalPoints = (user.problemsSolved * 100) + (user.averageAccuracy || 0);
+
+        // Calculate streak based on consecutive days of solving problems
+        if (solvedDocs.length > 0) {
+            // Get all solved dates sorted descending
+            const solvedDates = solvedDocs
+                .filter(doc => doc.solvedAt || doc.lastSubmission)
+                .map(doc => {
+                    // Fallback to lastSubmission if solvedAt is missing (legacy data)
+                    const dateStr = doc.solvedAt || doc.lastSubmission;
+                    if (!dateStr) return null;
+                    const date = new Date(dateStr);
+                    date.setHours(0, 0, 0, 0); // Normalize to start of day
+                    return date.getTime();
+                })
+                .filter(Boolean) // Filter out nulls
+                .sort((a, b) => b - a); // Sort descending (newest first)
+
+            // Remove duplicates (same day)
+            const uniqueDates = [...new Set(solvedDates)];
+
+            if (uniqueDates.length > 0) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTime = today.getTime();
+                const oneDayMs = 24 * 60 * 60 * 1000;
+
+                // Check if user solved something today or yesterday
+                const mostRecentDate = uniqueDates[0];
+                const daysSinceLastSolve = Math.floor((todayTime - mostRecentDate) / oneDayMs);
+
+                if (daysSinceLastSolve <= 1) {
+                    // Calculate consecutive days
+                    let streak = 1;
+                    for (let i = 1; i < uniqueDates.length; i++) {
+                        const dayDiff = Math.floor((uniqueDates[i - 1] - uniqueDates[i]) / oneDayMs);
+                        if (dayDiff === 1) {
+                            streak++;
+                        } else {
+                            break; // Streak broken
+                        }
+                    }
+                    user.currentStreak = streak;
+                    console.log(`🔥 Streak updated for user ${userId}: ${streak} days`);
+                } else {
+                    // Streak broken (more than 1 day gap)
+                    user.currentStreak = 0;
+                    console.log(`❌ Streak reset for user ${userId} (${daysSinceLastSolve} days since last solve)`);
+                }
+            }
+        } else {
+            user.currentStreak = 0;
+        }
+
         await user.save();
     }
 
@@ -79,6 +135,8 @@ class Progress {
             status: this.status,
             bestAccuracy: this.bestAccuracy,
             lastSubmission: this.lastSubmission,
+            solvedAt: this.solvedAt, // NEW: Save solvedAt timestamp
+            timeSpent: this.timeSpent, // NEW: Save timeSpent
             timer: { ...this.timer }
         };
 

@@ -109,6 +109,30 @@ export const useSimpleImageCropper = () => {
         setIsDragging(false);
     }, []);
 
+    const handleTouchMove = useCallback((e) => {
+        if (!isDragging || !originalImage) return;
+        if (e.cancelable) e.preventDefault();
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - dragStart.x;
+        const deltaY = touch.clientY - dragStart.y;
+
+        const newX = crop.x + deltaX / scale;
+        const newY = crop.y + deltaY / scale;
+
+        const maxX = imageDimensions.width - crop.width;
+        const maxY = imageDimensions.height - crop.height;
+
+        const bX = Math.max(0, Math.min(newX, maxX));
+        const bY = Math.max(0, Math.min(newY, maxY));
+
+        setCrop(prev => ({ ...prev, x: bX, y: bY }));
+        setDragStart({ x: touch.clientX, y: touch.clientY });
+    }, [isDragging, dragStart, crop, originalImage, imageDimensions, scale]);
+
+    const handleTouchEnd = useCallback(() => {
+        setIsDragging(false);
+    }, []);
+
     const handleResizeMouseDown = useCallback((e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -139,6 +163,28 @@ export const useSimpleImageCropper = () => {
     }, [isResizing, resizeStart, originalImage, imageDimensions, crop.x, crop.y, scale]);
 
     const handleResizeMouseUp = useCallback(() => {
+        setIsResizing(false);
+    }, []);
+
+    const handleTouchResizeMove = useCallback((e) => {
+        if (!isResizing || !originalImage) return;
+        if (e.cancelable) e.preventDefault();
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - resizeStart.x;
+        const newCircleSizeScreen = Math.max(50 * scale, resizeStart.circleSize + deltaX);
+        const newCropSize = newCircleSizeScreen / scale;
+
+        const maxCropSize = Math.min(imageDimensions.width - crop.x, imageDimensions.height - crop.y);
+        const finalCropSize = Math.min(newCropSize, maxCropSize);
+
+        setCrop(prev => ({
+            ...prev,
+            width: finalCropSize,
+            height: finalCropSize
+        }));
+    }, [isResizing, resizeStart, originalImage, imageDimensions, crop.x, crop.y, scale]);
+
+    const handleTouchResizeEnd = useCallback(() => {
         setIsResizing(false);
     }, []);
 
@@ -212,6 +258,11 @@ export const useSimpleImageCropper = () => {
         handleResizeMouseDown,
         handleResizeMouseMove,
         handleResizeMouseUp,
+        // Touch versions
+        handleTouchMove,
+        handleTouchEnd,
+        handleTouchResizeMove,
+        handleTouchResizeEnd,
         canvasRef,
         imageRef
     };

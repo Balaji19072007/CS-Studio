@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const express = require('express');
+// Forced restart trigger
+// Forced restart trigger
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
@@ -36,6 +38,7 @@ const authRoutes = require('./routes/authRoutes');
 const googleAuthRoutes = require('./routes/googleAuthRoutes');
 const problemRoutes = require('./routes/problemRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 // const predictionRoutes = require('./routes/predictionRoutes');
 // const statsRoutes = require('./routes/statsRoutes');
 // const notificationRoutes = require('./routes/notificationRoutes');
@@ -89,6 +92,7 @@ app.use('/api/google-auth', googleAuthRoutes);
 app.use('/api/problems', problemRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/chat', chatRoutes);
 // Real Stats Route
 // --- Firestore Imports for Stats ---
 // --- Firestore Imports for Stats ---
@@ -126,10 +130,7 @@ app.use('/api/stats', (req, res) => res.json({
 app.use('/api/notifications', (req, res) => res.json([]));
 app.use('/api/community', communityRoutes);
 
-// Health Check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', database: 'Firestore' });
-});
+// Health Check removed (duplicate)
 
 // --- Socket.IO Mock ---
 // --- Socket.IO Setup ---
@@ -145,6 +146,16 @@ const io = new Server(server, {
 require('./socket/socketHandler')(io);
 
 // Start Server
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date(),
+    version: 'debug-v1',
+    cwd: process.cwd()
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

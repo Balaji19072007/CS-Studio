@@ -151,10 +151,10 @@ const Community = () => {
 
         try {
             setCommenting(true);
-            const response = await communityAPI.addComment(selectedDiscussion._id, commentContent);
+            const response = await communityAPI.addComment(selectedDiscussion.id, commentContent);
 
             // Allow immediate UI update
-            const updatedDiscussion = await communityAPI.getDiscussionById(selectedDiscussion._id);
+            const updatedDiscussion = await communityAPI.getDiscussionById(selectedDiscussion.id);
             setSelectedDiscussion(updatedDiscussion.data);
             setCommentContent('');
         } catch (err) {
@@ -172,7 +172,7 @@ const Community = () => {
         try {
             await communityAPI.toggleLike(id);
             // Refresh specific discussion in list or view
-            if (selectedDiscussion && selectedDiscussion._id === id) {
+            if (selectedDiscussion && selectedDiscussion.id === id) {
                 const updated = await communityAPI.getDiscussionById(id);
                 setSelectedDiscussion(updated.data);
             }
@@ -195,8 +195,8 @@ const Community = () => {
 
         try {
             await communityAPI.deleteDiscussion(discussionToDelete);
-            setDiscussions(prev => prev.filter(d => d._id !== discussionToDelete));
-            if (selectedDiscussion?._id === discussionToDelete) {
+            setDiscussions(prev => prev.filter(d => d.id !== discussionToDelete));
+            if (selectedDiscussion?.id === discussionToDelete) {
                 setSelectedDiscussion(null);
             }
             setShowDeleteModal(false);
@@ -208,24 +208,23 @@ const Community = () => {
     };
 
     return (
-        <div className="min-h-screen dark-gradient-secondary font-sans text-gray-100">
-            {/* Hero Section */}
-            <div className="gradient-bg text-white relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8 text-center">
-                <div className="max-w-4xl mx-auto relative z-10">
-                    <h1 className="text-4xl font-extrabold sm:text-6xl mb-6">
-                        <span className="block">Join Our</span>
-                        <span className="block text-primary-400">Community Forum</span>
+        <div className="min-h-screen bg-[#f9fafb] dark:dark-gradient-secondary font-sans text-gray-900 dark:text-gray-100">
+            {/* Hero Section - Minimal */}
+            <div className="pt-24 pb-10 relative z-10 px-4">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h1 className="text-4xl font-bold tracking-tight text-white mb-4 sm:mb-6">
+                        Join Our <span className="text-primary-500">Community</span>
                     </h1>
-                    <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
-                        Connect, share, and grow with fellow developers.
+                    <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-8">
+                        Connect, share, and grow with fellow developers. Discuss problems, share solutions, and get help.
                     </p>
 
                     <button
                         onClick={() => isLoggedIn ? setShowCreateModal(true) : alert('Please login to start a discussion')}
-                        className="dark-btn px-8 py-4 rounded-full text-lg font-bold shadow-lg hover:scale-105 transition-transform flex items-center justify-center mx-auto"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 hover:bg-gray-100 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-white/10"
                     >
-                        <span className="mr-2">Start a New Discussion</span>
-                        <i data-feather="plus-circle" className="w-5 h-5"></i>
+                        <i data-feather="plus-circle" className="w-5 h-5 text-gray-900"></i>
+                        Start Discussion
                     </button>
                 </div>
             </div>
@@ -244,17 +243,17 @@ const Community = () => {
                         ) : (
                             discussions.map(discussion => (
                                 <div
-                                    key={discussion._id}
-                                    onClick={() => openDiscussion(discussion._id)}
-                                    className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6 hover:bg-gray-800 transition-all cursor-pointer group"
+                                    key={discussion.id}
+                                    onClick={() => openDiscussion(discussion.id)}
+                                    className="bg-[#ffffff] dark:!bg-gray-900/40 border border-gray-200 dark:border-gray-700/50 rounded-xl p-4 sm:p-6 hover:shadow-lg dark:hover:bg-gray-800/60 transition-all cursor-pointer group hover:border-primary-500/30"
                                 >
                                     {/* User Info Header */}
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-3">
                                             <UserAvatar user={discussion.author} size="md" />
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-white text-sm">{getUserDisplayName(discussion.author)}</span>
-                                                <span className="text-xs text-gray-400">{new Date(discussion.createdAt).toLocaleDateString()}</span>
+                                                <span className="font-bold text-gray-900 dark:text-white text-sm">{getUserDisplayName(discussion.author)}</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(discussion.createdAt).toLocaleDateString()}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -264,7 +263,7 @@ const Community = () => {
                                             </div>
                                             {user && discussion.author && user.id === discussion.author._id && (
                                                 <button
-                                                    onClick={(e) => requestDelete(e, discussion._id)}
+                                                    onClick={(e) => requestDelete(e, discussion.id)}
                                                     className="text-gray-500 hover:text-red-500 transition-colors p-1"
                                                     title="Delete Discussion"
                                                 >
@@ -275,19 +274,19 @@ const Community = () => {
                                     </div>
 
                                     {/* Content */}
-                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors text-left">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors text-left">
                                         {discussion.title}
                                     </h3>
 
-                                    <p className="text-gray-300 mb-4 line-clamp-2 text-sm text-left">
+                                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 text-sm text-left">
                                         {discussion.content}
                                     </p>
 
                                     {/* Footer */}
-                                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/30">
+                                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/30">
                                         <div className="flex gap-2">
                                             {discussion.tags.map((tag, idx) => (
-                                                <span key={idx} className="px-2 py-1 bg-gray-800 text-xs text-gray-300 rounded-md border border-gray-700">
+                                                <span key={idx} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 rounded-md border border-gray-200 dark:border-gray-700">
                                                     #{tag}
                                                 </span>
                                             ))}
@@ -296,7 +295,7 @@ const Community = () => {
                                         <div className="flex items-center gap-6 text-gray-400">
                                             <button
                                                 className="flex items-center gap-2 hover:text-red-400 transition-colors"
-                                                onClick={(e) => handleLike(e, discussion._id)}
+                                                onClick={(e) => handleLike(e, discussion.id)}
                                             >
                                                 <i data-feather="heart" className={`w-4 h-4 ${discussion.likes.includes(user?.id) ? 'fill-red-500 text-red-500' : ''}`}></i>
                                                 {discussion.likes.length}
@@ -316,42 +315,42 @@ const Community = () => {
 
             {/* CREATE POST MODAL */}
             {showCreateModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-gray-900 rounded-2xl w-full max-w-2xl border border-gray-700 shadow-2xl overflow-hidden">
-                        <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-                            <h2 className="text-2xl font-bold text-white">Create New Discussion</h2>
-                            <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-white">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-[#ffffff] dark:bg-gray-900 rounded-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden">
+                        <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Create Discussion</h2>
+                            <button onClick={() => setShowCreateModal(false)} className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                                 <i data-feather="x" className="w-6 h-6"></i>
                             </button>
                         </div>
-                        <form onSubmit={handleCreatePost} className="p-6 space-y-4">
+                        <form onSubmit={handleCreatePost} className="p-4 md:p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Title</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-primary-500 focus:outline-none"
+                                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                                     placeholder="What's on your mind?"
                                     value={newPost.title}
                                     onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Content</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Content</label>
                                 <textarea
                                     required
                                     rows="6"
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-primary-500 focus:outline-none resize-none"
+                                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none resize-none"
                                     placeholder="Describe your question or topic in detail..."
                                     value={newPost.content}
                                     onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                                 ></textarea>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Tags (comma separated)</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Tags (comma separated)</label>
                                 <input
                                     type="text"
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-primary-500 focus:outline-none"
+                                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                                     placeholder="java, algorithms, web-dev"
                                     value={newPost.tags}
                                     onChange={(e) => setNewPost({ ...newPost, tags: e.target.value })}
@@ -383,7 +382,7 @@ const Community = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
                     <div className="bg-gray-900 rounded-2xl w-full max-w-4xl border border-gray-700 shadow-2xl my-8 flex flex-col max-h-[90vh]">
                         {/* Header */}
-                        <div className="p-6 border-b border-gray-800 flex justify-between items-start sticky top-0 bg-gray-900 z-10 rounded-t-2xl">
+                        <div className="p-4 md:p-6 border-b border-gray-800 flex justify-between items-start sticky top-0 bg-gray-900 z-10 rounded-t-2xl">
                             <div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <UserAvatar user={selectedDiscussion.author} size="md" />
@@ -392,12 +391,12 @@ const Community = () => {
                                         <span className="text-sm text-gray-400">{new Date(selectedDiscussion.createdAt).toLocaleDateString()}</span>
                                     </div>
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 text-left">{selectedDiscussion.title}</h2>
+                                <h2 className="text-xl md:text-3xl font-bold text-white mb-2 text-left">{selectedDiscussion.title}</h2>
                             </div>
                             <div className="flex items-center gap-2">
                                 {user && selectedDiscussion.author && user.id === selectedDiscussion.author._id && (
                                     <button
-                                        onClick={(e) => requestDelete(e, selectedDiscussion._id)}
+                                        onClick={(e) => requestDelete(e, selectedDiscussion.id)}
                                         className="text-gray-400 hover:text-red-500 p-2 transition-colors"
                                         title="Delete Discussion"
                                     >
@@ -411,7 +410,7 @@ const Community = () => {
                         </div>
 
                         {/* Content Scrollable Area */}
-                        <div className="flex-1 overflow-y-auto p-6">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6">
                             <div className="prose prose-invert max-w-none mb-8 text-gray-300 whitespace-pre-wrap leading-relaxed text-left">
                                 {selectedDiscussion.content}
                             </div>
@@ -426,7 +425,7 @@ const Community = () => {
 
                             <div className="flex items-center gap-6 py-4 border-y border-gray-800 mb-8">
                                 <button
-                                    onClick={(e) => handleLike(e, selectedDiscussion._id)}
+                                    onClick={(e) => handleLike(e, selectedDiscussion.id)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors ${selectedDiscussion.likes.includes(user?.id) ? 'text-red-500' : 'text-gray-400'}`}
                                 >
                                     <i data-feather="heart" className={`w-5 h-5 ${selectedDiscussion.likes.includes(user?.id) ? 'fill-current' : ''}`}></i>
@@ -512,7 +511,7 @@ const Community = () => {
             {/* Back to Top */}
             <button
                 onClick={scrollToTop}
-                className={`fixed bottom-8 right-8 p-3 rounded-full bg-primary-600 text-white shadow-lg transition-all duration-300 z-40 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`fixed bottom-8 right-8 p-3 rounded-full bg-primary-600 text-white shadow-lg transition-all duration-300 z-40 hidden md:block ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
             >
                 <i data-feather="arrow-up" className="w-6 h-6"></i>
             </button>

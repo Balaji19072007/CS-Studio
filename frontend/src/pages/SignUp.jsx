@@ -363,56 +363,56 @@ const SignUp = () => {
   // --- Component Render ---
 
   return (
-    <div className="min-h-screen dark-gradient-secondary flex items-center justify-center p-4 py-12">
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div className="min-h-screen dark-gradient-secondary flex items-center justify-center p-6 py-12">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
         {/* LEFT COLUMN: Informational Content */}
         <div className="hidden lg:block">
-          <div className="max-w-md">
-            <div className="flex items-center mb-8">
+          <div className="max-w-md space-y-8">
+            <div className="flex items-center gap-3">
               <div className="h-12 w-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
                 <i data-feather="code" className="text-white text-xl"></i>
               </div>
-              <span className="ml-3 text-3xl font-bold nav-user-text">CS Studio</span>
+              <span className="text-3xl font-bold nav-user-text">CS Studio</span>
             </div>
 
-            <h1 className="text-4xl font-extrabold text-white mb-6">
-              Start Your<br />
-              <span className="block text-primary-400">Coding Journey</span>
-            </h1>
-
-            <p className="text-lg text-gray-400 mb-8">
-              Join 15,000+ developers mastering computer science with interactive lessons, real-world projects, and personalized learning paths.
-            </p>
-
             <div className="space-y-4">
-              <div className="flex items-center text-gray-300">
-                <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center mr-4">
-                  <i data-feather="play-circle" className="text-primary-400 w-5 h-5"></i>
+              <h1 className="text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                Start Your Journey
+              </h1>
+              <p className="text-lg text-gray-400 leading-relaxed">
+                Join thousands of developers learning to code
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <i data-feather="play-circle" className="text-primary-400 w-6 h-6"></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Interactive Learning</h3>
-                  <p className="text-gray-400 text-sm">Learn with animations and visualizations</p>
+                  <h3 className="font-semibold text-white mb-1">Interactive Learning</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">Visual animations and code execution</p>
                 </div>
               </div>
 
-              <div className="flex items-center text-gray-300">
-                <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center mr-4">
-                  <i data-feather="target" className="text-primary-400 w-5 h-5"></i>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <i data-feather="target" className="text-primary-400 w-6 h-6"></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Personalized Path</h3>
-                  <p className="text-gray-400 text-sm">Follow career-focused roadmaps</p>
+                  <h3 className="font-semibold text-white mb-1">Personalized Path</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">Career-focused roadmaps</p>
                 </div>
               </div>
 
-              <div className="flex items-center text-gray-300">
-                <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center mr-4">
-                  <i data-feather="briefcase" className="text-primary-400 w-5 h-5"></i>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <i data-feather="briefcase" className="text-primary-400 w-6 h-6"></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Career Ready</h3>
-                  <p className="text-gray-400 text-sm">Build job-ready skills and confidence</p>
+                  <h3 className="font-semibold text-white mb-1">Career Ready</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">Build job-ready skills</p>
                 </div>
               </div>
             </div>
@@ -423,28 +423,28 @@ const SignUp = () => {
         <div className="w-full max-w-md mx-auto">
           {/* Mobile Logo Header */}
           <div className="lg:hidden flex justify-center mb-8">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-md">
                 <i data-feather="code" className="text-white"></i>
               </div>
-              <span className="ml-2 text-xl font-bold nav-user-text">CS Studio</span>
+              <span className="text-xl font-bold nav-user-text">CS Studio</span>
             </Link>
           </div>
 
-          <div className="dark-glass rounded-lg shadow-2xl p-8 border border-gray-700">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white">
+          <div className="dark-glass rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700">
+            <div className="text-center mb-8 space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">
                 {step === 1 ? 'Create Account' : 'Verify Email'}
               </h2>
-              <p className="mt-1 text-gray-400 text-sm">
-                {step === 1 ? 'Start your coding journey in minutes' : 'Enter the OTP sent to your email'}
+              <p className="text-sm text-gray-400">
+                {step === 1 ? 'Start learning in minutes' : 'Enter the code sent to your email'}
               </p>
             </div>
 
             {/* Message Display */}
             {message.type && (
               <div
-                className={`mb-6 p-4 rounded-lg ${message.type === 'success'
+                className={`mb-6 p-4 rounded-lg text-sm ${message.type === 'success'
                   ? 'bg-green-500/20 border border-green-500 text-green-100'
                   : 'bg-red-500/20 border border-red-500 text-red-100'
                   }`}
@@ -455,10 +455,10 @@ const SignUp = () => {
 
             {step === 1 ? (
               /* Step 1: Registration Form */
-              <form onSubmit={handleRegistrationSubmit} className="space-y-4">
-                {/* First Name & Last Name (Grouped) */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="mb-0">
+              <form onSubmit={handleRegistrationSubmit} className="space-y-5">
+                {/* First Name & Last Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
                     <label htmlFor="firstName" className="sr-only">First Name</label>
                     <input
                       type="text"
@@ -466,12 +466,12 @@ const SignUp = () => {
                       name="firstName"
                       value={registrationData.firstName}
                       onChange={handleChange}
-                      className="form-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="form-input w-full px-4 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                       placeholder="First Name"
                       disabled={loading}
                     />
                   </div>
-                  <div className="mb-0">
+                  <div>
                     <label htmlFor="lastName" className="sr-only">Last Name</label>
                     <input
                       type="text"
@@ -479,7 +479,7 @@ const SignUp = () => {
                       name="lastName"
                       value={registrationData.lastName}
                       onChange={handleChange}
-                      className="form-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="form-input w-full px-4 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                       placeholder="Last Name"
                       disabled={loading}
                     />
@@ -487,7 +487,7 @@ const SignUp = () => {
                 </div>
 
                 {/* Email */}
-                <div className="mb-4">
+                <div>
                   <label htmlFor="email" className="sr-only">Email Address</label>
                   <input
                     type="email"
@@ -495,7 +495,7 @@ const SignUp = () => {
                     name="email"
                     value={registrationData.email}
                     onChange={handleChange}
-                    className="form-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="form-input w-full px-4 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                     placeholder="Email Address"
                     disabled={loading}
                     autoComplete="email"
@@ -503,7 +503,7 @@ const SignUp = () => {
                 </div>
 
                 {/* Password */}
-                <div className="mb-4">
+                <div>
                   <label htmlFor="password" className="sr-only">Password</label>
                   <div className="relative">
                     <input
@@ -512,7 +512,7 @@ const SignUp = () => {
                       name="password"
                       value={registrationData.password}
                       onChange={handleChange}
-                      className="form-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="form-input w-full px-4 pr-12 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                       placeholder="Password"
                       disabled={loading}
                       autoComplete="new-password"
@@ -520,7 +520,7 @@ const SignUp = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                       disabled={loading}
                     >
                       <i
@@ -532,7 +532,7 @@ const SignUp = () => {
                 </div>
 
                 {/* Confirm Password */}
-                <div className="mb-4">
+                <div>
                   <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -540,7 +540,7 @@ const SignUp = () => {
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="form-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="form-input w-full px-4 py-3.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                     placeholder="Confirm Password"
                     disabled={loading}
                     autoComplete="new-password"
@@ -548,26 +548,22 @@ const SignUp = () => {
                 </div>
 
                 {/* Terms Checkbox */}
-                <div className="mb-6 pt-2">
-                  <label className="flex items-start cursor-pointer">
+                <div className="pt-2">
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       id="terms-checkbox"
                       name="terms"
                       checked={termsChecked}
                       onChange={(e) => setTermsChecked(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-primary-500 focus:ring-2 focus:ring-primary-500"
+                      className="mt-1 w-5 h-5 rounded border-gray-600 bg-gray-700/50 text-primary-500 focus:ring-2 focus:ring-primary-500"
                       disabled={loading}
                     />
-                    <span className="ml-2 text-sm text-gray-400">
+                    <span className="text-sm text-gray-400 leading-relaxed">
                       I agree to the{' '}
-                      <a href="#" className="text-primary-400 hover:text-primary-300 underline">
-                        Terms and Conditions
-                      </a>{' '}
-                      and{' '}
-                      <a href="#" className="text-primary-400 hover:text-primary-300 underline">
-                        Privacy Policy
-                      </a>
+                      <a href="#" className="text-primary-400 hover:text-primary-300 underline">Terms</a>
+                      {' '}and{' '}
+                      <a href="#" className="text-primary-400 hover:text-primary-300 underline">Privacy</a>
                     </span>
                   </label>
                 </div>
@@ -576,11 +572,11 @@ const SignUp = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center">
-                      <i data-feather="loader" className="w-5 h-5 animate-spin mr-2"></i>
+                    <span className="flex items-center justify-center gap-2">
+                      <i data-feather="loader" className="w-5 h-5 animate-spin"></i>
                       Sending OTP...
                     </span>
                   ) : (
@@ -591,24 +587,24 @@ const SignUp = () => {
             ) : (
               /* Step 2: OTP Verification */
               <form onSubmit={handleOtpSubmit} className="space-y-6">
-                <p className="text-gray-400 text-center mb-2">
+                <p className="text-gray-400 text-center text-sm">
                   We sent a 6-digit code to <strong className="text-white">{registrationData.email}</strong>
                 </p>
 
                 {/* Timer Display */}
-                <div className="text-center mb-4">
+                <div className="text-center">
                   <div className={`text-sm font-medium ${timeLeft > 30 ? 'text-green-400' : 'text-red-400'}`}>
-                    ⏰ OTP expires in: {formatTime(timeLeft)}
+                    ⏰ Expires in: {formatTime(timeLeft)}
                   </div>
                   {timeLeft === 0 && (
                     <div className="text-red-400 text-sm mt-1">
-                      OTP has expired. Please request a new one.
+                      OTP expired. Request a new one.
                     </div>
                   )}
                 </div>
 
-                {/* OTP Input (Center Aligned) */}
-                <div className="flex justify-center space-x-2 mb-4">
+                {/* OTP Input */}
+                <div className="flex justify-center gap-2 sm:gap-3">
                   {otpCode.map((digit, index) => (
                     <input
                       key={index}
@@ -621,19 +617,19 @@ const SignUp = () => {
                       onChange={(e) => handleOtpChange(e.target, index)}
                       onKeyDown={(e) => handleOtpKeyDown(e, index)}
                       onFocus={(e) => e.target.select()}
-                      className="form-input w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-lg text-white bg-gray-800 border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="form-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold rounded-lg text-white bg-gray-800 border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                       disabled={loading || timeLeft === 0}
                     />
                   ))}
                 </div>
 
                 {/* Resend OTP Link */}
-                <div className="text-center mb-4">
+                <div className="text-center">
                   <button
                     type="button"
                     onClick={handleResendOTP}
                     disabled={loading || !canResend}
-                    className="text-primary-400 hover:text-primary-300 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-sm text-primary-400 hover:text-primary-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Didn't receive code? Resend OTP
                   </button>
@@ -644,11 +640,11 @@ const SignUp = () => {
                   id="verify-otp-btn"
                   type="submit"
                   disabled={loading || timeLeft === 0}
-                  className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center">
-                      <i data-feather="loader" className="w-5 h-5 animate-spin mr-2"></i>
+                    <span className="flex items-center justify-center gap-2">
+                      <i data-feather="loader" className="w-5 h-5 animate-spin"></i>
                       Verifying...
                     </span>
                   ) : (
@@ -656,11 +652,11 @@ const SignUp = () => {
                   )}
                 </button>
 
-                {/* Back Button - FIXED: Uses the proper reset function */}
+                {/* Back Button */}
                 <button
                   type="button"
                   onClick={handleBackToRegistration}
-                  className="w-full mt-4 py-2 text-primary-400 hover:text-white transition-colors"
+                  className="w-full py-2 text-sm text-primary-400 hover:text-white transition-colors"
                   disabled={loading}
                 >
                   ← Back to Registration
@@ -670,23 +666,25 @@ const SignUp = () => {
 
             {step === 1 && (
               <>
-                {/* Divider and Google Sign Up */}
-                <div className="my-6 flex items-center">
+                {/* Divider */}
+                <div className="my-6 flex items-center gap-4">
                   <div className="flex-grow border-t border-gray-600"></div>
-                  <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Or sign up with</span>
+                  <span className="text-gray-400 text-sm">Or</span>
                   <div className="flex-grow border-t border-gray-600"></div>
                 </div>
 
-                <div className="flex justify-center">
-                  <button onClick={() => signupWithGoogle()} className="w-full py-3 bg-white text-gray-900 rounded-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center justify-center gap-3 border border-gray-200">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
-                    <span>Sign up with Google</span>
-                  </button>
-                </div>
+                {/* Google Sign Up */}
+                <button
+                  onClick={() => signupWithGoogle()}
+                  className="w-full py-3.5 bg-white text-gray-900 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+                >
+                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                  <span>Continue with Google</span>
+                </button>
 
                 {/* Sign In Link */}
                 <div className="mt-6 text-center">
-                  <p className="text-gray-400">
+                  <p className="text-gray-400 text-sm">
                     Already have an account?{' '}
                     <Link
                       to="/login"
@@ -701,11 +699,11 @@ const SignUp = () => {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-gray-400 text-sm mt-6">
+          <p className="text-center text-gray-500 text-xs mt-6">
             By signing up, you agree to our{' '}
-            <a href="#" className="underline hover:text-gray-300">Terms</a>{' '}
-            and{' '}
-            <a href="#" className="underline hover:text-gray-300">Privacy Policy</a>
+            <a href="#" className="underline hover:text-gray-400">Terms</a>
+            {' '}and{' '}
+            <a href="#" className="underline hover:text-gray-400">Privacy</a>
           </p>
         </div>
       </div>

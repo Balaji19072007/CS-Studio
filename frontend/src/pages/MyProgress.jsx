@@ -107,42 +107,36 @@ const MyProgress = () => {
   const progressToNextLevel = ((userStats.totalPoints || 0) % 100);
 
   return (
-    <div className="min-h-screen dark-gradient-secondary pt-6 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:dark-gradient-secondary pt-6 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Back Button */}
         <div className="flex items-center">
-          <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-            <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 group-hover:border-primary-500 transition-colors">
-              <i data-feather="arrow-left" className="w-4 h-4"></i>
+          <Link to="/" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors group">
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 group-hover:border-primary-500 transition-colors">
+              <i data-feather="arrow-left" className="w-4 h-4 text-gray-700 dark:text-gray-300"></i>
             </div>
             <span className="text-sm font-medium">Back to Dashboard</span>
           </Link>
         </div>
 
         {/* --- HEADER --- */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-gray-800 pb-8">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-gray-200 dark:border-gray-800 pb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="bg-primary-500/10 text-primary-400 border border-primary-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                Level {level}
-              </span>
-              <span className="text-gray-500 text-sm font-mono">
-                {userStats.totalPoints} XP
-              </span>
             </div>
-            <h1 className="text-4xl font-extrabold text-white tracking-tight">
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               My Progress
             </h1>
-            <p className="text-gray-400 mt-2 max-w-xl">
+            <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-xl">
               Consistent effort builds mastery. Track your daily contributions and skill growth here.
             </p>
           </div>
 
           {/* Streak Badge */}
-          <div className="bg-gray-800/50 p-4 rounded-2xl border border-gray-700/50 flex items-center gap-4">
+          <div className="bg-[#ffffff] dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-200 dark:border-gray-700/50 flex items-center gap-4 shadow-sm">
             <div className="text-right">
-              <div className="text-3xl font-bold text-white leading-none">{userStats.currentStreak || 0}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white leading-none">{userStats.currentStreak || 0}</div>
               <div className="text-xs text-gray-500 font-bold uppercase tracking-wide">Day Streak</div>
             </div>
             <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
@@ -157,9 +151,9 @@ const MyProgress = () => {
           <div className="lg:col-span-2 space-y-8">
 
             {/* 1. Contribution Graph */}
-            <div className="bg-gray-800 rounded-2xl border border-gray-700 p-6 shadow-xl relative overflow-hidden">
-              <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <i data-feather="grid" className="w-5 h-5 text-green-400"></i>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-xl relative overflow-hidden">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <i data-feather="grid" className="w-5 h-5 text-green-500 dark:text-green-400"></i>
                 Contribution Activity
               </h2>
 
@@ -168,10 +162,10 @@ const MyProgress = () => {
                 {/* We show simple blocks for mobile/desktop responsiveness */}
                 {yearDays.slice(-140).map((date, i) => { // Show last ~5 months to fit
                   const count = heatmapData[date] || 0;
-                  let colorClass = 'bg-gray-800 border border-gray-700/50'; // 0
-                  if (count > 0) colorClass = 'bg-green-900 border border-green-800'; // 1
-                  if (count > 2) colorClass = 'bg-green-700 border border-green-600'; // 3+
-                  if (count > 5) colorClass = 'bg-green-500 border border-green-400 shadow-[0_0_5px_rgba(34,197,94,0.4)]'; // 6+
+                  let colorClass = 'bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700/50'; // 0
+                  if (count > 0) colorClass = 'bg-green-100 border border-green-200 dark:bg-green-900 dark:border-green-800'; // 1
+                  if (count > 2) colorClass = 'bg-green-300 border border-green-400 dark:bg-green-700 dark:border-green-600'; // 3+
+                  if (count > 5) colorClass = 'bg-green-500 border border-green-600 dark:bg-green-500 dark:border-green-400 shadow-[0_0_5px_rgba(34,197,94,0.4)]'; // 6+
 
                   return (
                     <div
@@ -193,10 +187,10 @@ const MyProgress = () => {
             </div>
 
             {/* 2. Recent History Table (Mini) */}
-            <div className="bg-gray-800 rounded-2xl border border-gray-700 p-6 shadow-xl">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-xl">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <i data-feather="clock" className="w-5 h-5 text-blue-400"></i>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <i data-feather="clock" className="w-5 h-5 text-blue-500 dark:text-blue-400"></i>
                   Recent Activity
                 </h2>
                 <Link to="/problem-stats" className="text-xs font-bold text-primary-400 hover:text-primary-300 flex items-center gap-1 transition-colors">
@@ -206,11 +200,11 @@ const MyProgress = () => {
 
               <div className="space-y-4">
                 {history.slice(0, 5).map(item => (
-                  <div key={item.problemId} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-colors">
+                  <div key={item.problemId} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className={`w-2 h-2 rounded-full ${item.status === 'solved' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                       <div>
-                        <h4 className="text-sm font-semibold text-white">{item.title}</h4>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</h4>
                         <p className="text-xs text-gray-500">{new Date(item.lastSubmission).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -228,9 +222,9 @@ const MyProgress = () => {
           <div className="space-y-8">
 
             {/* 1. Skill Mastery Bars */}
-            <div className="bg-gray-800 rounded-2xl border border-gray-700 p-6 shadow-xl">
-              <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <i data-feather="cpu" className="w-5 h-5 text-purple-400"></i>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-xl">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <i data-feather="cpu" className="w-5 h-5 text-purple-500 dark:text-purple-400"></i>
                 Skill Mastery
               </h2>
               <div className="space-y-6">
@@ -241,10 +235,10 @@ const MyProgress = () => {
                 ].map((skill, i) => (
                   <div key={i}>
                     <div className="flex justify-between text-xs font-semibold mb-2">
-                      <span className="text-gray-300">{skill.label}</span>
-                      <span className="text-white">{skill.count} / {skill.total}</span>
+                      <span className="text-gray-600 dark:text-gray-300">{skill.label}</span>
+                      <span className="text-gray-900 dark:text-white">{skill.count} / {skill.total}</span>
                     </div>
-                    <div className="w-full bg-gray-900 rounded-full h-2">
+                    <div className="w-full bg-gray-100 dark:bg-gray-900 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${skill.color} shadow-[0_0_10px_rgba(0,0,0,0.3)]`}
                         style={{ width: `${Math.min((skill.count / skill.total) * 100, 100)}%` }}
@@ -255,30 +249,7 @@ const MyProgress = () => {
               </div>
             </div>
 
-            {/* 2. Next Milestone */}
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 p-6 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <i data-feather="award" className="w-32 h-32 text-yellow-400"></i>
-              </div>
-              <h2 className="text-lg font-bold text-white mb-2 relative z-10">Next Milestone</h2>
-              <div className="flex items-center gap-3 mb-4 relative z-10">
-                <div className="w-10 h-10 bg-yellow-500/20 text-yellow-400 rounded-lg flex items-center justify-center border border-yellow-500/30">
-                  <i data-feather="award" className="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 className="text-white font-semibold">Level {level + 1}</h3>
-                  <p className="text-xs text-gray-400">Reach {(level + 1) * 100} XP</p>
-                </div>
-              </div>
 
-              <div className="w-full bg-gray-700/50 rounded-full h-1.5 relative z-10">
-                <div
-                  className="bg-yellow-500 h-1.5 rounded-full"
-                  style={{ width: `${progressToNextLevel}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-2 text-right relative z-10">{100 - progressToNextLevel} XP to go</p>
-            </div>
           </div>
 
         </div>

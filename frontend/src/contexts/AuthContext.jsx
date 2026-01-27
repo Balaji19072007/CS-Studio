@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     try {
       if (token) {
         localStorage.setItem('token', token);
-        
+
         if (userData) {
           // Store all user data in one object for consistency
           const userDataToStore = {
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('userData', JSON.stringify(userDataToStore));
           setUser(userDataToStore);
         }
-        
+
         setIsAuthenticated(true);
       }
     } catch (error) {
@@ -68,6 +68,7 @@ export const AuthProvider = ({ children }) => {
     try {
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
+      sessionStorage.clear(); // Clear all session data (cache)
       setIsAuthenticated(false);
       setUser(null);
       navigate('/');
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (userData) => {
     try {
       const updatedUser = { ...user, ...userData };
-      
+
       // Ensure all required fields are present
       const completeUserData = {
         id: updatedUser.id || user?.id,
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }) => {
         bio: updatedUser.bio,
         username: updatedUser.username || user?.username,
       };
-      
+
       // Update both state and localStorage
       localStorage.setItem('userData', JSON.stringify(completeUserData));
       setUser(completeUserData);
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   const updateUserProfile = async (userData) => {
     try {
       const updatedUser = { ...user, ...userData };
-      
+
       // Ensure all fields are properly updated
       const completeUserData = {
         id: updatedUser.id || user?.id,
@@ -116,11 +117,11 @@ export const AuthProvider = ({ children }) => {
         username: updatedUser.username || user?.username,
         updatedAt: updatedUser.updatedAt || Date.now(),
       };
-      
+
       // Update both state and localStorage
       localStorage.setItem('userData', JSON.stringify(completeUserData));
       setUser(completeUserData);
-      
+
       return completeUserData;
     } catch (error) {
       console.error('Error updating user profile:', error);
