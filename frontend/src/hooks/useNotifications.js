@@ -16,12 +16,23 @@ export const useNotifications = () => {
       setUnreadCount(0);
       return;
     }
-    
+
     try {
       setLoading(true);
       setError(null);
       const response = await notificationService.getNotifications({ page, limit });
-      setNotifications(response.data || []);
+      // Robustly handle response structure
+      let notifs = [];
+      if (response && Array.isArray(response.data)) {
+        notifs = response.data;
+      } else if (Array.isArray(response)) {
+        notifs = response;
+      } else if (response && response.data && Array.isArray(response.data.data)) {
+        // Handle { data: { data: [] } } case if apiService wraps differently
+        notifs = response.data.data;
+      }
+
+      setNotifications(notifs);
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError(err.response?.data?.msg || 'Failed to fetch notifications');
@@ -37,7 +48,7 @@ export const useNotifications = () => {
       setUnreadCount(0);
       return;
     }
-    
+
     try {
       const response = await notificationService.getUnreadCount();
       setUnreadCount(response.count || 0);
@@ -50,11 +61,11 @@ export const useNotifications = () => {
   // FIXED: Better real-time notification handler
   const handleNewNotification = useCallback((newNotification) => {
     console.log('📢 REAL-TIME: New notification received via socket:', newNotification);
-    
+
     // Immediately update both notifications list and unread count
     setNotifications(prev => [newNotification, ...prev]);
     setUnreadCount(prev => prev + 1);
-    
+
     // Show browser notification
     if (Notification.permission === 'granted' && document.hidden) {
       new Notification(newNotification.title, {
@@ -68,15 +79,15 @@ export const useNotifications = () => {
   const markAsRead = useCallback(async (notificationId) => {
     try {
       await notificationService.markAsRead(notificationId);
-      
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification._id === notificationId 
+
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification._id === notificationId
             ? { ...notification, read: true }
             : notification
         )
       );
-      
+
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
       console.error('Error marking notification as read:', err);
@@ -87,11 +98,11 @@ export const useNotifications = () => {
   const markAllAsRead = useCallback(async () => {
     try {
       await notificationService.markAllAsRead();
-      
-      setNotifications(prev => 
+
+      setNotifications(prev =>
         prev.map(notification => ({ ...notification, read: true }))
       );
-      
+
       setUnreadCount(0);
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
@@ -102,7 +113,7 @@ export const useNotifications = () => {
   const clearAllNotifications = useCallback(async () => {
     try {
       await notificationService.clearAll();
-      
+
       setNotifications([]);
       setUnreadCount(0);
     } catch (err) {
@@ -114,11 +125,11 @@ export const useNotifications = () => {
   const deleteNotification = useCallback(async (notificationId) => {
     try {
       await notificationService.deleteNotification(notificationId);
-      
-      setNotifications(prev => 
+
+      setNotifications(prev =>
         prev.filter(notification => notification._id !== notificationId)
       );
-      
+
       // Update unread count
       const deletedNotification = notifications.find(n => n._id === notificationId);
       if (deletedNotification && !deletedNotification.read) {
@@ -140,20 +151,20 @@ export const useNotifications = () => {
     const initializeSocket = async () => {
       const token = localStorage.getItem('token');
       const userData = localStorage.getItem('userData');
-      
+
       if (token && userData && !socketInitialized) {
         try {
           console.log('🔌 Initializing socket connection...');
-          
+
           // Set up notification listener FIRST
           socketService.onNotification(handleNewNotification);
-          
+
           // Then connect socket
           socketService.connect(token);
-          
+
           setSocketInitialized(true);
           console.log('✅ Socket service initialized');
-          
+
         } catch (error) {
           console.error('❌ Socket initialization failed:', error);
         }

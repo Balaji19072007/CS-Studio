@@ -96,7 +96,7 @@ const ProblemCard = ({ problem }) => {
                     <Link
                         to={isLoggedIn ? `/solve?problemId=${problemId}` : '/signin'}
                         onClick={handleSolveClick}
-                        className={`inline-flex items-center justify-center rounded-lg flex-shrink-0 transition-colors ${isLoggedIn ? 'bg-gray-100 text-gray-700 hover:bg-primary-500 hover:text-white dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-primary-600 dark:hover:text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'}`}
+                        className={`inline-flex items-center justify-center rounded-lg flex-shrink-0 transition-colors ${isLoggedIn ? 'bg-gray-100 text-gray-700 hover:bg-primary-500 hover:text-white dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-primary-600 dark:hover:text-white sm:!bg-green-600 sm:!text-white sm:hover:!bg-green-700 sm:dark:!bg-green-600 sm:dark:!text-white sm:dark:hover:!bg-green-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'}`}
                     >
                         {/* Desktop: Solve Button */}
                         <span className="hidden sm:flex items-center px-3 py-1.5 text-sm font-medium">

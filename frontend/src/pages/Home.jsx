@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import * as feather from 'feather-icons';
 import UserHomePage from './UserHomePage.jsx';
+import Loader from '../components/common/Loader.jsx';
 
 // Use relative URLs since CORS is now enabled
 const API_BASE_URL = ''; // Empty for relative URLs
@@ -311,97 +312,18 @@ const RatingPrompt = () => {
 // --- Main Home Component ---
 
 const Home = () => {
-    const { isLoggedIn } = useAuth();
-    const [isVisible, setIsVisible] = useState(false);
-    const [userStats, setUserStats] = useState({
-        totalUsers: 15678,
-        satisfactionRate: 96
-    });
-    const [apiData, setApiData] = useState(null);
-
-    // Fetch real-time stats
-    useEffect(() => {
-        const fetchUserStats = async () => {
-            try {
-                console.log('🔄 Fetching user stats from API...');
-                const response = await fetch('/api/stats/user-stats');
-                const contentType = response.headers.get('content-type');
-
-                if (contentType && contentType.includes('text/html')) {
-                    console.log('❌ API returned HTML page. Check if route exists.');
-                    return;
-                }
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ API Success - Data received:', data);
-                    setUserStats({
-                        totalUsers: data.totalUsers,
-                        satisfactionRate: data.satisfactionRate
-                    });
-                    setApiData(data);
-                } else {
-                    console.log('❌ API Error:', response.status, response.statusText);
-                }
-            } catch (error) {
-                console.log('❌ Network Error:', error.message);
-            }
-        };
-
-        fetchUserStats();
-
-        const interval = setInterval(fetchUserStats, 30000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const handleScroll = useCallback(() => {
-        if (window.pageYOffset > 300) {
-            setIsVisible(true);
-        } else {
-            setIsVisible(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        feather.replace();
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [handleScroll]);
-
-    useEffect(() => {
-        feather.replace();
-    });
-
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleStartLearning = () => {
-        return isLoggedIn ? '/courses' : '/signup';
-    };
-
-    const FEATURE_DATA = [
-        { icon: 'git-merge', title: 'Interactive Data Structures', description: 'See lists, trees, and graphs animate as code executes, eliminating abstract concepts.' },
-        { icon: 'aperture', title: 'Visualize Algorithms', description: 'Step-by-step visualizations for sorting, pathfinding (e.g., Dijkstra), and recursion.' },
-        { icon: 'cloud-lightning', title: 'Real-time Execution', description: 'Fast, sandbox compiler for C, Python, Java, and more, powered by our Socket.IO backend.' },
-        { icon: 'activity', title: 'Master Design Patterns', description: 'Structured projects guide you through SOLID principles and design patterns like Factory and Observer.' },
-        { icon: 'command', title: 'Competitive Challenges', description: 'Tackle problems rated Easy to Hard, preparing you for technical interviews.' },
-        { icon: 'shield', title: 'Full Career Roadmaps', description: 'Structured paths for Full Stack, Data Science, and DevOps, built by industry experts.' }
-    ];
-
-    const PATHS_DATA = [
-        { icon: 'code', title: 'Programming Fundamentals', subtitle: 'Start with Python & C', description: 'Master core syntax, logic, and functional programming concepts for a strong foundation.' },
-        { icon: 'database', title: 'Data Structures & Algorithms', subtitle: 'Trees, Graphs, and DP', description: 'The essential core of computer science. Prepare for any technical interview with deep visualization.' },
-        { icon: 'globe', title: 'Full Stack Web Developer', subtitle: 'MERN Stack & Beyond', description: 'Learn modern web development from database management to front-end architecture.' },
-    ];
-
-    const TESTIMONIALS_DATA = [
-        { initials: 'MC', name: 'Michael Chen', title: 'Software Engineer', quote: 'The interactive lessons made complex algorithms so much easier to understand. I went from zero to getting multiple job offers in just 6 months!' },
-        { initials: 'SJ', name: 'Sarah Johnson', title: 'Frontend Developer', quote: 'I love the problem-solving approach. The animated explanations helped me visualize concepts I struggled with for years. Now I\'m building my own apps!' },
-        { initials: 'DW', name: 'David Wilson', title: 'CS Student', quote: 'The perfect supplement to my CS degree. The problems are challenging but the explanations are clear. My interview skills improved dramatically.' }
-    ];
-
     // --- CONDITIONAL RENDERING FOR LOGGED IN USERS ---
+    // Prevent flash of public content while auth is loading
+    const { isLoggedIn, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-900">
+                <Loader size="lg" message="Loading..." className="text-white" />
+            </div>
+        );
+    }
+
     if (isLoggedIn) {
         return <UserHomePage />;
     }

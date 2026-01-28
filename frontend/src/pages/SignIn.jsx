@@ -1,15 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import * as feather from 'feather-icons';
-import { API_ENDPOINTS } from '../config/api.js';
 import { auth } from '../config/firebase.js';
 
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useGoogleLogin } from '@react-oauth/google';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, signOut } from 'firebase/auth';
 
 const SignIn = () => {
-  const { login, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth(); // Auth state handled by Context now
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -46,6 +45,32 @@ const SignIn = () => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  // --- Password Reset ---
+  const handleForgotPassword = async (e) => {
+    e.preventDefault(); // Prevent default link behavior
+    const { email } = formData;
+    if (!email) {
+      showMessage('error', 'Please enter your email address to reset password.');
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ type: null, text: '' }); // Clear previous messages
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMessage('success', 'Password reset email sent! Check your inbox.');
+    } catch (error) {
+      console.error('[SignIn] Password reset error:', error.code, error.message);
+      let msg = 'Failed to send reset email.';
+      if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
+      if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
+      showMessage('error', msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // --- Core Authentication Handlers ---
 
   const handleEmailSignIn = async (e) => {
@@ -61,102 +86,69 @@ const SignIn = () => {
       return;
     }
 
+    console.log('[SignIn] Attempting login for:', email);
+
     try {
-      // Direct calls to Backend API (Firestore)
-      const response = await fetch(API_ENDPOINTS.AUTH.SIGNIN, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // Use Firebase Client SDK
+      console.log('Attempting Firebase Sign In for:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log('Firebase Sign In Successful:', user.uid);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        login(data.token, {
-          userId: data.userId,
-          name: data.name,
-          email: data.email,
-          photoUrl: data.photoUrl,
-        });
-
-        showMessage('success', 'Sign in successful! Redirecting...');
-        setTimeout(() => navigate('/'), 1000);
-      } else {
-        console.error('Sign in failed:', data);
-        showMessage('error', data.msg || 'Invalid credentials');
+      if (!user.emailVerified) {
+        console.warn('User email not verified. preventing login.');
+        await signOut(auth);
+        showMessage('error', 'Please verify your email before logging in.');
+        return;
       }
+
+      // We rely on AuthContext onAuthStateChanged to pick up the change
+      showMessage('success', 'Signed in successfully!');
+      // Navigation handled by AuthContext listener or explicit here
+      setTimeout(() => navigate('/'), 1000);
+
     } catch (error) {
-      console.error('Sign in error:', error);
-      showMessage('error', 'Network error. Please check your connection.');
+      console.error('[SignIn] Login error:', error.code, error.message);
+      let errorMsg = 'Invalid credentials';
+      if (error.code === 'auth/user-not-found') errorMsg = 'No user found with this email.';
+      if (error.code === 'auth/wrong-password') errorMsg = 'Incorrect password.';
+      if (error.code === 'auth/invalid-email') errorMsg = 'Invalid email format.';
+      if (error.code === 'auth/too-many-requests') errorMsg = 'Too many failed attempts. Try again later.';
+
+      showMessage('error', errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Google Sign In Handler (Custom) ---
-  const handleGoogleSuccess = async (tokenResponse) => {
+  // --- Google Sign In Handler ---
+  const handleGoogleSignIn = async () => {
     setLoading(true);
     setMessage({ type: null, text: '' });
+    console.log('[SignIn] Starting Google Auth...');
 
     try {
-      // For implicit flow, we receive an access_token. 
-      // If the backend expects an ID token, this might need adjustment, 
-      // but assuming we send the credential received.
-      // With useGoogleLogin, we get "access_token" in tokenResponse.
-      // Standard GoogleLogin component (used previously) gave "credential" (ID Token).
-      // We will try sending access_token as idToken, OR we might need to fetch the ID Token.
-      // However, fixing the design was the priority.
-      // If this fails, we will need to implement the code flow.
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      const response = await fetch(API_ENDPOINTS.GOOGLE_AUTH.CALLBACK, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // We are sending the access token. The backend should verify it or use it to fetch user info.
-        // If the backend strictly requires an ID token, this call might fail.
-        // But let's assume adaptable backend or we will receive feedback.
-        body: JSON.stringify({
-          idToken: tokenResponse.access_token,
-          // also sending access_token explicitly if needed
-          access_token: tokenResponse.access_token
-        }),
-      });
+      console.log('[SignIn] Google Auth Success:', user.uid, user.email);
+      console.log('[SignIn] User is new?', result._tokenResponse?.isNewUser);
 
-      const data = await response.json();
+      showMessage('success', 'Signed in with Google! Redirecting...');
+      setTimeout(() => navigate('/'), 1000); // AuthContext will also catch this state change
 
-      if (response.ok) {
-        login(data.token, {
-          userId: data.userId,
-          name: data.name,
-          email: data.email,
-          photoUrl: data.photoUrl,
-        });
-
-        showMessage('success', 'Signed in with Google! Redirecting...');
-        setTimeout(() => navigate('/'), 1000);
-      } else {
-        console.error('Google Sign In failed:', data);
-        showMessage('error', data.msg || 'Google authentication failed');
-      }
     } catch (error) {
-      console.error('Google Sign In network error:', error);
-      showMessage('error', 'Network error. Please try again.');
+      console.error('[SignIn] Google Auth Error:', error.code, error.message);
+      let errorMsg = 'Google authentication failed.';
+      if (error.code === 'auth/popup-closed-by-user') errorMsg = 'Sign-in cancelled.';
+      if (error.code === 'auth/popup-blocked') errorMsg = 'Popup blocked. Please allow popups.';
+
+      showMessage('error', errorMsg);
     } finally {
       setLoading(false);
     }
   };
-
-  const handleGoogleError = () => {
-    showMessage('error', 'Google Sign In was unsuccessful. Please try again.');
-  };
-
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: handleGoogleError,
-  });
 
   // --- Component Render ---
 
@@ -239,8 +231,8 @@ const SignIn = () => {
             {message.type && (
               <div
                 className={`mb-6 p-4 rounded-lg text-sm ${message.type === 'success'
-                  ? 'bg-green-500/20 border border-green-500 text-green-100'
-                  : 'bg-red-500/20 border border-red-500 text-red-100'
+                    ? 'bg-green-500/20 border border-green-500 text-green-100'
+                    : 'bg-red-500/20 border border-red-500 text-red-100'
                   }`}
               >
                 {message.text}
@@ -299,10 +291,19 @@ const SignIn = () => {
                     ></i>
                   </button>
                 </div>
-                <div className="mt-3 flex justify-end">
-                  <a href="#" className="text-sm text-primary-400 hover:text-primary-300 transition-colors">
-                    Forgot password?
-                  </a>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
+                      Remember me
+                    </label>
+                  </div>
+
+                  <div className="text-sm">
+                    <Link to="/forgot-password" className="font-medium text-primary-400 hover:text-primary-300">
+                      Forgot your password?
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -330,14 +331,18 @@ const SignIn = () => {
               <div className="flex-grow border-t border-gray-600"></div>
             </div>
 
-            {/* Google Sign In */}
+            {/* Google Sign In Button */}
             <button
-              onClick={() => loginWithGoogle()}
-              className="w-full py-3.5 bg-white text-gray-900 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="w-full py-3.5 bg-white text-gray-900 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
               <span>Continue with Google</span>
             </button>
+
+
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center">

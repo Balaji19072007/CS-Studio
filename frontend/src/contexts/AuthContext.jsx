@@ -1,5 +1,7 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'; // Add useContext
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../config/firebase.js';
 
 export const AuthContext = createContext();
 
@@ -10,67 +12,113 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
+    // Firebase Auth Listener
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Prevent race conditions where this runs multiple times
+      if (firebaseUser) {
+        console.log('Firebase User Detected:', firebaseUser.email, 'Verified:', firebaseUser.emailVerified);
 
-  const checkAuthStatus = () => {
-    try {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('userData');
-
-      if (token && userData) {
-        const parsedUser = JSON.parse(userData);
-        setIsAuthenticated(true);
-        setUser(parsedUser);
-      } else {
-        setIsAuthenticated(false);
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      setIsAuthenticated(false);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const login = (token, userData = null) => {
-    try {
-      if (token) {
-        localStorage.setItem('token', token);
-
-        if (userData) {
-          // Store all user data in one object for consistency
-          const userDataToStore = {
-            id: userData.userId,
-            name: userData.name,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            email: userData.email,
-            photoUrl: userData.photoUrl,
-            bio: userData.bio,
-            username: userData.username,
-            updatedAt: userData.updatedAt || Date.now(),
-          };
-          localStorage.setItem('userData', JSON.stringify(userDataToStore));
-          setUser(userDataToStore);
+        // Enforce Email Verification
+        if (!firebaseUser.emailVerified) {
+          console.warn('User email not verified. Signing out.');
+          await signOut(auth);
+          setUser(null);
+          setIsAuthenticated(false);
+          localStorage.removeItem('userData');
+          localStorage.removeItem('token');
+          setLoading(false);
+          return;
         }
 
-        setIsAuthenticated(true);
+        try {
+          // Sync with backend to get MongoDB ID and JWT
+          const response = await fetch('http://localhost:5000/api/auth/google', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: firebaseUser.email,
+              uid: firebaseUser.uid,
+              firstName: firebaseUser.displayName?.split(' ')[0] || 'User',
+              lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
+              photoUrl: firebaseUser.photoURL
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            // Consolidate data: Firebase auth + Backend Data
+            const userData = {
+              ...data, // Contains userId (MongoDB _id), role, etc.
+              uid: firebaseUser.uid, // Keep Firebase UID as well
+              role: data.role || 'student', // Ensure role exists
+            };
+
+            setUser(userData);
+            setIsAuthenticated(true);
+
+            // Store Backend JWT for API calls
+            localStorage.setItem('userData', JSON.stringify(userData));
+            localStorage.setItem('token', data.token);
+            console.log('Backend Sync Success. Token saved.');
+          } else {
+            console.error('Backend Sync Failed:', response.statusText);
+            // Fallback: Use Firebase data only (Dashboard might be empty)
+            const userData = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+              role: 'student', // Default role for fallback
+            };
+            setUser(userData);
+            setIsAuthenticated(true);
+            localStorage.setItem('userData', JSON.stringify(userData));
+          }
+
+        } catch (error) {
+          console.error('Error syncing with backend:', error);
+          const userData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            role: 'student', // Default role on error
+          };
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
+
+      } else {
+        // User is signed out
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('userData');
+        localStorage.removeItem('token');
       }
-    } catch (error) {
-      console.error('Error during login:', error);
+      setLoading(false);
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, []);
+
+  const login = (token, userData) => {
+    // Legacy support or manual state update if needed, 
+    // but onAuthStateChanged handles the main logic.
+    // This might be called after custom backend auth to set extra user details
+    if (userData) {
+      setUser(userData);
+      localStorage.setItem('userData', JSON.stringify(userData));
     }
+    setIsAuthenticated(true);
   };
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-      sessionStorage.clear(); // Clear all session data (cache)
-      setIsAuthenticated(false);
-      setUser(null);
+      await signOut(auth);
+      // State updates handled by onAuthStateChanged
       navigate('/');
     } catch (error) {
       console.error('Error during logout:', error);
@@ -78,55 +126,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
-    try {
-      const updatedUser = { ...user, ...userData };
-
-      // Ensure all required fields are present
-      const completeUserData = {
-        id: updatedUser.id || user?.id,
-        name: updatedUser.name || updatedUser.firstName + ' ' + updatedUser.lastName,
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email || user?.email,
-        photoUrl: updatedUser.photoUrl,
-        bio: updatedUser.bio,
-        username: updatedUser.username || user?.username,
-      };
-
-      // Update both state and localStorage
-      localStorage.setItem('userData', JSON.stringify(completeUserData));
-      setUser(completeUserData);
-    } catch (error) {
-      console.error('Error updating user:', error);
-    }
+    // Update local state for immediate UI feedback
+    setUser(prev => ({ ...prev, ...userData }));
   };
 
   const updateUserProfile = async (userData) => {
-    try {
-      const updatedUser = { ...user, ...userData };
-
-      // Ensure all fields are properly updated
-      const completeUserData = {
-        id: updatedUser.id || user?.id,
-        name: updatedUser.name || `${updatedUser.firstName || user?.firstName} ${updatedUser.lastName || user?.lastName}`.trim(),
-        firstName: updatedUser.firstName || user?.firstName,
-        lastName: updatedUser.lastName || user?.lastName,
-        email: updatedUser.email || user?.email,
-        photoUrl: updatedUser.photoUrl !== undefined ? updatedUser.photoUrl : user?.photoUrl,
-        bio: updatedUser.bio !== undefined ? updatedUser.bio : user?.bio,
-        username: updatedUser.username || user?.username,
-        updatedAt: updatedUser.updatedAt || Date.now(),
-      };
-
-      // Update both state and localStorage
-      localStorage.setItem('userData', JSON.stringify(completeUserData));
-      setUser(completeUserData);
-
-      return completeUserData;
-    } catch (error) {
-      console.error('Error updating user profile:', error);
-      throw error;
-    }
+    // Placeholder - in a real app you might update Firebase profile here
+    updateUser(userData);
+    return userData;
   };
 
   const value = {
@@ -138,13 +145,12 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     updateUserProfile,
-    checkAuthStatus,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use the auth context - ADD THIS
+// Custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

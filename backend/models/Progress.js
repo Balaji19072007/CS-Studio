@@ -77,30 +77,28 @@ class Progress {
         if (solvedDocs.length > 0) {
             // Get all solved dates sorted descending
             const solvedDates = solvedDocs
-                .filter(doc => doc.solvedAt || doc.lastSubmission)
                 .map(doc => {
-                    // Fallback to lastSubmission if solvedAt is missing (legacy data)
+                    // Use solvedAt if exists, fallback to lastSubmission but only if solvedAt is missing
                     const dateStr = doc.solvedAt || doc.lastSubmission;
                     if (!dateStr) return null;
                     const date = new Date(dateStr);
-                    date.setHours(0, 0, 0, 0); // Normalize to start of day
-                    return date.getTime();
+                    // Normalize to UTC start of day to avoid timezone "skips"
+                    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
                 })
-                .filter(Boolean) // Filter out nulls
-                .sort((a, b) => b - a); // Sort descending (newest first)
+                .filter(Boolean)
+                .sort((a, b) => b - a);
 
-            // Remove duplicates (same day)
+            // Remove duplicates (same day in UTC)
             const uniqueDates = [...new Set(solvedDates)];
 
             if (uniqueDates.length > 0) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const todayTime = today.getTime();
+                const now = new Date();
+                const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
                 const oneDayMs = 24 * 60 * 60 * 1000;
 
-                // Check if user solved something today or yesterday
+                // Check if user solved something today UTC or yesterday UTC
                 const mostRecentDate = uniqueDates[0];
-                const daysSinceLastSolve = Math.floor((todayTime - mostRecentDate) / oneDayMs);
+                const daysSinceLastSolve = Math.floor((todayUTC - mostRecentDate) / oneDayMs);
 
                 if (daysSinceLastSolve <= 1) {
                     // Calculate consecutive days
@@ -109,16 +107,19 @@ class Progress {
                         const dayDiff = Math.floor((uniqueDates[i - 1] - uniqueDates[i]) / oneDayMs);
                         if (dayDiff === 1) {
                             streak++;
+                        } else if (dayDiff === 0) {
+                            continue; // Should be handled by Set, but safe-guard
                         } else {
                             break; // Streak broken
                         }
                     }
                     user.currentStreak = streak;
-                    console.log(`🔥 Streak updated for user ${userId}: ${streak} days`);
+                    user.lastStreakUpdate = new Date().toISOString(); // track when we last processed
+                    console.log(`🔥 UTC Streak updated for user ${userId}: ${streak} days`);
                 } else {
-                    // Streak broken (more than 1 day gap)
+                    // Streak broken (more than 1 day gap in UTC)
                     user.currentStreak = 0;
-                    console.log(`❌ Streak reset for user ${userId} (${daysSinceLastSolve} days since last solve)`);
+                    console.log(`❌ Streak reset for user ${userId} (${daysSinceLastSolve} days since last solve in UTC)`);
                 }
             }
         } else {

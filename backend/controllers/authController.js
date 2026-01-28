@@ -586,13 +586,104 @@ exports.signInUser = async (req, res) => {
           email: user.email,
           photoUrl: user.photoUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`,
           username: user.username,
-          bio: user.bio
+          bio: user.bio,
+          role: user.role
         });
       }
     );
   } catch (err) {
     console.error('Sign in error:', err.message);
     res.status(500).json({ msg: 'Server error during sign in' });
+  }
+};
+
+/**
+ * @desc    Google Auth / Sync (Exchange Firebase Token for Backend JWT)
+ * @route   POST /api/auth/google
+ * @access  Public
+ */
+exports.googleAuth = async (req, res) => {
+  const { email, uid, firstName, lastName, photoUrl } = req.body;
+
+  try {
+    // Note: In a production environment with Service Account Keys, 
+    // we would verify the Firebase ID Token here using firebase-admin.
+    // For now, we trust the client-side authentication and sync the user.
+
+    if (!email) {
+      return res.status(400).json({ msg: 'Email is required' });
+    }
+
+    // 1. Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // 2. Create new user if not exists
+      const baseUsername = email.split('@')[0];
+      let username = baseUsername;
+      let counter = 1;
+
+      // Ensure unique username
+      while (await User.findOne({ username })) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+
+      // Create random password (user uses Google to login anyway)
+      const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
+      user = new User({
+        firstName: firstName || 'User',
+        lastName: lastName || '',
+        username,
+        email,
+        password: hashedPassword,
+        photoUrl: photoUrl || `https://ui-avatars.com/api/?name=${firstName || 'User'}+${lastName || ''}&background=random`,
+        googleId: uid
+      });
+
+      await user.save();
+    } else {
+      // Optionally update Google ID if missing
+      if (!user.googleId && uid) {
+        user.googleId = uid;
+        await user.save();
+      }
+    }
+
+    // 3. Generate Backend JWT
+    const payload = {
+      user: {
+        id: user.id
+      }
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '5h' },
+      (err, token) => {
+        if (err) throw err;
+        res.json({
+          token,
+          userId: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          photoUrl: user.photoUrl,
+          username: user.username,
+          bio: user.bio,
+          role: user.role
+        });
+      }
+    );
+
+  } catch (err) {
+    console.error('Google sync error:', err.message);
+    res.status(500).json({ msg: 'Server error during Google sync' });
   }
 };
 

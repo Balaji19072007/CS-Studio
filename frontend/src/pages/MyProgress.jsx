@@ -54,20 +54,41 @@ const MyProgress = () => {
   const processHeatmap = (historyItems) => {
     const counts = {};
     historyItems.forEach(item => {
-      const date = new Date(item.lastSubmission).toISOString().split('T')[0];
-      counts[date] = (counts[date] || 0) + 1;
+      // Use solvedAt if available, fallback to lastSubmission
+      const dateVal = item.solvedAt || item.lastSubmission;
+      if (!dateVal) return;
+
+      try {
+        const dateObj = new Date(dateVal);
+        if (isNaN(dateObj.getTime())) return;
+
+        // Group by Local Date (YYYY-MM-DD)
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const dateKey = `${year}-${month}-${day}`;
+
+        counts[dateKey] = (counts[dateKey] || 0) + 1;
+      } catch (e) {
+        console.warn("Skipping invalid date in heatmap:", dateVal);
+      }
     });
     setHeatmapData(counts);
   };
 
-  // Helper to generate last 365 days
+  // Helper to generate last 365 days in local time
   const generateYearDays = () => {
     const days = [];
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     for (let i = 364; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(today.getDate() - i);
-      days.push(d.toISOString().split('T')[0]);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      days.push(`${year}-${month}-${day}`);
     }
     return days;
   };
@@ -134,14 +155,12 @@ const MyProgress = () => {
           </div>
 
           {/* Streak Badge */}
-          <div className="bg-[#ffffff] dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-200 dark:border-gray-700/50 flex items-center gap-4 shadow-sm">
-            <div className="text-right">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white leading-none">{userStats.currentStreak || 0}</div>
-              <div className="text-xs text-gray-500 font-bold uppercase tracking-wide">Day Streak</div>
+          <div className="bg-white dark:bg-gray-800/40 backdrop-blur-md p-5 rounded-3xl border border-gray-200 dark:border-gray-700/50 flex flex-col items-center justify-center shadow-xl group hover:border-orange-500/30 transition-all duration-300">
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="text-4xl font-black text-gray-900 dark:text-white group-hover:scale-110 transition-transform duration-300">{userStats.currentStreak || 0}</span>
+              <span className="text-3xl drop-shadow-[0_0_8px_rgba(249,115,22,0.4)]">🔥</span>
             </div>
-            <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
-              <i data-feather="flame" className="text-orange-500 w-6 h-6"></i>
-            </div>
+            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-[0.2em] mt-2 text-center">Day Streak</div>
           </div>
         </div>
 
@@ -157,21 +176,20 @@ const MyProgress = () => {
                 Contribution Activity
               </h2>
 
-              {/* Heatmap Grid */}
-              <div className="flex flex-wrap gap-1 justify-center sm:justify-start overflow-x-auto pb-2">
-                {/* We show simple blocks for mobile/desktop responsiveness */}
-                {yearDays.slice(-140).map((date, i) => { // Show last ~5 months to fit
+              {/* Heatmap Grid - Simplified Top-First Layout */}
+              <div className="flex flex-wrap gap-1.5 justify-start">
+                {yearDays.slice(-364).reverse().map((date) => {
                   const count = heatmapData[date] || 0;
-                  let colorClass = 'bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700/50'; // 0
-                  if (count > 0) colorClass = 'bg-green-100 border border-green-200 dark:bg-green-900 dark:border-green-800'; // 1
-                  if (count > 2) colorClass = 'bg-green-300 border border-green-400 dark:bg-green-700 dark:border-green-600'; // 3+
-                  if (count > 5) colorClass = 'bg-green-500 border border-green-600 dark:bg-green-500 dark:border-green-400 shadow-[0_0_5px_rgba(34,197,94,0.4)]'; // 6+
+                  let colorClass = 'bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/30';
+                  if (count > 0) colorClass = 'bg-green-100 dark:bg-green-900/40 border-green-200 dark:border-green-800/50';
+                  if (count > 2) colorClass = 'bg-green-300 dark:bg-green-700/60 border-green-400 dark:border-green-600/50';
+                  if (count > 5) colorClass = 'bg-green-500 dark:bg-green-500 border-green-600 dark:border-green-400 shadow-[0_0_8px_rgba(34,197,94,0.3)]';
 
                   return (
                     <div
                       key={date}
-                      title={`${date}: ${count} submissions`}
-                      className={`w-3 h-3 sm:w-4 sm:h-4 rounded-sm ${colorClass} transition-all hover:scale-125`}
+                      title={`${date}: ${count} solutions`}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[3px] ${colorClass} transition-all hover:scale-150 hover:z-10 cursor-help`}
                     ></div>
                   );
                 })}

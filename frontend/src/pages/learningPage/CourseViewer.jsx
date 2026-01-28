@@ -401,38 +401,51 @@ const CourseViewer = () => {
     return (
         <div className={`h-screen flex flex-col overflow-hidden ${isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
             {/* Top Navigation Bar - W3Schools style */}
-            <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 w-full z-40 border-b shadow-sm ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <div className="flex items-center">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center">
+            {/* Top Navigation Bar */}
+            <div className={`h-16 flex-shrink-0 flex items-center justify-between px-4 w-full z-40 border-b shadow-sm ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} relative`}>
+
+                {/* Left Side: Back Button (Desktop) & Mobile Layout */}
+                <div className="flex items-center z-10">
+                    {/* Mobile Hamburger */}
+                    <button
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className="p-2 mr-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
+                    >
+                        {isSidebarOpen ? <FaTimes /> : <FaBars />}
+                    </button>
+
+                    {/* Desktop Back Button */}
+                    <Link
+                        to="/courses"
+                        className="hidden md:flex text-gray-600 dark:text-gray-300 hover:text-primary-600 items-center transition-colors font-medium"
+                    >
+                        <FaArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Courses
+                    </Link>
+
+                    {/* Mobile Content */}
+                    <div className="md:hidden flex flex-col items-start ml-1">
                         <Link
                             to="/courses"
-                            className="text-gray-600 dark:text-gray-300 hover:text-primary-600 flex items-center transition-colors font-medium mb-1 sm:mb-0 sm:mr-6 text-xs sm:text-base order-1 sm:order-2"
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 flex items-center mb-0.5"
                         >
-                            <FaArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                            Back to Courses
+                            <FaArrowLeft className="w-3 h-3 mr-1" /> Back
                         </Link>
-
-                        <div className="flex items-center order-2 sm:order-1">
-                            <button
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className="p-2 mr-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
-                            >
-                                {isSidebarOpen ? <FaTimes /> : <FaBars />}
-                            </button>
-
-                            {/* Breadcrumbs / Title */}
-                            <div className="flex items-center">
-                                <FaChevronRight className="w-3 h-3 text-gray-400 mr-2 hidden sm:block" />
-                                <span className="font-bold text-base sm:text-lg text-primary-600 dark:text-primary-400 truncate max-w-[150px] sm:max-w-xs">
-                                    {courseData.title}
-                                </span>
-                            </div>
-                        </div>
+                        <span className="font-bold text-sm sm:text-base text-primary-600 dark:text-primary-400 truncate max-w-[180px]">
+                            {courseData.title}
+                        </span>
                     </div>
                 </div>
 
-                {/* Top Nav Buttons (Next/Prev) */}
-                <div className="flex items-center space-x-2">
+                {/* Center Title (Desktop Only) */}
+                <div className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+                    <span className="font-bold text-lg text-primary-600 dark:text-primary-400">
+                        {courseData.title}
+                    </span>
+                </div>
+
+                {/* Right Side: Navigation Buttons */}
+                <div className="flex items-center space-x-2 z-10">
                     <button
                         onClick={() => prevTopic && handleTopicClick(prevTopic)}
                         disabled={!prevTopic}

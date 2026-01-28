@@ -17,6 +17,7 @@ class User {
         this.totalPoints = data.totalPoints || 0;
         this.problemsSolved = data.problemsSolved || 0;
         this.currentStreak = data.currentStreak || 0;
+        this.lastStreakUpdate = data.lastStreakUpdate || data.createdAt || new Date().toISOString();
         this.role = data.role || 'user';
         this.createdAt = data.createdAt || new Date().toISOString();
         this.updatedAt = data.updatedAt || new Date().toISOString();

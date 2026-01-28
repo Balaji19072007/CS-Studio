@@ -578,13 +578,13 @@ const Navbar = () => {
                                                 {user && (
                                                     <>
                                                         <div className="flex items-center gap-3 px-4 py-3 rounded-t-2xl" style={{ backgroundColor: isDark ? 'rgba(55, 65, 81, 0.5)' : '#f9fafb' }}>
-                                                            {/* Theme Toggle Icon in Header */}
+                                                            {/* Theme Toggle Icon in Header - Mobile Only via lg:hidden */}
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleThemeToggle();
                                                                 }}
-                                                                className={`p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-gray-700 text-yellow-500' : 'hover:bg-gray-200 text-gray-500'}`}
+                                                                className={`lg:hidden p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-gray-700 text-yellow-500' : 'hover:bg-gray-200 text-gray-500'}`}
                                                                 title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                                             >
                                                                 <i data-feather={isDark ? 'sun' : 'moon'} className="w-5 h-5"></i>
@@ -651,26 +651,43 @@ const Navbar = () => {
                                     <Link to="/signin" className="dark-btn-secondary hidden lg:inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300">
                                         Sign In
                                     </Link>
-                                    <Link to="/signup" className="dark-btn inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300">
+                                    <Link to="/signup" className="dark-btn hidden lg:inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300">
                                         Join for Free
                                     </Link>
                                 </div>
                             )}
                         </div>
 
-                        {/* Mobile menu button */}
+                        {/* Mobile menu button / Auth Buttons */}
                         <div className="flex items-center sm:hidden ml-2">
-                            <button
-                                id="mobile-menu-button"
-                                type="button"
-                                className={`inline-flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${isDark
-                                    ? 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                onClick={toggleMobileMenu}
-                            >
-                                <i data-feather={menuIcon} className="w-6 h-6"></i>
-                            </button>
+                            {isLoggedIn ? (
+                                <button
+                                    id="mobile-menu-button"
+                                    type="button"
+                                    className={`inline-flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${isDark
+                                        ? 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    onClick={toggleMobileMenu}
+                                >
+                                    <i data-feather={menuIcon} className="w-6 h-6"></i>
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <Link
+                                        to="/signin"
+                                        className="px-3 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition-all"
+                                    >
+                                        Sign In
+                                    </Link>
+                                    <Link
+                                        to="/signup"
+                                        className="px-3 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-md transition-all"
+                                    >
+                                        Sign Up
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
 

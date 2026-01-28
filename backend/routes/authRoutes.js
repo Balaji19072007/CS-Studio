@@ -6,7 +6,7 @@ const authController = require('../controllers/authController');
 // Helper to get the upload middleware instance and Cloudinary object from the app
 const getUploadMiddleware = (req, res, next) => {
   // Get the configured multer instance
-  req.upload = req.app.get('upload'); 
+  req.upload = req.app.get('upload');
   // Pass the configured Cloudinary instance to the controller
   req.cloudinary = req.app.get('cloudinary');
   next();
@@ -16,7 +16,11 @@ const getUploadMiddleware = (req, res, next) => {
 router.post('/signup', authController.signUpUser);
 
 // --- POST /api/auth/signin ---
+// --- POST /api/auth/signin ---
 router.post('/signin', authController.signInUser);
+
+// --- POST /api/auth/google ---
+router.post('/google', authController.googleAuth);
 
 // --- POST /api/auth/send-otp ---
 router.post('/send-otp', authController.sendOTP);
@@ -32,11 +36,11 @@ router.get('/me', authMiddleware, authController.getCurrentUser);
 // 2. Load the Cloudinary/Multer config onto the request (getUploadMiddleware)
 // 3. Process the incoming file (req.upload.single('profilePicture'))
 router.put(
-  '/profile', 
-  authMiddleware, 
-  getUploadMiddleware, 
+  '/profile',
+  authMiddleware,
+  getUploadMiddleware,
   // IMPORTANT: 'profilePicture' must match the key used in the FormData in Settings.jsx
-  (req, res, next) => req.upload.single('profilePicture')(req, res, next), 
+  (req, res, next) => req.upload.single('profilePicture')(req, res, next),
   authController.updateProfile
 );
 

@@ -18,8 +18,18 @@ import { getAuth } from "firebase/auth";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+let analytics;
+// Only initialize analytics in browser environment and (optional) specific environments
+if (typeof window !== 'undefined') {
+  // You might want to skip analytics on localhost to avoid pollution
+  if (window.location.hostname !== 'localhost') {
+    analytics = getAnalytics(app);
+  }
+}
+
 const db = getFirestore(app);
+// Ensure we get the auth instance correctly
 const auth = getAuth(app);
 
 export { app, analytics, db, auth };

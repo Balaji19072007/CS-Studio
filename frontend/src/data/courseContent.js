@@ -9879,36 +9879,721 @@ Happy Coding! 🐍💻
                 id: 1,
                 title: "Module 1: Introduction to Programming & Java",
                 topics: [
-                    { id: 'java-1-1', title: "What is Programming?", type: "video", duration: "25m", content: `# 🟢 Topic 1\nContent in progress...` },
-                    { id: 'java-1-2', title: "What is a Programming Language?", type: "video", duration: "30m", content: `# 🟢 Topic 2\nContent in progress...` },
-                    { id: 'java-1-3', title: "Types of Programming Languages", type: "video", duration: "35m", content: `# 🟢 Topic 3\nContent in progress...` },
                     {
-                        id: 'java-quiz-1-1', title: "📝 Quiz 1 (Topics 1-3)", type: "quiz", questions: [
-                            { question: "What is programming?", options: ["Writing stories", "Creating instructions for computers", "Drawing", "Gaming"], correct: 1 }
+                        id: 'java-1-1', title: "What is Programming?", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🔤 What is a Program?
+
+A program is:
+**A set of instructions written in a programming language to perform a task.**
+
+### Example Tasks:
+*   Print a message
+*   Add two numbers
+*   Store student marks
+
+---
+
+## 🧩 Example Code 1: Printing a Message
+
+### 💻 Java Code 1 (Basic)
+\`\`\`java
+class HelloProgram {
+    public static void main(String[] args) {
+        System.out.println("Hello, Programming!");
+    }
+}
+\`\`\`
+
+### 🧠 Explanation (Line by Line)
+*   \`class HelloProgram\` → Defines a class
+*   \`main\` → Starting point of Java program
+*   \`System.out.println\` → Prints message on screen
+
+### 🖥 Output
+\`\`\`text
+Hello, Programming!
+\`\`\`
+
+---
+
+## 🧩 Example Code 2: Adding Two Numbers
+
+### 💻 Java Code 2
+\`\`\`java
+class AddNumbers {
+    public static void main(String[] args) {
+        int a = 10;
+        int b = 20;
+        int sum = a + b;
+
+        System.out.println("Sum = " + sum);
+    }
+}
+\`\`\`
+
+### 🧠 Explanation
+*   \`int a = 10;\` → Stores first number
+*   \`int b = 20;\` → Stores second number
+*   \`sum = a + b;\` → Adds numbers
+*   \`println\` → Displays result
+
+### 🖥 Output
+\`\`\`text
+Sum = 30
+\`\`\`
+
+---
+
+## ❌ Common Beginner Mistakes
+*   Thinking computer understands English ❌
+*   Missing small steps ❌
+*   Forgetting main method ❌
+*   Missing semicolon \`;\` ❌
+
+> ⚠️ Computers are very strict.
+
+---
+
+## ⭐ Key Points to Remember
+*   Programming = giving instructions to computer
+*   Instructions must be clear and exact
+*   Programs are written using programming languages
+*   Java is one such programming language
+
+---
+
+## 📝 Practice Questions
+1.  Write a program to print your name
+2.  Modify program to print your age
+3.  Change message to “I love Java”
+` },
+                    {
+                        id: 'java-1-2', title: "What is a Programming Language?", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: What is a Programming Language?
+
+## ✅ What is a Programming Language? (Very Simple)
+A programming language is a language used to write instructions so that a computer can understand and execute them.
+
+*   Humans use **English, Hindi**, etc.
+*   Computers understand **machine language (0s and 1s)**
+*   Programming languages act as a **bridge** between humans and computers
+
+> 👉 **We write programs using programming languages.**
+
+---
+
+## 🧠 Real-Life Example
+Imagine you want to talk to a person from another country:
+1.  You don’t know their language ❌
+2.  Communication fails ❌
+3.  So you use a **common language** ✔️
+
+💡 **Similarly:**
+**Human** → **Programming Language** → **Computer**
+
+---
+
+## 💻 Why Do We Need Programming Languages?
+Programming languages help us to:
+*   Write programs easily
+*   Avoid writing 0s and 1s
+*   Create complex software
+*   Communicate with computer clearly
+
+**Without programming languages:**
+*   Writing programs would be very hard
+*   Error chances would be very high
+
+---
+
+## 🔤 Types of Programming Languages (Basic Idea)
+1.  **Low-level languages** (Machine, Assembly)
+2.  **High-level languages** (C, C++, Java, Python)
+
+> 👉 **Java is a high-level programming language.**
+
+---
+
+## 🧩 Example Code 1: Message Using Java Language
+
+### 💻 Java Code 1 (Simple Message)
+\`\`\`java
+class LanguageExample {
+    public static void main(String[] args) {
+        System.out.println("Java is a programming language");
+    }
+}
+\`\`\`
+
+### 🧠 Explanation
+*   This program is written in **Java**
+*   Computer does not understand English directly
+*   Java converts this code into machine language internally
+*   Computer prints the message
+
+### 🖥 Output
+\`\`\`text
+Java is a programming language
+\`\`\`
+
+---
+
+## 🧩 Example Code 2: Instructions Using Java
+
+### 💻 Java Code 2
+\`\`\`java
+class InstructionExample {
+    public static void main(String[] args) {
+        int x = 5;
+        int y = 3;
+        System.out.println("Multiplication = " + (x * y));
+    }
+}
+\`\`\`
+
+### 🧠 Explanation
+*   \`int x = 5;\` → First value
+*   \`int y = 3;\` → Second value
+*   \`(x * y)\` → Instruction to multiply
+*   Java tells computer what to do
+
+### 🖥 Output
+\`\`\`text
+Multiplication = 15
+\`\`\`
+
+---
+
+## ❌ Common Beginner Mistakes
+*   Thinking Java is understood directly by CPU ❌
+*   Confusing programming language with spoken language ❌
+*   Forgetting syntax rules ❌
+
+---
+
+## ⭐ Key Points to Remember
+*   Programming language = communication tool
+*   It connects humans and computers
+*   Java is a high-level programming language
+*   Programs are written using languages, not 0s and 1s
+
+---
+
+## 📝 Practice Questions
+1.  Write a Java program to print “Java is easy”
+2.  Change the program to print your favorite language
+3.  Modify program to add two numbers
+` },
+                    {
+                        id: 'java-1-3', title: "Types of Programming Languages", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Types of Programming Languages
+✅ Introduction
+**Types of Programming Languages** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Types of Programming Languages** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Types of Programming Languages
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Types of Programming Languages...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Types of Programming Languages will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-1-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of What is Programming??",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with What is Programming?.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of What is a Programming Language??",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with What is a Programming Language?.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Types of Programming Languages?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Types of Programming Languages.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-1-4', title: "What is Java?", type: "video", duration: "30m", content: `# 🟢 Topic 4\nContent in progress...` },
-                    { id: 'java-1-5', title: "History of Java", type: "video", duration: "25m", content: `# 🟢 Topic 5\nContent in progress...` },
-                    { id: 'java-1-6', title: "Features of Java", type: "video", duration: "40m", content: `# 🟢 Topic 6\nContent in progress...` },
                     {
-                        id: 'java-quiz-1-2', title: "📝 Quiz 2 (Topics 4-6)", type: "quiz", questions: [
-                            { question: "Who created Java?", options: ["Dennis Ritchie", "James Gosling", "Guido van Rossum", "Bjarne Stroustrup"], correct: 1 }
+                        id: 'java-1-4', title: "What is Java?", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: What is Java?
+✅ Introduction
+**What is Java?** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **What is Java?** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for What is Java?
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning What is Java?...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering What is Java? will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-1-5', title: "History of Java", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: History of Java
+✅ Introduction
+**History of Java** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **History of Java** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for History of Java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning History of Java...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering History of Java will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-1-6', title: "Features of Java", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Features of Java
+✅ Introduction
+**Features of Java** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Features of Java** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Features of Java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Features of Java...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Features of Java will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-1-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of What is Java??",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with What is Java?.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of History of Java?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with History of Java.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Features of Java?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Features of Java.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-1-7', title: "Java Editions (JSE, JEE, JME)", type: "video", duration: "35m", content: `# 🟢 Topic 7\nContent in progress...` },
-                    { id: 'java-1-8', title: "Java vs Other Languages", type: "video", duration: "30m", content: `# 🟢 Topic 8\nContent in progress...` },
-                    { id: 'java-1-9', title: "Applications of Java", type: "video", duration: "25m", content: `# 🟢 Topic 9\nContent in progress...` },
                     {
-                        id: 'java-quiz-1-3', title: "📝 Quiz 3 (Topics 7-9)", type: "quiz", questions: [
-                            { question: "Java is used for?", options: ["Mobile apps", "Web apps", "Enterprise software", "All of these"], correct: 3 }
+                        id: 'java-1-7', title: "Java Editions (JSE, JEE, JME)", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Java Editions (JSE, JEE, JME)
+✅ Introduction
+**Java Editions (JSE, JEE, JME)** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Java Editions (JSE, JEE, JME)** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Java Editions (JSE, JEE, JME)
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Java Editions (JSE, JEE, JME)...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Java Editions (JSE, JEE, JME) will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-1-8', title: "Java vs Other Languages", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Java vs Other Languages
+✅ Introduction
+**Java vs Other Languages** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Java vs Other Languages** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Java vs Other Languages
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Java vs Other Languages...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Java vs Other Languages will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-1-9', title: "Applications of Java", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: Applications of Java
+✅ Introduction
+**Applications of Java** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Applications of Java** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Applications of Java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Applications of Java...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Applications of Java will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-1-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Java Editions (JSE, JEE, JME)?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Java Editions (JSE, JEE, JME).",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Java vs Other Languages?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Java vs Other Languages.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Applications of Java?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Applications of Java.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-1-10', title: "Java Development Kit (JDK)", type: "video", duration: "35m", content: `# 🟢 Topic 10\nContent in progress...` },
-                    { id: 'java-1-11', title: "Java Virtual Machine (JVM)", type: "video", duration: "40m", content: `# 🟢 Topic 11\nContent in progress...` },
-                    { id: 'java-1-12', title: "Java Runtime Environment (JRE)", type: "video", duration: "30m", content: `# 🟢 Topic 12\nContent in progress...` },
                     {
-                        id: 'java-quiz-1-4', title: "📝 Quiz 4 (Topics 10-12)", type: "quiz", questions: [
-                            { question: "What does JVM stand for?", options: ["Java Virtual Machine", "Java Video Manager", "Java Version Manager", "None"], correct: 0 }
+                        id: 'java-1-10', title: "Java Development Kit (JDK)", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: Java Development Kit (JDK)
+✅ Introduction
+**Java Development Kit (JDK)** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Java Development Kit (JDK)** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Java Development Kit (JDK)
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Java Development Kit (JDK)...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Java Development Kit (JDK) will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-1-11', title: "Java Virtual Machine (JVM)", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: Java Virtual Machine (JVM)
+✅ Introduction
+**Java Virtual Machine (JVM)** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Java Virtual Machine (JVM)** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Java Virtual Machine (JVM)
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Java Virtual Machine (JVM)...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Java Virtual Machine (JVM) will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-1-12', title: "Java Runtime Environment (JRE)", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 12: Java Runtime Environment (JRE)
+✅ Introduction
+**Java Runtime Environment (JRE)** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Java Runtime Environment (JRE)** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Java Runtime Environment (JRE)
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Java Runtime Environment (JRE)...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Java Runtime Environment (JRE) will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-1-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Java Development Kit (JDK)?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Java Development Kit (JDK).",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Java Virtual Machine (JVM)?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Java Virtual Machine (JVM).",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Java Runtime Environment (JRE)?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Java Runtime Environment (JRE).",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     }
                 ]
@@ -9917,75 +10602,1302 @@ Happy Coding! 🐍💻
                 id: 2,
                 title: "Module 2: Java Basics",
                 topics: [
-                    { id: 'java-2-1', title: "Structure of a Java Program", type: "video", duration: "30m", content: `# 🟢 Topic 13\nContent in progress...` },
-                    { id: 'java-2-2', title: "First Java Program", type: "video", duration: "35m", content: `# 🟢 Topic 14\nContent in progress...` },
-                    { id: 'java-2-3', title: "How Java Program Works", type: "video", duration: "40m", content: `# 🟢 Topic 15\nContent in progress...` },
                     {
-                        id: 'java-quiz-2-1', title: "📝 Quiz 5 (Topics 13-15)", type: "quiz", questions: [
-                            { question: "Java program starts from?", options: ["start()", "main()", "begin()", "init()"], correct: 1 }
+                        id: 'java-2-1', title: "Structure of a Java Program", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Structure of a Java Program
+✅ Introduction
+**Structure of a Java Program** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Structure of a Java Program** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Structure of a Java Program
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Structure of a Java Program...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Structure of a Java Program will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-2', title: "First Java Program", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: First Java Program
+✅ Introduction
+**First Java Program** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **First Java Program** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for First Java Program
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning First Java Program...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering First Java Program will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-3', title: "How Java Program Works (Compile & Run)", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: How Java Program Works (Compile & Run)
+✅ Introduction
+**How Java Program Works (Compile & Run)** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **How Java Program Works (Compile & Run)** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for How Java Program Works (Compile & Run)
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning How Java Program Works (Compile & Run)...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering How Java Program Works (Compile & Run) will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-2-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Structure of a Java Program?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Structure of a Java Program.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of First Java Program?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with First Java Program.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of How Java Program Works (Compile & Run)?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with How Java Program Works (Compile & Run).",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-2-4', title: "Java Tokens", type: "video", duration: "25m", content: `# 🟢 Topic 16\nContent in progress...` },
-                    { id: 'java-2-5', title: "Keywords", type: "video", duration: "30m", content: `# 🟢 Topic 17\nContent in progress...` },
-                    { id: 'java-2-6', title: "Identifiers", type: "video", duration: "25m", content: `# 🟢 Topic 18\nContent in progress...` },
                     {
-                        id: 'java-quiz-2-2', title: "📝 Quiz 6 (Topics 16-18)", type: "quiz", questions: [
-                            { question: "Which is a keyword?", options: ["myVar", "public", "hello", "x"], correct: 1 }
+                        id: 'java-2-4', title: "Java Tokens", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Java Tokens
+✅ Introduction
+**Java Tokens** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Java Tokens** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Java Tokens
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Java Tokens...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Java Tokens will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-5', title: "Keywords", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Keywords
+✅ Introduction
+**Keywords** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Keywords** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Keywords
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Keywords...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Keywords will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-6', title: "Identifiers", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Identifiers
+✅ Introduction
+**Identifiers** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Identifiers** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Identifiers
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Identifiers...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Identifiers will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-2-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Java Tokens?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Java Tokens.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Keywords?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Keywords.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Identifiers?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Identifiers.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-2-7', title: "Literals", type: "video", duration: "30m", content: `# 🟢 Topic 19\nContent in progress...` },
-                    { id: 'java-2-8', title: "Comments in Java", type: "video", duration: "20m", content: `# 🟢 Topic 20\nContent in progress...` },
-                    { id: 'java-2-9', title: "Data Types", type: "video", duration: "45m", content: `# 🟢 Topic 21\nContent in progress...` },
                     {
-                        id: 'java-quiz-2-3', title: "📝 Quiz 7 (Topics 19-21)", type: "quiz", questions: [
-                            { question: "int is a?", options: ["Primitive type", "Object", "Class", "Interface"], correct: 0 }
+                        id: 'java-2-7', title: "Literals", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Literals
+✅ Introduction
+**Literals** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Literals** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Literals
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Literals...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Literals will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-8', title: "Comments in Java", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Comments in Java
+✅ Introduction
+**Comments in Java** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Comments in Java** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Comments in Java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Comments in Java...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Comments in Java will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-9', title: "Data Types", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: Data Types
+✅ Introduction
+**Data Types** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Data Types** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Data Types
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Data Types...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Data Types will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-2-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Literals?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Literals.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Comments in Java?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Comments in Java.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Data Types?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Data Types.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-2-10', title: "Variables", type: "video", duration: "35m", content: `# 🟢 Topic 22\nContent in progress...` },
-                    { id: 'java-2-11', title: "Type Casting", type: "video", duration: "40m", content: `# 🟢 Topic 23\nContent in progress...` },
-                    { id: 'java-2-12', title: "Operators", type: "video", duration: "50m", content: `# 🟢 Topic 24\nContent in progress...` },
                     {
-                        id: 'java-quiz-2-4', title: "📝 Quiz 8 (Topics 22-24)", type: "quiz", questions: [
-                            { question: "++ is?", options: ["Addition", "Increment", "Concatenation", "None"], correct: 1 }
+                        id: 'java-2-10', title: "Variables", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: Variables
+✅ Introduction
+**Variables** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Variables** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Variables
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Variables...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Variables will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-11', title: "Type Casting", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: Type Casting
+✅ Introduction
+**Type Casting** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Type Casting** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Type Casting
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Type Casting...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Type Casting will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-2-12', title: "Operators", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 12: Operators
+✅ Introduction
+**Operators** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Operators** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Operators
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Operators...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Operators will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-2-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Variables?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Variables.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Type Casting?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Type Casting.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Operators?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Operators.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-2-13', title: "Operator Precedence", type: "video", duration: "30m", content: `# 🟢 Topic 25\nContent in progress...` }
+                    {
+                        id: 'java-2-13', title: "Operator Precedence", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 13: Operator Precedence
+✅ Introduction
+**Operator Precedence** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Operator Precedence** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Operator Precedence
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Operator Precedence...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Operator Precedence will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-2-quiz-5',
+                        title: "Quiz 5: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Operator Precedence?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Operator Precedence.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 3,
                 title: "Module 3: Control Statements",
                 topics: [
-                    { id: 'java-3-1', title: "Conditional Statements", type: "video", duration: "25m", content: `# 🟢 Topic 26\nContent in progress...` },
-                    { id: 'java-3-2', title: "if Statement", type: "video", duration: "30m", content: `# 🟢 Topic 27\nContent in progress...` },
-                    { id: 'java-3-3', title: "if-else Statement", type: "video", duration: "35m", content: `# 🟢 Topic 28\nContent in progress...` },
                     {
-                        id: 'java-quiz-3-1', title: "📝 Quiz 9 (Topics 26-28)", type: "quiz", questions: [
-                            { question: "if statement checks?", options: ["Type", "Condition", "Value", "Class"], correct: 1 }
+                        id: 'java-3-1', title: "Conditional Statements", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Conditional Statements
+✅ Introduction
+**Conditional Statements** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Conditional Statements** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Conditional Statements
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Conditional Statements...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Conditional Statements will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-2', title: "if Statement", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: if Statement
+✅ Introduction
+**if Statement** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **if Statement** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for if Statement
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning if Statement...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering if Statement will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-3', title: "if–else Statement", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: if–else Statement
+✅ Introduction
+**if–else Statement** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **if–else Statement** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for if–else Statement
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning if–else Statement...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering if–else Statement will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-3-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Conditional Statements?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Conditional Statements.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of if Statement?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with if Statement.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of if–else Statement?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with if–else Statement.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-3-4', title: "nested if", type: "video", duration: "30m", content: `# 🟢 Topic 29\nContent in progress...` },
-                    { id: 'java-3-5', title: "switch Statement", type: "video", duration: "40m", content: `# 🟢 Topic 30\nContent in progress...` },
-                    { id: 'java-3-6', title: "for Loop", type: "video", duration: "35m", content: `# 🟢 Topic 31\nContent in progress...` },
                     {
-                        id: 'java-quiz-3-2', title: "📝 Quiz 10 (Topics 29-31)", type: "quiz", questions: [
-                            { question: "Loop repeats?", options: ["Once", "Multiple times", "Never", "Randomly"], correct: 1 }
+                        id: 'java-3-4', title: "nested if", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: nested if
+✅ Introduction
+**nested if** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **nested if** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for nested if
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning nested if...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering nested if will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-5', title: "switch Statement", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: switch Statement
+✅ Introduction
+**switch Statement** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **switch Statement** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for switch Statement
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning switch Statement...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering switch Statement will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-6', title: "Looping Statements", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Looping Statements
+✅ Introduction
+Loops allow you to execute a block of code repeatedly.
+
+---
+
+🧠 Key Concept
+*   Understanding **Looping Statements** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+for (int i = 0; i < 5; i++) {
+    System.out.println("Iteration: " + i);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Looping Statements will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-3-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of nested if?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with nested if.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of switch Statement?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with switch Statement.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Looping Statements?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Looping Statements.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-3-7', title: "while Loop", type: "video", duration: "30m", content: `# 🟢 Topic 32\nContent in progress...` },
-                    { id: 'java-3-8', title: "do-while Loop", type: "video", duration: "30m", content: `# 🟢 Topic 33\nContent in progress...` },
-                    { id: 'java-3-9', title: "Nested Loops", type: "video", duration: "35m", content: `# 🟢 Topic 34\nContent in progress...` },
                     {
-                        id: 'java-quiz-3-3', title: "📝 Quiz 11 (Topics 32-34)", type: "quiz", questions: [
-                            { question: "do-while runs minimum?", options: ["0 times", "1 time", "2 times", "Infinite"], correct: 1 }
+                        id: 'java-3-7', title: "for Loop", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: for Loop
+✅ Introduction
+Loops allow you to execute a block of code repeatedly.
+
+---
+
+🧠 Key Concept
+*   Understanding **for Loop** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+for (int i = 0; i < 5; i++) {
+    System.out.println("Iteration: " + i);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering for Loop will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-8', title: "while Loop", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: while Loop
+✅ Introduction
+Loops allow you to execute a block of code repeatedly.
+
+---
+
+🧠 Key Concept
+*   Understanding **while Loop** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+for (int i = 0; i < 5; i++) {
+    System.out.println("Iteration: " + i);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering while Loop will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-9', title: "do–while Loop", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: do–while Loop
+✅ Introduction
+Loops allow you to execute a block of code repeatedly.
+
+---
+
+🧠 Key Concept
+*   Understanding **do–while Loop** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+for (int i = 0; i < 5; i++) {
+    System.out.println("Iteration: " + i);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering do–while Loop will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-3-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of for Loop?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with for Loop.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of while Loop?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with while Loop.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of do–while Loop?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with do–while Loop.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-3-10', title: "break", type: "video", duration: "25m", content: `# 🟢 Topic 35\nContent in progress...` },
-                    { id: 'java-3-11', title: "continue", type: "video", duration: "25m", content: `# 🟢 Topic 36\nContent in progress...` },
-                    { id: 'java-3-12', title: "return", type: "video", duration: "25m", content: `# 🟢 Topic 37\nContent in progress...` },
                     {
-                        id: 'java-quiz-3-4', title: "📝 Quiz 12 (Topics 35-37)", type: "quiz", questions: [
-                            { question: "break exits?", options: ["Function", "Loop", "Program", "Class"], correct: 1 }
+                        id: 'java-3-10', title: "Nested Loops", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: Nested Loops
+✅ Introduction
+Loops allow you to execute a block of code repeatedly.
+
+---
+
+🧠 Key Concept
+*   Understanding **Nested Loops** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+for (int i = 0; i < 5; i++) {
+    System.out.println("Iteration: " + i);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Nested Loops will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-11', title: "Jump Statements", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: Jump Statements
+✅ Introduction
+**Jump Statements** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Jump Statements** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Jump Statements
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Jump Statements...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Jump Statements will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-12', title: "break", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 12: break
+✅ Introduction
+**break** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **break** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for break
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning break...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering break will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-3-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Nested Loops?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Nested Loops.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Jump Statements?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Jump Statements.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of break?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with break.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    },
+                    {
+                        id: 'java-3-13', title: "continue", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 13: continue
+✅ Introduction
+**continue** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **continue** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for continue
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning continue...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering continue will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-3-14', title: "return", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 14: return
+✅ Introduction
+**return** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **return** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for return
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning return...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering return will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-3-quiz-5',
+                        title: "Quiz 5: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of continue?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with continue.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of return?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with return.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     }
                 ]
@@ -9994,353 +11906,5476 @@ Happy Coding! 🐍💻
                 id: 4,
                 title: "Module 4: Arrays & Strings",
                 topics: [
-                    { id: 'java-4-1', title: "Arrays Introduction", type: "video", duration: "30m", content: `# 🟢 Topic 38\nContent in progress...` },
-                    { id: 'java-4-2', title: "Single Dimensional Array", type: "video", duration: "40m", content: `# 🟢 Topic 39\nContent in progress...` },
-                    { id: 'java-4-3', title: "Multi-Dimensional Array", type: "video", duration: "45m", content: `# 🟢 Topic 40\nContent in progress...` },
                     {
-                        id: 'java-quiz-4-1', title: "📝 Quiz 13 (Topics 38-40)", type: "quiz", questions: [
-                            { question: "Array index starts from?", options: ["1", "0", "-1", "10"], correct: 1 }
+                        id: 'java-4-1', title: "Arrays Introduction", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Arrays Introduction
+✅ Introduction
+Arrays are used to store multiple values in a single variable.
+
+---
+
+🧠 Key Concept
+*   Understanding **Arrays Introduction** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+int[] numbers = {1, 2, 3, 4, 5};
+System.out.println(numbers[0]); // Outputs 1
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Arrays Introduction will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-4-2', title: "Single Dimensional Array", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Single Dimensional Array
+✅ Introduction
+Arrays are used to store multiple values in a single variable.
+
+---
+
+🧠 Key Concept
+*   Understanding **Single Dimensional Array** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+int[] numbers = {1, 2, 3, 4, 5};
+System.out.println(numbers[0]); // Outputs 1
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Single Dimensional Array will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-4-3', title: "Multi-Dimensional Array", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Multi-Dimensional Array
+✅ Introduction
+Arrays are used to store multiple values in a single variable.
+
+---
+
+🧠 Key Concept
+*   Understanding **Multi-Dimensional Array** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+int[] numbers = {1, 2, 3, 4, 5};
+System.out.println(numbers[0]); // Outputs 1
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Multi-Dimensional Array will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-4-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Arrays Introduction?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Arrays Introduction.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Single Dimensional Array?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Single Dimensional Array.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Multi-Dimensional Array?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Multi-Dimensional Array.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-4-4', title: "Array Operations", type: "video", duration: "35m", content: `# 🟢 Topic 41\nContent in progress...` },
-                    { id: 'java-4-5', title: "Array of Objects", type: "video", duration: "40m", content: `# 🟢 Topic 42\nContent in progress...` },
-                    { id: 'java-4-6', title: "String Class", type: "video", duration: "50m", content: `# 🟢 Topic 43\nContent in progress...` },
                     {
-                        id: 'java-quiz-4-2', title: "📝 Quiz 14 (Topics 41-43)", type: "quiz", questions: [
-                            { question: "String is?", options: ["Primitive", "Class", "Interface", "Package"], correct: 1 }
+                        id: 'java-4-4', title: "Array Operations", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Array Operations
+✅ Introduction
+Arrays are used to store multiple values in a single variable.
+
+---
+
+🧠 Key Concept
+*   Understanding **Array Operations** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+int[] numbers = {1, 2, 3, 4, 5};
+System.out.println(numbers[0]); // Outputs 1
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Array Operations will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-4-5', title: "Array of Objects", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Array of Objects
+✅ Introduction
+Arrays are used to store multiple values in a single variable.
+
+---
+
+🧠 Key Concept
+*   Understanding **Array of Objects** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+int[] numbers = {1, 2, 3, 4, 5};
+System.out.println(numbers[0]); // Outputs 1
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Array of Objects will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-4-6', title: "String Class", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: String Class
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **String Class** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering String Class will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-4-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Array Operations?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Array Operations.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Array of Objects?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Array of Objects.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of String Class?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with String Class.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-4-7', title: "String Methods", type: "video", duration: "45m", content: `# 🟢 Topic 44\nContent in progress...` },
-                    { id: 'java-4-8', title: "StringBuffer", type: "video", duration: "35m", content: `# 🟢 Topic 45\nContent in progress...` },
-                    { id: 'java-4-9', title: "StringBuilder", type: "video", duration: "35m", content: `# 🟢 Topic 46\nContent in progress...` },
                     {
-                        id: 'java-quiz-4-3', title: "📝 Quiz 15 (Topics 44-46)", type: "quiz", questions: [
-                            { question: "String is?", options: ["Mutable", "Immutable", "Both", "None"], correct: 1 }
+                        id: 'java-4-7', title: "String Methods", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: String Methods
+✅ Introduction
+Methods are blocks of code that run only when called.
+
+---
+
+🧠 Key Concept
+*   Understanding **String Methods** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+static void myMethod() {
+    System.out.println("Hello World!");
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering String Methods will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-4-8', title: "StringBuffer", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: StringBuffer
+✅ Introduction
+**StringBuffer** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **StringBuffer** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for StringBuffer
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning StringBuffer...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering StringBuffer will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-4-9', title: "StringBuilder", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: StringBuilder
+✅ Introduction
+**StringBuilder** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **StringBuilder** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for StringBuilder
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning StringBuilder...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering StringBuilder will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-4-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of String Methods?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with String Methods.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of StringBuffer?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with StringBuffer.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of StringBuilder?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with StringBuilder.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-4-10', title: "String vs StringBuffer vs StringBuilder", type: "video", duration: "30m", content: `# 🟢 Topic 47\nContent in progress...` }
+                    {
+                        id: 'java-4-10', title: "Difference between String, StringBuffer, StringBuilder", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: Difference between String, StringBuffer, StringBuilder
+✅ Introduction
+**Difference between String, StringBuffer, StringBuilder** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Difference between String, StringBuffer, StringBuilder** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Difference between String, StringBuffer, StringBuilder
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Difference between String, StringBuffer, StringBuilder...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Difference between String, StringBuffer, StringBuilder will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-4-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Difference between String, StringBuffer, StringBuilder?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Difference between String, StringBuffer, StringBuilder.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 5,
                 title: "Module 5: Methods & Constructors",
                 topics: [
-                    { id: 'java-5-1', title: "Methods in Java", type: "video", duration: "40m", content: `# 🟢 Topic 48\nContent in progress...` },
-                    { id: 'java-5-2', title: "Method Declaration", type: "video", duration: "30m", content: `# 🟢 Topic 49\nContent in progress...` },
-                    { id: 'java-5-3', title: "Method Calling", type: "video", duration: "30m", content: `# 🟢 Topic 50\nContent in progress...` },
                     {
-                        id: 'java-quiz-5-1', title: "📝 Quiz 16 (Topics 48-50)", type: "quiz", questions: [
-                            { question: "Method is?", options: ["Variable", "Function", "Class", "Package"], correct: 1 }
+                        id: 'java-5-1', title: "Methods in Java", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Methods in Java
+✅ Introduction
+Methods are blocks of code that run only when called.
+
+---
+
+🧠 Key Concept
+*   Understanding **Methods in Java** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+static void myMethod() {
+    System.out.println("Hello World!");
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Methods in Java will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-2', title: "Method Declaration", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Method Declaration
+✅ Introduction
+Methods are blocks of code that run only when called.
+
+---
+
+🧠 Key Concept
+*   Understanding **Method Declaration** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+static void myMethod() {
+    System.out.println("Hello World!");
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Method Declaration will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-3', title: "Method Calling", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Method Calling
+✅ Introduction
+Methods are blocks of code that run only when called.
+
+---
+
+🧠 Key Concept
+*   Understanding **Method Calling** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+static void myMethod() {
+    System.out.println("Hello World!");
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Method Calling will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-5-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Methods in Java?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Methods in Java.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Method Declaration?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Method Declaration.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Method Calling?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Method Calling.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-5-4', title: "Method Parameters", type: "video", duration: "35m", content: `# 🟢 Topic 51\nContent in progress...` },
-                    { id: 'java-5-5', title: "Return Types", type: "video", duration: "30m", content: `# 🟢 Topic 52\nContent in progress...` },
-                    { id: 'java-5-6', title: "Method Overloading", type: "video", duration: "40m", content: `# 🟢 Topic 53\nContent in progress...` },
                     {
-                        id: 'java-quiz-5-2', title: "📝 Quiz 17 (Topics 51-53)", type: "quiz", questions: [
-                            { question: "Overloading means?", options: ["Same name, different parameters", "Different name", "Same everything", "None"], correct: 0 }
+                        id: 'java-5-4', title: "Method Parameters", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Method Parameters
+✅ Introduction
+Methods are blocks of code that run only when called.
+
+---
+
+🧠 Key Concept
+*   Understanding **Method Parameters** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+static void myMethod() {
+    System.out.println("Hello World!");
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Method Parameters will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-5', title: "Return Types", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Return Types
+✅ Introduction
+**Return Types** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Return Types** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Return Types
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Return Types...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Return Types will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-6', title: "Method Overloading", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Method Overloading
+✅ Introduction
+Methods are blocks of code that run only when called.
+
+---
+
+🧠 Key Concept
+*   Understanding **Method Overloading** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+static void myMethod() {
+    System.out.println("Hello World!");
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Method Overloading will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-5-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Method Parameters?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Method Parameters.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Return Types?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Return Types.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Method Overloading?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Method Overloading.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-5-7', title: "Constructors", type: "video", duration: "45m", content: `# 🟢 Topic 54\nContent in progress...` },
-                    { id: 'java-5-8', title: "Default Constructor", type: "video", duration: "30m", content: `# 🟢 Topic 55\nContent in progress...` },
-                    { id: 'java-5-9', title: "Parameterized Constructor", type: "video", duration: "35m", content: `# 🟢 Topic 56\nContent in progress...` },
                     {
-                        id: 'java-quiz-5-3', title: "📝 Quiz 18 (Topics 54-56)", type: "quiz", questions: [
-                            { question: "Constructor has?", options: ["Return type", "No return type", "void", "int"], correct: 1 }
+                        id: 'java-5-7', title: "Constructors", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Constructors
+✅ Introduction
+**Constructors** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Constructors** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Constructors
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Constructors...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Constructors will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-8', title: "Default Constructor", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Default Constructor
+✅ Introduction
+**Default Constructor** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Default Constructor** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Default Constructor
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Default Constructor...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Default Constructor will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-9', title: "Parameterized Constructor", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: Parameterized Constructor
+✅ Introduction
+**Parameterized Constructor** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Parameterized Constructor** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Parameterized Constructor
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Parameterized Constructor...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Parameterized Constructor will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-5-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Constructors?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Constructors.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Default Constructor?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Default Constructor.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Parameterized Constructor?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Parameterized Constructor.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-5-10', title: "Constructor Overloading", type: "video", duration: "35m", content: `# 🟢 Topic 57\nContent in progress...` },
-                    { id: 'java-5-11', title: "this Keyword", type: "video", duration: "40m", content: `# 🟢 Topic 58\nContent in progress...` }
+                    {
+                        id: 'java-5-10', title: "Constructor Overloading", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: Constructor Overloading
+✅ Introduction
+**Constructor Overloading** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Constructor Overloading** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Constructor Overloading
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Constructor Overloading...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Constructor Overloading will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-5-11', title: "this Keyword", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: this Keyword
+✅ Introduction
+**this Keyword** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **this Keyword** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for this Keyword
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning this Keyword...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering this Keyword will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-5-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Constructor Overloading?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Constructor Overloading.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of this Keyword?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with this Keyword.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 6,
-                title: "Module 6: Object-Oriented Programming",
+                title: "Module 6: Object-Oriented Programming (OOP)",
                 topics: [
-                    { id: 'java-6-1', title: "OOP Concepts", type: "video", duration: "35m", content: `# 🟢 Topic 59\nContent in progress...` },
-                    { id: 'java-6-2', title: "Class and Object", type: "video", duration: "50m", content: `# 🟢 Topic 60\nContent in progress...` },
-                    { id: 'java-6-3', title: "Encapsulation", type: "video", duration: "40m", content: `# 🟢 Topic 61\nContent in progress...` },
                     {
-                        id: 'java-quiz-6-1', title: "📝 Quiz 19 (Topics 59-61)", type: "quiz", questions: [
-                            { question: "OOP stands for?", options: ["Object Oriented Programming", "Operator", "Output", "None"], correct: 0 }
+                        id: 'java-6-1', title: "Object-Oriented Programming Concepts", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Object-Oriented Programming Concepts
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **Object-Oriented Programming Concepts** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Object-Oriented Programming Concepts will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-2', title: "Class and Object", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Class and Object
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **Class and Object** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Class and Object will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-3', title: "Encapsulation", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Encapsulation
+✅ Introduction
+**Encapsulation** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Encapsulation** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Encapsulation
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Encapsulation...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Encapsulation will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-6-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Object-Oriented Programming Concepts?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Object-Oriented Programming Concepts.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Class and Object?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Class and Object.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Encapsulation?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Encapsulation.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-6-4', title: "Abstraction", type: "video", duration: "40m", content: `# 🟢 Topic 62\nContent in progress...` },
-                    { id: 'java-6-5', title: "Inheritance", type: "video", duration: "50m", content: `# 🟢 Topic 63\nContent in progress...` },
-                    { id: 'java-6-6', title: "Types of Inheritance", type: "video", duration: "45m", content: `# 🟢 Topic 64\nContent in progress...` },
                     {
-                        id: 'java-quiz-6-2', title: "📝 Quiz 20 (Topics 62-64)", type: "quiz", questions: [
-                            { question: "Inheritance uses?", options: ["extends", "implements", "inherits", "uses"], correct: 0 }
+                        id: 'java-6-4', title: "Abstraction", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Abstraction
+✅ Introduction
+**Abstraction** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Abstraction** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Abstraction
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Abstraction...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Abstraction will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-5', title: "Inheritance", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Inheritance
+✅ Introduction
+Inheritance allows one class to inherit attributes and methods from another.
+
+---
+
+🧠 Key Concept
+*   Understanding **Inheritance** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Animal { void eat() {} }
+class Dog extends Animal { void bark() {} }
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Inheritance will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-6', title: "Types of Inheritance", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Types of Inheritance
+✅ Introduction
+Inheritance allows one class to inherit attributes and methods from another.
+
+---
+
+🧠 Key Concept
+*   Understanding **Types of Inheritance** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Animal { void eat() {} }
+class Dog extends Animal { void bark() {} }
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Types of Inheritance will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-6-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Abstraction?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Abstraction.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Inheritance?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Inheritance.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Types of Inheritance?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Types of Inheritance.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-6-7', title: "Polymorphism", type: "video", duration: "45m", content: `# 🟢 Topic 65\nContent in progress...` },
-                    { id: 'java-6-8', title: "Compile-Time Polymorphism", type: "video", duration: "40m", content: `# 🟢 Topic 66\nContent in progress...` },
-                    { id: 'java-6-9', title: "Run-Time Polymorphism", type: "video", duration: "40m", content: `# 🟢 Topic 67\nContent in progress...` },
                     {
-                        id: 'java-quiz-6-3', title: "📝 Quiz 21 (Topics 65-67)", type: "quiz", questions: [
-                            { question: "Runtime polymorphism?", options: ["Overloading", "Overriding", "Both", "None"], correct: 1 }
+                        id: 'java-6-7', title: "Polymorphism", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Polymorphism
+✅ Introduction
+**Polymorphism** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Polymorphism** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Polymorphism
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Polymorphism...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Polymorphism will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-8', title: "Compile-Time Polymorphism", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Compile-Time Polymorphism
+✅ Introduction
+**Compile-Time Polymorphism** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Compile-Time Polymorphism** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Compile-Time Polymorphism
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Compile-Time Polymorphism...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Compile-Time Polymorphism will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-9', title: "Run-Time Polymorphism", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: Run-Time Polymorphism
+✅ Introduction
+**Run-Time Polymorphism** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Run-Time Polymorphism** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Run-Time Polymorphism
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Run-Time Polymorphism...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Run-Time Polymorphism will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-6-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Polymorphism?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Polymorphism.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Compile-Time Polymorphism?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Compile-Time Polymorphism.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Run-Time Polymorphism?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Run-Time Polymorphism.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-6-10', title: "super Keyword", type: "video", duration: "35m", content: `# 🟢 Topic 68\nContent in progress...` },
-                    { id: 'java-6-11', title: "instanceof Operator", type: "video", duration: "30m", content: `# 🟢 Topic 69\nContent in progress...` }
+                    {
+                        id: 'java-6-10', title: "super Keyword", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: super Keyword
+✅ Introduction
+**super Keyword** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **super Keyword** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for super Keyword
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning super Keyword...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering super Keyword will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-6-11', title: "instanceof Operator", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: instanceof Operator
+✅ Introduction
+**instanceof Operator** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **instanceof Operator** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for instanceof Operator
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning instanceof Operator...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering instanceof Operator will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-6-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of super Keyword?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with super Keyword.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of instanceof Operator?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with instanceof Operator.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 7,
                 title: "Module 7: Access Control & Keywords",
                 topics: [
-                    { id: 'java-7-1', title: "Access Modifiers", type: "video", duration: "35m", content: `# 🟢 Topic 70\nContent in progress...` },
-                    { id: 'java-7-2', title: "public", type: "video", duration: "25m", content: `# 🟢 Topic 71\nContent in progress...` },
-                    { id: 'java-7-3', title: "private", type: "video", duration: "25m", content: `# 🟢 Topic 72\nContent in progress...` },
                     {
-                        id: 'java-quiz-7-1', title: "📝 Quiz 22 (Topics 70-72)", type: "quiz", questions: [
-                            { question: "private means?", options: ["Anywhere", "Same class only", "Package", "All"], correct: 1 }
+                        id: 'java-7-1', title: "Access Modifiers", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Access Modifiers
+✅ Introduction
+**Access Modifiers** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Access Modifiers** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Access Modifiers
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Access Modifiers...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Access Modifiers will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-2', title: "public", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: public
+✅ Introduction
+**public** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **public** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for public
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning public...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering public will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-3', title: "private", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: private
+✅ Introduction
+**private** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **private** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for private
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning private...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering private will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-7-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Access Modifiers?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Access Modifiers.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of public?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with public.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of private?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with private.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-7-4', title: "protected", type: "video", duration: "30m", content: `# 🟢 Topic 73\nContent in progress...` },
-                    { id: 'java-7-5', title: "default", type: "video", duration: "25m", content: `# 🟢 Topic 74\nContent in progress...` },
-                    { id: 'java-7-6', title: "Non-Access Modifiers", type: "video", duration: "30m", content: `# 🟢 Topic 75\nContent in progress...` },
                     {
-                        id: 'java-quiz-7-2', title: "📝 Quiz 23 (Topics 73-75)", type: "quiz", questions: [
-                            { question: "protected allows?", options: ["Class", "Package + child", "All", "None"], correct: 1 }
+                        id: 'java-7-4', title: "protected", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: protected
+✅ Introduction
+**protected** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **protected** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for protected
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning protected...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering protected will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-5', title: "default", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: default
+✅ Introduction
+**default** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **default** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for default
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning default...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering default will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-6', title: "Non-Access Modifiers", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Non-Access Modifiers
+✅ Introduction
+**Non-Access Modifiers** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Non-Access Modifiers** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Non-Access Modifiers
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Non-Access Modifiers...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Non-Access Modifiers will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-7-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of protected?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with protected.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of default?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with default.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Non-Access Modifiers?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Non-Access Modifiers.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-7-7', title: "static", type: "video", duration: "40m", content: `# 🟢 Topic 76\nContent in progress...` },
-                    { id: 'java-7-8', title: "final", type: "video", duration: "35m", content: `# 🟢 Topic 77\nContent in progress...` },
-                    { id: 'java-7-9', title: "abstract", type: "video", duration: "40m", content: `# 🟢 Topic 78\nContent in progress...` },
                     {
-                        id: 'java-quiz-7-3', title: "📝 Quiz 24 (Topics 76-78)", type: "quiz", questions: [
-                            { question: "static belongs to?", options: ["Object", "Class", "Method", "None"], correct: 1 }
+                        id: 'java-7-7', title: "static", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: static
+✅ Introduction
+**static** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **static** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for static
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning static...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering static will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-8', title: "final", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: final
+✅ Introduction
+**final** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **final** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for final
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning final...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering final will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-9', title: "abstract", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: abstract
+✅ Introduction
+**abstract** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **abstract** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for abstract
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning abstract...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering abstract will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-7-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of static?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with static.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of final?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with final.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of abstract?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with abstract.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-7-10', title: "transient", type: "video", duration: "25m", content: `# 🟢 Topic 79\nContent in progress...` },
-                    { id: 'java-7-11', title: "volatile", type: "video", duration: "30m", content: `# 🟢 Topic 80\nContent in progress...` }
+                    {
+                        id: 'java-7-10', title: "transient", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: transient
+✅ Introduction
+**transient** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **transient** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for transient
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning transient...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering transient will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-7-11', title: "volatile", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: volatile
+✅ Introduction
+**volatile** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **volatile** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for volatile
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning volatile...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering volatile will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-7-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of transient?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with transient.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of volatile?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with volatile.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 8,
                 title: "Module 8: Packages & Interfaces",
                 topics: [
-                    { id: 'java-8-1', title: "Packages in Java", type: "video", duration: "35m", content: `# 🟢 Topic 81\nContent in progress...` },
-                    { id: 'java-8-2', title: "Built-in Packages", type: "video", duration: "30m", content: `# 🟢 Topic 82\nContent in progress...` },
-                    { id: 'java-8-3', title: "User-Defined Packages", type: "video", duration: "35m", content: `# 🟢 Topic 83\nContent in progress...` },
                     {
-                        id: 'java-quiz-8-1', title: "📝 Quiz 25 (Topics 81-83)", type: "quiz", questions: [
-                            { question: "Package groups?", options: ["Classes", "Methods", "Variables", "Objects"], correct: 0 }
+                        id: 'java-8-1', title: "Packages in Java", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Packages in Java
+✅ Introduction
+**Packages in Java** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Packages in Java** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Packages in Java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Packages in Java...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Packages in Java will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-8-2', title: "Built-in Packages", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Built-in Packages
+✅ Introduction
+**Built-in Packages** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Built-in Packages** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Built-in Packages
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Built-in Packages...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Built-in Packages will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-8-3', title: "User-Defined Packages", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: User-Defined Packages
+✅ Introduction
+**User-Defined Packages** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **User-Defined Packages** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for User-Defined Packages
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning User-Defined Packages...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering User-Defined Packages will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-8-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Packages in Java?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Packages in Java.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Built-in Packages?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Built-in Packages.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of User-Defined Packages?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with User-Defined Packages.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-8-4', title: "Interface", type: "video", duration: "45m", content: `# 🟢 Topic 84\nContent in progress...` },
-                    { id: 'java-8-5', title: "Implementing Interface", type: "video", duration: "40m", content: `# 🟢 Topic 85\nContent in progress...` },
-                    { id: 'java-8-6', title: "Multiple Inheritance using Interface", type: "video", duration: "40m", content: `# 🟢 Topic 86\nContent in progress...` },
                     {
-                        id: 'java-quiz-8-2', title: "📝 Quiz 26 (Topics 84-86)", type: "quiz", questions: [
-                            { question: "Interface has?", options: ["Abstract methods", "Concrete methods", "Variables", "A only"], correct: 3 }
+                        id: 'java-8-4', title: "Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Interface
+✅ Introduction
+**Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Interface will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-8-5', title: "Implementing Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Implementing Interface
+✅ Introduction
+**Implementing Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Implementing Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Implementing Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Implementing Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Implementing Interface will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-8-6', title: "Multiple Inheritance using Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Multiple Inheritance using Interface
+✅ Introduction
+Inheritance allows one class to inherit attributes and methods from another.
+
+---
+
+🧠 Key Concept
+*   Understanding **Multiple Inheritance using Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Animal { void eat() {} }
+class Dog extends Animal { void bark() {} }
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Multiple Inheritance using Interface will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-8-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Implementing Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Implementing Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Multiple Inheritance using Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Multiple Inheritance using Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-8-7', title: "Marker Interface", type: "video", duration: "30m", content: `# 🟢 Topic 87\nContent in progress...` }
+                    {
+                        id: 'java-8-7', title: "Marker Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Marker Interface
+✅ Introduction
+**Marker Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Marker Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Marker Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Marker Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Marker Interface will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-8-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Marker Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Marker Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 9,
                 title: "Module 9: Exception Handling",
                 topics: [
-                    { id: 'java-9-1', title: "What is an Exception?", type: "video", duration: "30m", content: `# 🟢 Topic 88\nContent in progress...` },
-                    { id: 'java-9-2', title: "Types of Exceptions", type: "video", duration: "35m", content: `# 🟢 Topic 89\nContent in progress...` },
-                    { id: 'java-9-3', title: "try and catch", type: "video", duration: "40m", content: `# 🟢 Topic 90\nContent in progress...` },
                     {
-                        id: 'java-quiz-9-1', title: "📝 Quiz 27 (Topics 88-90)", type: "quiz", questions: [
-                            { question: "Exception means?", options: ["Error", "Runtime problem", "Both", "None"], correct: 2 }
+                        id: 'java-9-1', title: "What is an Exception?", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: What is an Exception?
+✅ Introduction
+Exception handling ensures the program flow continues after an error.
+
+---
+
+🧠 Key Concept
+*   Understanding **What is an Exception?** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+try {
+    int data = 100/0;
+} catch (ArithmeticException e) {
+    System.out.println(e);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering What is an Exception? will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-9-2', title: "Types of Exceptions", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Types of Exceptions
+✅ Introduction
+Exception handling ensures the program flow continues after an error.
+
+---
+
+🧠 Key Concept
+*   Understanding **Types of Exceptions** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+try {
+    int data = 100/0;
+} catch (ArithmeticException e) {
+    System.out.println(e);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Types of Exceptions will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-9-3', title: "try and catch", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: try and catch
+✅ Introduction
+**try and catch** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **try and catch** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for try and catch
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning try and catch...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering try and catch will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-9-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of What is an Exception??",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with What is an Exception?.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Types of Exceptions?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Types of Exceptions.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of try and catch?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with try and catch.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-9-4', title: "multiple catch", type: "video", duration: "35m", content: `# 🟢 Topic 91\nContent in progress...` },
-                    { id: 'java-9-5', title: "finally Block", type: "video", duration: "30m", content: `# 🟢 Topic 92\nContent in progress...` },
-                    { id: 'java-9-6', title: "throw Keyword", type: "video", duration: "30m", content: `# 🟢 Topic 93\nContent in progress...` },
                     {
-                        id: 'java-quiz-9-2', title: "📝 Quiz 28 (Topics 91-93)", type: "quiz", questions: [
-                            { question: "finally runs?", options: ["Always", "On error", "Sometimes", "Never"], correct: 0 }
+                        id: 'java-9-4', title: "multiple catch", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: multiple catch
+✅ Introduction
+**multiple catch** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **multiple catch** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for multiple catch
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning multiple catch...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering multiple catch will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-9-5', title: "finally Block", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: finally Block
+✅ Introduction
+**finally Block** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **finally Block** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for finally Block
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning finally Block...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering finally Block will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-9-6', title: "throw Keyword", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: throw Keyword
+✅ Introduction
+**throw Keyword** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **throw Keyword** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for throw Keyword
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning throw Keyword...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering throw Keyword will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-9-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of multiple catch?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with multiple catch.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of finally Block?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with finally Block.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of throw Keyword?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with throw Keyword.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-9-7', title: "throws Keyword", type: "video", duration: "30m", content: `# 🟢 Topic 94\nContent in progress...` },
-                    { id: 'java-9-8', title: "Custom Exceptions", type: "video", duration: "35m", content: `# 🟢 Topic 95\nContent in progress...` }
+                    {
+                        id: 'java-9-7', title: "throws Keyword", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: throws Keyword
+✅ Introduction
+**throws Keyword** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **throws Keyword** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for throws Keyword
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning throws Keyword...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering throws Keyword will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-9-8', title: "Custom Exceptions", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Custom Exceptions
+✅ Introduction
+Exception handling ensures the program flow continues after an error.
+
+---
+
+🧠 Key Concept
+*   Understanding **Custom Exceptions** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+try {
+    int data = 100/0;
+} catch (ArithmeticException e) {
+    System.out.println(e);
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Custom Exceptions will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-9-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of throws Keyword?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with throws Keyword.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Custom Exceptions?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Custom Exceptions.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 10,
                 title: "Module 10: Multithreading",
                 topics: [
-                    { id: 'java-10-1', title: "What is Multithreading?", type: "video", duration: "35m", content: `# 🟢 Topic 96\nContent in progress...` },
-                    { id: 'java-10-2', title: "Thread Class", type: "video", duration: "40m", content: `# 🟢 Topic 97\nContent in progress...` },
-                    { id: 'java-10-3', title: "Runnable Interface", type: "video", duration: "40m", content: `# 🟢 Topic 98\nContent in progress...` },
                     {
-                        id: 'java-quiz-10-1', title: "📝 Quiz 29 (Topics 96-98)", type: "quiz", questions: [
-                            { question: "Thread is?", options: ["Process", "Lightweight process", "Program", "Class"], correct: 1 }
+                        id: 'java-10-1', title: "What is Multithreading?", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: What is Multithreading?
+✅ Introduction
+**What is Multithreading?** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **What is Multithreading?** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for What is Multithreading?
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning What is Multithreading?...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering What is Multithreading? will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-10-2', title: "Thread Class", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Thread Class
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **Thread Class** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Thread Class will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-10-3', title: "Runnable Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Runnable Interface
+✅ Introduction
+**Runnable Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Runnable Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Runnable Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Runnable Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Runnable Interface will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-10-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of What is Multithreading??",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with What is Multithreading?.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Thread Class?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Thread Class.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Runnable Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Runnable Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-10-4', title: "Thread Life Cycle", type: "video", duration: "35m", content: `# 🟢 Topic 99\nContent in progress...` },
-                    { id: 'java-10-5', title: "Thread Priority", type: "video", duration: "30m", content: `# 🟢 Topic 100\nContent in progress...` },
-                    { id: 'java-10-6', title: "Synchronization", type: "video", duration: "45m", content: `# 🟢 Topic 101\nContent in progress...` },
                     {
-                        id: 'java-quiz-10-2', title: "📝 Quiz 30 (Topics 99-101)", type: "quiz", questions: [
-                            { question: "Synchronization prevents?", options: ["Errors", "Race condition", "Compilation", "None"], correct: 1 }
+                        id: 'java-10-4', title: "Thread Life Cycle", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Thread Life Cycle
+✅ Introduction
+**Thread Life Cycle** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Thread Life Cycle** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Thread Life Cycle
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Thread Life Cycle...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Thread Life Cycle will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-10-5', title: "Thread Priority", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Thread Priority
+✅ Introduction
+**Thread Priority** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Thread Priority** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Thread Priority
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Thread Priority...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Thread Priority will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-10-6', title: "Synchronization", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Synchronization
+✅ Introduction
+**Synchronization** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Synchronization** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Synchronization
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Synchronization...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Synchronization will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-10-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Thread Life Cycle?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Thread Life Cycle.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Thread Priority?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Thread Priority.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Synchronization?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Synchronization.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-10-7', title: "Inter-thread Communication", type: "video", duration: "40m", content: `# 🟢 Topic 102\nContent in progress...` },
-                    { id: 'java-10-8', title: "Deadlock", type: "video", duration: "35m", content: `# 🟢 Topic 103\nContent in progress...` }
+                    {
+                        id: 'java-10-7', title: "Inter-thread Communication", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Inter-thread Communication
+✅ Introduction
+**Inter-thread Communication** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Inter-thread Communication** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Inter-thread Communication
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Inter-thread Communication...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Inter-thread Communication will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-10-8', title: "Deadlock", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Deadlock
+✅ Introduction
+**Deadlock** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Deadlock** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Deadlock
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Deadlock...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Deadlock will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-10-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Inter-thread Communication?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Inter-thread Communication.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Deadlock?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Deadlock.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 11,
                 title: "Module 11: File Handling & I/O",
                 topics: [
-                    { id: 'java-11-1', title: "File Class", type: "video", duration: "35m", content: `# 🟢 Topic 104\nContent in progress...` },
-                    { id: 'java-11-2', title: "File Input Stream", type: "video", duration: "40m", content: `# 🟢 Topic 105\nContent in progress...` },
-                    { id: 'java-11-3', title: "File Output Stream", type: "video", duration: "40m", content: `# 🟢 Topic 106\nContent in progress...` },
                     {
-                        id: 'java-quiz-11-1', title: "📝 Quiz 31 (Topics 104-106)", type: "quiz", questions: [
-                            { question: "File class in?", options: ["java.io", "java.util", "java.lang", "java.file"], correct: 0 }
+                        id: 'java-11-1', title: "File Class", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: File Class
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **File Class** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering File Class will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-11-2', title: "File Input Stream", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: File Input Stream
+✅ Introduction
+**File Input Stream** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **File Input Stream** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for File Input Stream
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning File Input Stream...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering File Input Stream will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-11-3', title: "File Output Stream", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: File Output Stream
+✅ Introduction
+**File Output Stream** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **File Output Stream** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for File Output Stream
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning File Output Stream...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering File Output Stream will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-11-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of File Class?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with File Class.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of File Input Stream?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with File Input Stream.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of File Output Stream?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with File Output Stream.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-11-4', title: "BufferedReader", type: "video", duration: "35m", content: `# 🟢 Topic 107\nContent in progress...` },
-                    { id: 'java-11-5', title: "BufferedWriter", type: "video", duration: "35m", content: `# 🟢 Topic 108\nContent in progress...` },
-                    { id: 'java-11-6', title: "Scanner Class", type: "video", duration: "30m", content: `# 🟢 Topic 109\nContent in progress...` },
                     {
-                        id: 'java-quiz-11-2', title: "📝 Quiz 32 (Topics 107-109)", type: "quiz", questions: [
-                            { question: "Scanner reads?", options: ["Output", "Input", "Both", "None"], correct: 1 }
+                        id: 'java-11-4', title: "BufferedReader", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: BufferedReader
+✅ Introduction
+**BufferedReader** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **BufferedReader** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for BufferedReader
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning BufferedReader...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering BufferedReader will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-11-5', title: "BufferedWriter", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: BufferedWriter
+✅ Introduction
+**BufferedWriter** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **BufferedWriter** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for BufferedWriter
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning BufferedWriter...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering BufferedWriter will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-11-6', title: "Scanner Class", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Scanner Class
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **Scanner Class** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Scanner Class will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-11-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of BufferedReader?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with BufferedReader.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of BufferedWriter?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with BufferedWriter.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Scanner Class?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Scanner Class.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-11-7', title: "Serialization", type: "video", duration: "40m", content: `# 🟢 Topic 110\nContent in progress...` },
-                    { id: 'java-11-8', title: "Deserialization", type: "video", duration: "35m", content: `# 🟢 Topic 111\nContent in progress...` }
+                    {
+                        id: 'java-11-7', title: "Serialization", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Serialization
+✅ Introduction
+**Serialization** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Serialization** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Serialization
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Serialization...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Serialization will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-11-8', title: "Deserialization", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Deserialization
+✅ Introduction
+**Deserialization** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Deserialization** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Deserialization
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Deserialization...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Deserialization will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-11-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Serialization?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Serialization.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Deserialization?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Deserialization.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 12,
                 title: "Module 12: Collections Framework",
                 topics: [
-                    { id: 'java-12-1', title: "Collections Framework Introduction", type: "video", duration: "40m", content: `# 🟢 Topic 112\nContent in progress...` },
-                    { id: 'java-12-2', title: "List Interface", type: "video", duration: "35m", content: `# 🟢 Topic 113\nContent in progress...` },
-                    { id: 'java-12-3', title: "ArrayList", type: "video", duration: "45m", content: `# 🟢 Topic 114\nContent in progress...` },
                     {
-                        id: 'java-quiz-12-1', title: "📝 Quiz 33 (Topics 112-114)", type: "quiz", questions: [
-                            { question: "ArrayList is?", options: ["Fixed size", "Dynamic size", "No size", "Infinite"], correct: 1 }
+                        id: 'java-12-1', title: "Collections Framework Introduction", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Collections Framework Introduction
+✅ Introduction
+**Collections Framework Introduction** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Collections Framework Introduction** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Collections Framework Introduction
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Collections Framework Introduction...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Collections Framework Introduction will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-2', title: "List Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: List Interface
+✅ Introduction
+**List Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **List Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for List Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning List Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering List Interface will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-3', title: "ArrayList", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: ArrayList
+✅ Introduction
+Arrays are used to store multiple values in a single variable.
+
+---
+
+🧠 Key Concept
+*   Understanding **ArrayList** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+int[] numbers = {1, 2, 3, 4, 5};
+System.out.println(numbers[0]); // Outputs 1
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering ArrayList will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-12-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Collections Framework Introduction?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Collections Framework Introduction.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of List Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with List Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of ArrayList?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with ArrayList.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-12-4', title: "LinkedList", type: "video", duration: "40m", content: `# 🟢 Topic 115\nContent in progress...` },
-                    { id: 'java-12-5', title: "Vector", type: "video", duration: "35m", content: `# 🟢 Topic 116\nContent in progress...` },
-                    { id: 'java-12-6', title: "Stack", type: "video", duration: "35m", content: `# 🟢 Topic 117\nContent in progress...` },
                     {
-                        id: 'java-quiz-12-2', title: "📝 Quiz 34 (Topics 115-117)", type: "quiz", questions: [
-                            { question: "Stack follows?", options: ["FIFO", "LIFO", "Random", "None"], correct: 1 }
+                        id: 'java-12-4', title: "LinkedList", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: LinkedList
+✅ Introduction
+**LinkedList** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **LinkedList** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for LinkedList
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning LinkedList...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering LinkedList will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-5', title: "Vector", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Vector
+✅ Introduction
+**Vector** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Vector** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Vector
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Vector...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Vector will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-6', title: "Stack", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Stack
+✅ Introduction
+**Stack** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Stack** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Stack
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Stack...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Stack will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-12-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of LinkedList?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with LinkedList.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Vector?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Vector.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Stack?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Stack.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-12-7', title: "Set Interface", type: "video", duration: "35m", content: `# 🟢 Topic 118\nContent in progress...` },
-                    { id: 'java-12-8', title: "HashSet", type: "video", duration: "40m", content: `# 🟢 Topic 119\nContent in progress...` },
-                    { id: 'java-12-9', title: "LinkedHashSet", type: "video", duration: "35m", content: `# 🟢 Topic 120\nContent in progress...` },
                     {
-                        id: 'java-quiz-12-3', title: "📝 Quiz 35 (Topics 118-120)", type: "quiz", questions: [
-                            { question: "Set allows?", options: ["Duplicates", "No duplicates", "Both", "None"], correct: 1 }
+                        id: 'java-12-7', title: "Set Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Set Interface
+✅ Introduction
+**Set Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Set Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Set Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Set Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Set Interface will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-8', title: "HashSet", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: HashSet
+✅ Introduction
+**HashSet** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **HashSet** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for HashSet
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning HashSet...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering HashSet will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-9', title: "LinkedHashSet", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: LinkedHashSet
+✅ Introduction
+**LinkedHashSet** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **LinkedHashSet** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for LinkedHashSet
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning LinkedHashSet...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering LinkedHashSet will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-12-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Set Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Set Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of HashSet?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with HashSet.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of LinkedHashSet?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with LinkedHashSet.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-12-10', title: "TreeSet", type: "video", duration: "40m", content: `# 🟢 Topic 121\nContent in progress...` },
-                    { id: 'java-12-11', title: "Map Interface", type: "video", duration: "35m", content: `# 🟢 Topic 122\nContent in progress...` },
-                    { id: 'java-12-12', title: "HashMap", type: "video", duration: "45m", content: `# 🟢 Topic 123\nContent in progress...` },
                     {
-                        id: 'java-quiz-12-4', title: "📝 Quiz 36 (Topics 121-123)", type: "quiz", questions: [
-                            { question: "Map stores?", options: ["Key-Value", "Only Key", "Only Value", "Arrays"], correct: 0 }
+                        id: 'java-12-10', title: "TreeSet", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 10: TreeSet
+✅ Introduction
+**TreeSet** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **TreeSet** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for TreeSet
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning TreeSet...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering TreeSet will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-11', title: "Map Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 11: Map Interface
+✅ Introduction
+**Map Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Map Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Map Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Map Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Map Interface will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-12', title: "HashMap", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 12: HashMap
+✅ Introduction
+**HashMap** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **HashMap** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for HashMap
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning HashMap...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering HashMap will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-12-quiz-4',
+                        title: "Quiz 4: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of TreeSet?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with TreeSet.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Map Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Map Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of HashMap?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with HashMap.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-12-13', title: "LinkedHashMap", type: "video", duration: "35m", content: `# 🟢 Topic 124\nContent in progress...` },
-                    { id: 'java-12-14', title: "TreeMap", type: "video", duration: "40m", content: `# 🟢 Topic 125\nContent in progress...` },
-                    { id: 'java-12-15', title: "Iterator", type: "video", duration: "35m", content: `# 🟢 Topic 126\nContent in progress...` },
                     {
-                        id: 'java-quiz-12-5', title: "📝 Quiz 37 (Topics 124-126)", type: "quiz", questions: [
-                            { question: "Iterator traverses?", options: ["Collections", "Arrays", "Strings", "All"], correct: 0 }
+                        id: 'java-12-13', title: "LinkedHashMap", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 13: LinkedHashMap
+✅ Introduction
+**LinkedHashMap** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **LinkedHashMap** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for LinkedHashMap
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning LinkedHashMap...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering LinkedHashMap will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-14', title: "TreeMap", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 14: TreeMap
+✅ Introduction
+**TreeMap** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **TreeMap** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for TreeMap
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning TreeMap...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering TreeMap will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-12-15', title: "Iterator", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 15: Iterator
+✅ Introduction
+**Iterator** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Iterator** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Iterator
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Iterator...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Iterator will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-12-quiz-5',
+                        title: "Quiz 5: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of LinkedHashMap?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with LinkedHashMap.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of TreeMap?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with TreeMap.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Iterator?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Iterator.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-12-16', title: "Comparable & Comparator", type: "video", duration: "40m", content: `# 🟢 Topic 127\nContent in progress...` }
+                    {
+                        id: 'java-12-16', title: "Comparable & Comparator", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 16: Comparable & Comparator
+✅ Introduction
+**Comparable & Comparator** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Comparable & Comparator** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Comparable & Comparator
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Comparable & Comparator...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Comparable & Comparator will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-12-quiz-6',
+                        title: "Quiz 6: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Comparable & Comparator?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Comparable & Comparator.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 13,
                 title: "Module 13: Advanced Java Concepts",
                 topics: [
-                    { id: 'java-13-1', title: "Wrapper Classes", type: "video", duration: "35m", content: `# 🟢 Topic 128\nContent in progress...` },
-                    { id: 'java-13-2', title: "Autoboxing & Unboxing", type: "video", duration: "30m", content: `# 🟢 Topic 129\nContent in progress...` },
-                    { id: 'java-13-3', title: "Enum", type: "video", duration: "35m", content: `# 🟢 Topic 130\nContent in progress...` },
                     {
-                        id: 'java-quiz-13-1', title: "📝 Quiz 38 (Topics 128-130)", type: "quiz", questions: [
-                            { question: "Wrapper class converts?", options: ["Primitive to Object", "Object to Primitive", "Both", "None"], correct: 2 }
+                        id: 'java-13-1', title: "Wrapper Classes", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Wrapper Classes
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **Wrapper Classes** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Wrapper Classes will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-13-2', title: "Autoboxing & Unboxing", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Autoboxing & Unboxing
+✅ Introduction
+**Autoboxing & Unboxing** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Autoboxing & Unboxing** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Autoboxing & Unboxing
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Autoboxing & Unboxing...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Autoboxing & Unboxing will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-13-3', title: "Enum", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Enum
+✅ Introduction
+**Enum** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Enum** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Enum
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Enum...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Enum will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-13-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Wrapper Classes?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Wrapper Classes.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Autoboxing & Unboxing?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Autoboxing & Unboxing.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Enum?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Enum.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-13-4', title: "Annotations", type: "video", duration: "40m", content: `# 🟢 Topic 131\nContent in progress...` },
-                    { id: 'java-13-5', title: "Lambda Expressions", type: "video", duration: "45m", content: `# 🟢 Topic 132\nContent in progress...` },
-                    { id: 'java-13-6', title: "Functional Interface", type: "video", duration: "40m", content: `# 🟢 Topic 133\nContent in progress...` },
                     {
-                        id: 'java-quiz-13-2', title: "📝 Quiz 39 (Topics 131-133)", type: "quiz", questions: [
-                            { question: "Lambda is?", options: ["Anonymous function", "Class", "Interface", "Package"], correct: 0 }
+                        id: 'java-13-4', title: "Annotations", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Annotations
+✅ Introduction
+**Annotations** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Annotations** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Annotations
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Annotations...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Annotations will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-13-5', title: "Lambda Expressions", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Lambda Expressions
+✅ Introduction
+**Lambda Expressions** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Lambda Expressions** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Lambda Expressions
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Lambda Expressions...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Lambda Expressions will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-13-6', title: "Functional Interface", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Functional Interface
+✅ Introduction
+**Functional Interface** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Functional Interface** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Functional Interface
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Functional Interface...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Functional Interface will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-13-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Annotations?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Annotations.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Lambda Expressions?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Lambda Expressions.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Functional Interface?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Functional Interface.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-13-7', title: "Stream API", type: "video", duration: "50m", content: `# 🟢 Topic 134\nContent in progress...` },
-                    { id: 'java-13-8', title: "Optional Class", type: "video", duration: "35m", content: `# 🟢 Topic 135\nContent in progress...` },
-                    { id: 'java-13-9', title: "Date & Time API", type: "video", duration: "40m", content: `# 🟢 Topic 136\nContent in progress...` },
                     {
-                        id: 'java-quiz-13-3', title: "📝 Quiz 40 (Topics 134-136)", type: "quiz", questions: [
-                            { question: "Stream processes?", options: ["Collections", "Arrays", "Data", "All"], correct: 3 }
+                        id: 'java-13-7', title: "Stream API", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: Stream API
+✅ Introduction
+**Stream API** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Stream API** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Stream API
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Stream API...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Stream API will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-13-8', title: "Optional Class", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: Optional Class
+✅ Introduction
+Classes are blueprints for creating objects (instances).
+
+---
+
+🧠 Key Concept
+*   Understanding **Optional Class** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+class Car {
+    String color = "Red";
+}
+Car myCar = new Car();
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Optional Class will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-13-9', title: "Date & Time API", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 9: Date & Time API
+✅ Introduction
+**Date & Time API** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Date & Time API** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Date & Time API
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Date & Time API...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Date & Time API will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-13-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Stream API?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Stream API.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Optional Class?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Optional Class.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Date & Time API?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Date & Time API.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     }
                 ]
             },
             {
                 id: 14,
-                title: "Module 14: JDBC",
+                title: "Module 14: Java Database Connectivity (JDBC)",
                 topics: [
-                    { id: 'java-14-1', title: "Introduction to JDBC", type: "video", duration: "35m", content: `# 🟢 Topic 137\nContent in progress...` },
-                    { id: 'java-14-2', title: "JDBC Architecture", type: "video", duration: "40m", content: `# 🟢 Topic 138\nContent in progress...` },
-                    { id: 'java-14-3', title: "JDBC Drivers", type: "video", duration: "35m", content: `# 🟢 Topic 139\nContent in progress...` },
                     {
-                        id: 'java-quiz-14-1', title: "📝 Quiz 41 (Topics 137-139)", type: "quiz", questions: [
-                            { question: "JDBC connects Java with?", options: ["Database", "Network", "File", "Browser"], correct: 0 }
+                        id: 'java-14-1', title: "Introduction to JDBC", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Introduction to JDBC
+✅ Introduction
+**Introduction to JDBC** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Introduction to JDBC** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Introduction to JDBC
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Introduction to JDBC...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Introduction to JDBC will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-14-2', title: "JDBC Architecture", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: JDBC Architecture
+✅ Introduction
+**JDBC Architecture** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **JDBC Architecture** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for JDBC Architecture
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning JDBC Architecture...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering JDBC Architecture will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-14-3', title: "JDBC Drivers", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: JDBC Drivers
+✅ Introduction
+**JDBC Drivers** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **JDBC Drivers** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for JDBC Drivers
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning JDBC Drivers...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering JDBC Drivers will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-14-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Introduction to JDBC?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Introduction to JDBC.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of JDBC Architecture?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with JDBC Architecture.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of JDBC Drivers?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with JDBC Drivers.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-14-4', title: "Connecting Java with Database", type: "video", duration: "45m", content: `# 🟢 Topic 140\nContent in progress...` },
-                    { id: 'java-14-5', title: "Statement", type: "video", duration: "40m", content: `# 🟢 Topic 141\nContent in progress...` },
-                    { id: 'java-14-6', title: "PreparedStatement", type: "video", duration: "45m", content: `# 🟢 Topic 142\nContent in progress...` },
                     {
-                        id: 'java-quiz-14-2', title: "📝 Quiz 42 (Topics 140-142)", type: "quiz", questions: [
-                            { question: "PreparedStatement is?", options: ["Faster", "Slower", "Same as Statement", "None"], correct: 0 }
+                        id: 'java-14-4', title: "Connecting Java with Database", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Connecting Java with Database
+✅ Introduction
+**Connecting Java with Database** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Connecting Java with Database** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Connecting Java with Database
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Connecting Java with Database...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Connecting Java with Database will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-14-5', title: "Statement", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: Statement
+✅ Introduction
+**Statement** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Statement** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Statement
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Statement...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Statement will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-14-6', title: "PreparedStatement", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: PreparedStatement
+✅ Introduction
+**PreparedStatement** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **PreparedStatement** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for PreparedStatement
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning PreparedStatement...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering PreparedStatement will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-14-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Connecting Java with Database?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Connecting Java with Database.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Statement?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Statement.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of PreparedStatement?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with PreparedStatement.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-14-7', title: "ResultSet", type: "video", duration: "40m", content: `# 🟢 Topic 143\nContent in progress...` },
-                    { id: 'java-14-8', title: "CRUD Operations", type: "video", duration: "50m", content: `# 🟢 Topic 144\nContent in progress...` }
+                    {
+                        id: 'java-14-7', title: "ResultSet", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 7: ResultSet
+✅ Introduction
+**ResultSet** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **ResultSet** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for ResultSet
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning ResultSet...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering ResultSet will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-14-8', title: "CRUD Operations", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 8: CRUD Operations
+✅ Introduction
+**CRUD Operations** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **CRUD Operations** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for CRUD Operations
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning CRUD Operations...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering CRUD Operations will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-14-quiz-3',
+                        title: "Quiz 3: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of ResultSet?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with ResultSet.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of CRUD Operations?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with CRUD Operations.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 15,
-                title: "Module 15: Mini Projects",
+                title: "Module 15: Mini Projects & Practice",
                 topics: [
-                    { id: 'java-15-1', title: "Student Management System", type: "video", duration: "60m", content: `# 🟢 Project 1\nContent in progress...` },
-                    { id: 'java-15-2', title: "Banking Application", type: "video", duration: "60m", content: `# 🟢 Project 2\nContent in progress...` },
-                    { id: 'java-15-3', title: "Library Management System", type: "video", duration: "60m", content: `# 🟢 Project 3\nContent in progress...` },
                     {
-                        id: 'java-quiz-15-1', title: "📝 Quiz 43 (Projects 1-3)", type: "quiz", questions: [
-                            { question: "Project uses?", options: ["All concepts", "Only basics", "Only OOP", "None"], correct: 0 }
+                        id: 'java-15-1', title: "Student Management System", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 1: Student Management System
+✅ Introduction
+**Student Management System** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Student Management System** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Student Management System
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Student Management System...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Student Management System will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-15-2', title: "Banking Application", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 2: Banking Application
+✅ Introduction
+**Banking Application** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Banking Application** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Banking Application
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Banking Application...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Banking Application will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-15-3', title: "Library Management System", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 3: Library Management System
+✅ Introduction
+**Library Management System** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Library Management System** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Library Management System
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Library Management System...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Library Management System will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-15-quiz-1',
+                        title: "Quiz 1: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Student Management System?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Student Management System.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of Banking Application?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Banking Application.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Library Management System?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Library Management System.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     },
-                    { id: 'java-15-4', title: "Quiz Application", type: "video", duration: "50m", content: `# 🟢 Project 4\nContent in progress...` },
-                    { id: 'java-15-5', title: "File-Based Project", type: "video", duration: "55m", content: `# 🟢 Project 5\nContent in progress...` },
-                    { id: 'java-15-6', title: "Database-Based Project", type: "video", duration: "60m", content: `# 🟢 Project 6\nContent in progress...` },
                     {
-                        id: 'java-quiz-15-2', title: "📝 Quiz 44 (Projects 4-6)", type: "quiz", questions: [
-                            { question: "Real projects need?", options: ["Theory", "Practice", "Both", "None"], correct: 2 }
+                        id: 'java-15-4', title: "Quiz Application", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 4: Quiz Application
+✅ Introduction
+**Quiz Application** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Quiz Application** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Quiz Application
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Quiz Application...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Quiz Application will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-15-5', title: "File-Based Project", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 5: File-Based Project
+✅ Introduction
+**File-Based Project** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **File-Based Project** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for File-Based Project
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning File-Based Project...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering File-Based Project will help you write more efficient and cleaner Java code.
+` },
+                    {
+                        id: 'java-15-6', title: "Database-Based Project", type: "video", duration: "30m", videoUrl: "https://www.youtube.com/watch?v=eIrMbAQSU34", content: `# 🟢 Topic 6: Database-Based Project
+✅ Introduction
+**Database-Based Project** is a core concept in Java development.
+
+---
+
+🧠 Key Concept
+*   Understanding **Database-Based Project** is essential for mastering Java.
+*   It is widely used in real-world applications.
+*   Java provides robust support for this feature.
+
+---
+
+💻 Example Code
+\`\`\`java
+// Example code for Database-Based Project
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Learning Database-Based Project...");
+    }
+}
+\`\`\`
+
+---
+
+⭐ Key Takeaway
+Mastering Database-Based Project will help you write more efficient and cleaner Java code.
+` },
+
+                    {
+                        id: 'java-15-quiz-2',
+                        title: "Quiz 2: Review",
+                        type: 'quiz',
+                        questions: [
+
+                            {
+                                id: 1,
+                                question: "What is the main concept of Quiz Application?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Quiz Application.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 2,
+                                question: "What is the main concept of File-Based Project?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with File-Based Project.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 3,
+                                question: "What is the main concept of Database-Based Project?",
+                                options: [
+                                    "It is a programming feature.",
+                                    "It deals with Database-Based Project.",
+                                    "It is unrelated to Java.",
+                                    "None of the above."
+                                ],
+                                correctAnswer: 1
+                            },
+
+                            {
+                                id: 4,
+                                question: "Which statement is true about the topics covered?",
+                                options: [
+                                    "They are essential for Java.",
+                                    "They are deprecated.",
+                                    "They are only for C++.",
+                                    "They are optional."
+                                ],
+                                correctAnswer: 0
+                            }
                         ]
                     }
                 ]
             }
         ]
     },
-
-    // ==========================================
-    // DEVOPS
-    // ==========================================
     'devops': {
         id: 'devops',
         title: "Intro to DevOps",

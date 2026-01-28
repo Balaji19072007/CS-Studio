@@ -66,7 +66,7 @@ const MobileTopBar = () => {
                         className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm sm:hidden"
                         onClick={() => setIsMenuOpen(false)}
                     ></div>
-                    <div className="fixed top-16 right-4 z-50 w-64 bg-[#ffffff] dark:bg-[#1c273a] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 sm:hidden animate-in fade-in slide-in-from-top-5 duration-200">
+                    <div className="fixed top-16 right-4 z-50 w-64 bg-white dark:bg-[#1c273a] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 sm:hidden animate-in fade-in slide-in-from-top-5 duration-200">
                         <div className="p-4 border-b border-gray-100 dark:border-gray-700/50 flex items-center gap-3">
                             <button
                                 onClick={(e) => {

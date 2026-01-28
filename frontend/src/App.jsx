@@ -12,13 +12,14 @@ import Footer from './components/common/Footer.jsx';
 
 import MobileTopBar from './components/common/MobileTopBar.jsx';
 import MobileBottomNav from './components/common/MobileBottomNav.jsx';
-import MobileQuickActions from './components/common/MobileQuickActions.jsx';
 
 // Page imports
 import Home from './pages/Home.jsx';
 
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import AuthAction from './pages/AuthAction.jsx';
 import Problems from './pages/Problems.jsx';
 import Courses from './pages/Courses.jsx';
 import Roadmaps from './pages/Roadmaps.jsx';
@@ -65,11 +66,15 @@ import DataWranglingRoadmap from "./pages/roadmaps/DataWranglingRoadmap.jsx";
 import DataScienceModelingRoadmap from "./pages/roadmaps/DataScienceModelingRoadmap.jsx";
 import DataScienceRoadmap from "./pages/roadmaps/DataScienceRoadmap.jsx";
 import RatingPopup from './components/common/RatingPopup.jsx';
-import CSMentorWidget from './components/common/CSMentorWidget.jsx';
 import CodeEditorFloatingIcon from './components/common/CodeEditorFloatingIcon.jsx';
 import './App.css';
 
+
+
 function App() {
+  // Temporary test component - Remove after verification
+  // return <TestFirebaseAuth />;
+
   return (
     <ErrorBoundary>
       <Router
@@ -94,7 +99,6 @@ function AppContent() {
   const location = useLocation();
   const { user } = useAuth();
   const isLoggedIn = !!user; // Check if user is logged in
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Page refresh handling is now done in index.html for better reliability
 
@@ -117,6 +121,8 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/action" element={<AuthAction />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/courses" element={<Courses />} />
           {/* Dynamic Course Route - Replaces individual imports */}
@@ -170,24 +176,19 @@ function AppContent() {
 
       <RatingPopup />
       {/* Hide icons on public home (when not logged in), signin, signup, solve, and learn pages */}
+      {/* Hide icons on specific pages */}
       {!location.pathname.startsWith('/solve') &&
         !location.pathname.startsWith('/learn') &&
         location.pathname !== '/signin' &&
         location.pathname !== '/signup' &&
         location.pathname !== '/code' &&
+        location.pathname !== '/settings' &&
+        location.pathname !== '/problems' &&
+        location.pathname !== '/my-courses' &&
+        location.pathname !== '/my-progress' &&
+        location.pathname !== '/problem-stats' &&
         !(location.pathname === '/' && !isLoggedIn) &&
         <CodeEditorFloatingIcon />}
-      {!location.pathname.startsWith('/solve') &&
-        !location.pathname.startsWith('/learn') &&
-        location.pathname !== '/signin' &&
-        location.pathname !== '/signup' &&
-        location.pathname !== '/code' &&
-        !(location.pathname === '/' && !isLoggedIn) && (
-          <>
-            <CSMentorWidget isOpen={isChatOpen} onToggle={setIsChatOpen} />
-            <MobileQuickActions onOpenChat={() => setIsChatOpen(true)} />
-          </>
-        )}
 
       {!location.pathname.startsWith('/solve') && !location.pathname.startsWith('/learn') && <Footer />}
 

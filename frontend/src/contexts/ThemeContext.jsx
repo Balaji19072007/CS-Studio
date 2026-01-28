@@ -13,8 +13,18 @@ export function ThemeProvider({ children }) {
   });
 
   useEffect(() => {
+    // 1. Manage Body Classes (Legacy/Custom CSS support)
     document.body.classList.remove('dark-theme', 'light-theme');
     document.body.classList.add(theme + '-theme');
+
+    // 2. Manage HTML Classes (Standard Tailwind support)
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
     localStorage.setItem('theme', theme);
 
     // Initialize feather icons immediately

@@ -33,6 +33,10 @@ exports.updateProgress = async (req, res) => {
         // Update status if solved
         if (isSolved) {
             progress.status = 'solved';
+            // NEW: Set solvedAt ONLY on the first solve
+            if (!progress.solvedAt) {
+                progress.solvedAt = new Date().toISOString();
+            }
         } else {
             if (progress.status !== 'solved') {
                 progress.status = 'attempted';

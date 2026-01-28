@@ -68,7 +68,7 @@ const COURSES_DATA = [
         students: 9800,
         gradient: 'from-primary-500 to-primary-600',
         iconColor: 'text-primary-400',
-        route: '/learn/java'
+        route: '/learn/java-programming'
     },
 
     // Web Development
@@ -534,7 +534,7 @@ const CourseCard = ({ course }) => {
                     <Link
                         to={course.route || '/learn'}
                         onClick={handleStartClick}
-                        className={`w-full py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm flex items-center justify-center gap-2 group/btn hover:gap-3 transition-all duration-300`}
+                        className={`w-full py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm flex items-center justify-center gap-2 group/btn hover:gap-3 transition-all duration-300 border border-gray-700 dark:border-gray-300`}
                     >
                         Start Learning
                         <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
@@ -653,10 +653,10 @@ const Courses = () => {
                             <input
                                 type="text"
                                 placeholder="Search courses..."
-                                className="w-full bg-transparent border-b border-gray-700 px-0 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                className="w-full bg-transparent border-b border-gray-700 px-0 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors md:border md:border-gray-600 md:rounded-lg md:px-4"
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
-                            <Search className="absolute right-0 top-2.5 w-4 h-4 text-gray-500" />
+                            <Search className="absolute right-0 top-2.5 w-4 h-4 text-gray-500 md:right-3" />
                         </div>
                     </div>
                 </div>

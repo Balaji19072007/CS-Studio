@@ -569,23 +569,7 @@ body.light-theme .bg-gray-800 {
   background-color: var(--color-background-card) !important;
 }
 
-/* Target all text elements inside the list items in light mode */
-body.light-theme .space-y-3 h4,
-body.light-theme .space-y-3 p,
-body.light-theme .space-y-3 span {
-  color: var(--color-text-main) !important;
-}
-
-/* Re-fix for text color in the course list header */
-body.light-theme .text-gray-700 {
-  color: var(--color-text-main) !important;
-}
-
-/* Ensure the background of the individual course item is white in light mode */
-body.light-theme .space-y-3>div {
-  background-color: white !important;
-  border-color: #d1d5db;
-}
+/* Removed problematic space-y-3 global overrides */
 
 /* CRITICAL FIX 2: Ensure the estimated time tag background and text are correct in light mode */
 body.light-theme .text-gray-600.bg-gray-200 {

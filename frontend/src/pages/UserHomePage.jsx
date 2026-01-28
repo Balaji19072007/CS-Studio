@@ -36,11 +36,18 @@ const ActivityGraph = ({ history }) => {
 
     if (history) {
         history.forEach(item => {
-            if (item.status === 'solved' && item.solvedAt) {
-                const dateObj = new Date(item.solvedAt);
+            // Use solvedAt as primary source for activity graph
+            const dateVal = item.solvedAt || item.lastSubmission;
+            if (dateVal) {
+                const dateObj = new Date(dateVal);
                 if (!isNaN(dateObj.getTime())) {
-                    const itemDate = dateObj.toISOString().split('T')[0];
-                    const dayStat = last7Days.find(d => d.date === itemDate);
+                    // Normalize to Local Date (YYYY-MM-DD)
+                    const year = dateObj.getFullYear();
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const dateKey = `${year}-${month}-${day}`;
+
+                    const dayStat = last7Days.find(d => d.date === dateKey);
                     if (dayStat) {
                         dayStat.count++;
                     }
@@ -248,7 +255,7 @@ const UserHomePage = () => {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#0f111a] pt-6 sm:pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+        <div className="min-h-screen bg-gray-100 dark:bg-[#0f111a] pt-6 sm:pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
             <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
                 {/* --- HEADER --- */}
