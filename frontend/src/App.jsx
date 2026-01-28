@@ -71,6 +71,9 @@ import './App.css';
 
 
 
+// Custom hook to use the auth context
+import FullPageLoader from './components/common/FullPageLoader.jsx';
+
 function App() {
   // Temporary test component - Remove after verification
   // return <TestFirebaseAuth />;
@@ -97,8 +100,13 @@ function App() {
 function AppContent() {
   const { isDark } = useTheme();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // Destructure loading
   const isLoggedIn = !!user; // Check if user is logged in
+
+  // Global Loading State - Shows immediately on refresh
+  if (loading) {
+    return <FullPageLoader message="Initializing CS Studio..." />;
+  }
 
   // Page refresh handling is now done in index.html for better reliability
 
@@ -205,12 +213,8 @@ const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
 
   if (loading) {
-    // You can replace this with a proper loading spinner
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
+    // Replaced inline spinner with professional FullPageLoader
+    return <FullPageLoader message="Verifying access..." />;
   }
 
   if (!isLoggedIn) {

@@ -21,15 +21,15 @@ const CodeEditorFloatingIcon = () => {
     }, [isMobile]); // Re-run feather when visibility changes
 
     // Mobile background should be transparent as per user request
-    const mobileClasses = isMobile ? 'bg-transparent shadow-none border border-white/20' : 'dark-gradient-accent shadow-lg';
+    const mobileClasses = isMobile ? 'bg-transparent shadow-none' : 'dark-gradient-accent shadow-lg';
 
     return (
         <Link
             to="/code"
-            className={`fixed bottom-24 right-6 h-14 w-14 rounded-full text-white flex items-center justify-center transition-all duration-300 z-50 hover:shadow-xl ${mobileClasses}`}
+            className={`fixed bottom-24 right-6 h-10 w-10 md:h-14 md:w-14 rounded-full text-white flex items-center justify-center transition-all duration-300 z-50 hover:shadow-xl ${mobileClasses}`}
             title="Code Editor - Freeform Playground"
         >
-            <i data-feather="edit-3" className="h-6 w-6"></i>
+            <i data-feather="edit-3" className="h-5 w-5 md:h-6 md:w-6"></i>
         </Link>
     );
 };
