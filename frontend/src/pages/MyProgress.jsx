@@ -18,7 +18,7 @@ const MyProgress = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const headers = { 'Authorization': `Bearer ${token}` };
+        const headers = { 'x-auth-token': token };
 
         // 1. Fetch Stats (Summary + Difficulty)
         const statsRes = await fetch('/api/progress/user-stats', { headers });
@@ -180,26 +180,34 @@ const MyProgress = () => {
               <div className="flex flex-wrap gap-1.5 justify-start">
                 {yearDays.slice(-364).reverse().map((date) => {
                   const count = heatmapData[date] || 0;
-                  let colorClass = 'bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/30';
-                  if (count > 0) colorClass = 'bg-green-100 dark:bg-green-900/40 border-green-200 dark:border-green-800/50';
-                  if (count > 2) colorClass = 'bg-green-300 dark:bg-green-700/60 border-green-400 dark:border-green-600/50';
-                  if (count > 5) colorClass = 'bg-green-500 dark:bg-green-500 border-green-600 dark:border-green-400 shadow-[0_0_8px_rgba(34,197,94,0.3)]';
+
+                  // Default (Empty): Dark gray in dark mode
+                  let colorClass = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700';
+
+                  // Level 1: Low activity - Dark visible green
+                  if (count > 0) colorClass = 'bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-800';
+
+                  // Level 2: Medium activity - Mid green
+                  if (count > 2) colorClass = 'bg-green-300 dark:bg-green-600 border-green-400 dark:border-green-500';
+
+                  // Level 3: High activity - Bright neon green
+                  if (count > 5) colorClass = 'bg-green-500 dark:bg-green-400 border-green-600 dark:border-green-300 shadow-[0_0_8px_rgba(74,222,128,0.5)]'; // green-400 glow
 
                   return (
                     <div
                       key={date}
                       title={`${date}: ${count} solutions`}
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[3px] ${colorClass} transition-all hover:scale-150 hover:z-10 cursor-help`}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[3px] ${colorClass} transition-all hover:scale-125 hover:z-10 cursor-help`}
                     ></div>
                   );
                 })}
               </div>
               <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-500 font-medium">
                 <span>Less</span>
-                <div className="w-3 h-3 bg-gray-800 border border-gray-700 rounded-sm"></div>
-                <div className="w-3 h-3 bg-green-900 border border-green-800 rounded-sm"></div>
-                <div className="w-3 h-3 bg-green-700 border border-green-600 rounded-sm"></div>
-                <div className="w-3 h-3 bg-green-500 border border-green-400 rounded-sm"></div>
+                <div className="w-3 h-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-300 dark:bg-green-600 border border-green-400 dark:border-green-500 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-500 dark:bg-green-400 border border-green-600 dark:border-green-300 rounded-sm"></div>
                 <span>More</span>
               </div>
             </div>

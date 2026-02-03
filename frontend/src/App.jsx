@@ -19,9 +19,14 @@ import Home from './pages/Home.jsx';
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
-import AuthAction from './pages/AuthAction.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import Problems from './pages/Problems.jsx';
 import Courses from './pages/Courses.jsx';
+import CourseDetail from './pages/CourseDetail.jsx';
+import CourseLearning from './pages/CourseLearning.jsx';
+import PhaseTopics from './pages/PhaseTopics.jsx';
+import TopicContent from './pages/TopicContent.jsx';
+import QuizPage from './pages/QuizPage.jsx';
 import Roadmaps from './pages/Roadmaps.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import Community from './pages/Community.jsx';
@@ -29,11 +34,11 @@ import Settings from './pages/Settings.jsx';
 import Code from './pages/Code.jsx';
 import CodeVerification from './pages/CodeVerification.jsx';
 import SolveProblem from './pages/SolveProblem.jsx';
-import MyCourses from './pages/MyCourses.jsx';
+import CourseChallenge from './pages/CourseChallenge.jsx';
+import CourseChallengePage from './pages/CourseChallengePage.jsx';
 import MyProgress from './pages/MyProgress.jsx';
 import MyProblemStats from './pages/MyProblemStats.jsx';
 import Notifications from './pages/Notifications.jsx';
-import CourseViewer from './pages/learningPage/CourseViewer.jsx';
 // REMOVED: import CProgramming from './pages/learningPage/CProgramming.jsx';
 import CProgrammingRoadmap from './pages/roadmaps/CProgrammingRoadmap.jsx';
 import PythonProgrammingRoadmap from './pages/roadmaps/PythonProgrammingRoadmap.jsx';
@@ -75,8 +80,7 @@ import './App.css';
 import FullPageLoader from './components/common/FullPageLoader.jsx';
 
 function App() {
-  // Temporary test component - Remove after verification
-  // return <TestFirebaseAuth />;
+
 
   return (
     <ErrorBoundary>
@@ -114,27 +118,35 @@ function AppContent() {
     <div className={`min-h-screen flex flex-col ${isDark ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
 
       {/* Mobile Top Bar - Only visible on mobile when logged in - Hidden on Solve page */}
-      {isLoggedIn && !location.pathname.startsWith('/solve') && <MobileTopBar />}
+      {isLoggedIn && !location.pathname.startsWith('/solve') && !location.pathname.startsWith('/challenge') && <MobileTopBar />}
 
       {/* Main Navbar - Hidden on mobile if logged in (handled via CSS classes in Navbar component) */}
       <Navbar />
 
       <main
-        className={`flex-grow ${location.pathname.startsWith('/solve') ? 'pt-0 lg:pt-16' : 'pt-16'} pb-20 sm:pb-0`}
+        className={`flex-grow ${location.pathname.startsWith('/solve') || location.pathname.startsWith('/challenge') ? 'pt-0 lg:pt-16' : 'pt-16'} pb-20 sm:pb-0`}
         style={{ minHeight: '60vh' }}
       >
 
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/auth/action" element={<AuthAction />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/courses" element={<Courses />} />
-          {/* Dynamic Course Route - Replaces individual imports */}
-          <Route path="/learn/:courseId" element={<CourseViewer />} />
+          <Route path="/courses/:courseId" element={<CourseDetail />} />
+          <Route path="/courses/:courseId/learn" element={<CourseLearning />} />
+          <Route path="/courses/:courseId/learn/topic/:topicId" element={<CourseLearning />} />
+          <Route path="/courses/:courseId/learn/quiz/:quizId" element={<CourseLearning />} />
+
+          {/* Legacy routes - redirected or fallback */}
+          <Route path="/courses/:courseId/topic/:topicId" element={<TopicContent />} />
+          <Route path="/courses/:courseId/quiz/:quizId" element={<QuizPage />} />
+          {/* Legacy routes - kept for backward compatibility */}
+          <Route path="/courses/:courseId/phases/:phaseId" element={<PhaseTopics />} />
+          <Route path="/courses/:courseId/phases/:phaseId/topics/:topicId" element={<TopicContent />} />
           <Route path="/roadmaps" element={<Roadmaps />} />
           <Route path="/roadmaps/c-programming" element={<CProgrammingRoadmap />} />
           <Route path="/roadmaps/python-programming" element={<PythonProgrammingRoadmap />} />
@@ -170,9 +182,10 @@ function AppContent() {
           <Route path="/community" element={<Community />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/solve" element={<ProtectedRoute><SolveProblem /></ProtectedRoute>} />
+          <Route path="/challenge/:problemId" element={<ProtectedRoute><CourseChallenge /></ProtectedRoute>} />
+          <Route path="/course-challenge/:challengeId" element={<ProtectedRoute><CourseChallengePage /></ProtectedRoute>} />
           <Route path="/code" element={<ProtectedRoute><Code /></ProtectedRoute>} />
           <Route path="/code-verification" element={<ProtectedRoute><CodeVerification /></ProtectedRoute>} />
-          <Route path="/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
           <Route path="/my-progress" element={<ProtectedRoute><MyProgress /></ProtectedRoute>} />
           <Route path="/problem-stats" element={<ProtectedRoute><MyProblemStats /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
@@ -183,25 +196,23 @@ function AppContent() {
       </main>
 
       <RatingPopup />
-      {/* Hide icons on public home (when not logged in), signin, signup, solve, and learn pages */}
-      {/* Hide icons on specific pages */}
       {!location.pathname.startsWith('/solve') &&
-        !location.pathname.startsWith('/learn') &&
+        !location.pathname.startsWith('/challenge') &&
+        !location.pathname.startsWith('/courses/') &&
         location.pathname !== '/signin' &&
         location.pathname !== '/signup' &&
         location.pathname !== '/code' &&
         location.pathname !== '/settings' &&
         location.pathname !== '/problems' &&
-        location.pathname !== '/my-courses' &&
         location.pathname !== '/my-progress' &&
         location.pathname !== '/problem-stats' &&
         !(location.pathname === '/' && !isLoggedIn) &&
         <CodeEditorFloatingIcon />}
 
-      {!location.pathname.startsWith('/solve') && !location.pathname.startsWith('/learn') && <Footer />}
+      {!location.pathname.startsWith('/solve') && !location.pathname.startsWith('/challenge') && !location.pathname.startsWith('/courses/') && <Footer />}
 
       {/* Mobile Bottom Navigation - Only visible on mobile when logged in */}
-      {isLoggedIn && <MobileBottomNav />}
+      {isLoggedIn && !location.pathname.startsWith('/challenge') && <MobileBottomNav />}
     </div>
 
   );

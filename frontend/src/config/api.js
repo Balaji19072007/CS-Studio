@@ -19,8 +19,7 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Support both Authorization header and x-auth-token for compatibility
-      config.headers.Authorization = `Bearer ${token}`;
+      // CRITICAL: Use ONLY x-auth-token for backend authentication
       config.headers['x-auth-token'] = token;
     }
     return config;
@@ -197,8 +196,8 @@ export const getHeaders = (includeAuth = false) => {
   if (includeAuth) {
     const token = localStorage.getItem('token');
     if (token) {
+      // CRITICAL: Use ONLY x-auth-token for backend authentication
       headers['x-auth-token'] = token;
-      headers['Authorization'] = `Bearer ${token}`;
     }
   }
 

@@ -1,753 +1,312 @@
-// frontend/src/pages/Courses.jsx
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth.jsx';
-import {
-    Play,
-    BookOpen,
-    Clock,
-    Star,
-    Users,
-    ArrowRight,
-    Search,
-    ArrowDown,
-    ArrowUp,
-    ChevronRight,
-    CheckCircle
-} from 'lucide-react';
-
-// Comprehensive Course Data matching the HTML structure
-const COURSES_DATA = [
-    // Programming Fundamentals
-    {
-        id: 1,
-        category: 'programming',
-        title: 'C Language for Beginners',
-        lessons: 30,
-        instructorInitials: 'BJ',
-        instructorName: 'Bob Johnson',
-        difficulty: 'Beginner',
-        color: 'primary',
-        description: 'Learn C language from scratch with hands-on exercises and projects',
-        duration: '6 weeks',
-        rating: 4.8,
-        students: 12500,
-        gradient: 'from-primary-500 to-primary-600',
-        iconColor: 'text-primary-400',
-        route: '/learn/c-programming'
-    },
-    {
-        id: 2,
-        category: 'programming',
-        title: 'Python for Beginners',
-        lessons: 25,
-        instructorInitials: 'AJ',
-        instructorName: 'Alex Johnson',
-        difficulty: 'Beginner',
-        color: 'primary',
-        description: 'Learn Python from scratch with hands-on exercises and projects',
-        duration: '5 weeks',
-        rating: 4.9,
-        students: 18750,
-        gradient: 'from-primary-500 to-primary-600',
-        iconColor: 'text-primary-400',
-        route: '/learn/python'
-    },
-    {
-        id: 3,
-        category: 'programming',
-        title: 'Java Fundamentals',
-        lessons: 30,
-        instructorInitials: 'PP',
-        instructorName: 'Priya Patel',
-        difficulty: 'Intermediate',
-        color: 'primary',
-        description: 'Master object-oriented programming with Java',
-        duration: '6 weeks',
-        rating: 4.7,
-        students: 9800,
-        gradient: 'from-primary-500 to-primary-600',
-        iconColor: 'text-primary-400',
-        route: '/learn/java-programming'
-    },
-
-    // Web Development
-    {
-        id: 4,
-        category: 'web',
-        title: 'Modern Frontend Mastery',
-        lessons: 45,
-        instructorInitials: 'ER',
-        instructorName: 'Emma Rodriguez',
-        difficulty: 'Beginner',
-        color: 'blue',
-        description: 'Master HTML5, CSS3, JavaScript, and modern frameworks like React and Vue.js',
-        duration: '8 weeks',
-        rating: 4.8,
-        students: 15200,
-        gradient: 'from-blue-600 to-blue-500',
-        iconColor: 'text-blue-400',
-        route: '/learn/frontend'
-    },
-    {
-        id: 5,
-        category: 'web',
-        title: 'Node.js & Express',
-        lessons: 38,
-        instructorInitials: 'JK',
-        instructorName: 'James Kim',
-        difficulty: 'Intermediate',
-        color: 'blue',
-        description: 'Build scalable backend services with Node.js, Express, and MongoDB',
-        duration: '7 weeks',
-        rating: 4.7,
-        students: 11200,
-        gradient: 'from-blue-600 to-blue-500',
-        iconColor: 'text-blue-400',
-        route: '/learn/nodejs'
-    },
-    {
-        id: 6,
-        category: 'web',
-        title: 'MERN Stack Mastery',
-        lessons: 52,
-        instructorInitials: 'AM',
-        instructorName: 'Aisha Mohammed',
-        difficulty: 'Intermediate',
-        color: 'blue',
-        description: 'Build complete web applications with MongoDB, Express, React, and Node.js',
-        duration: '10 weeks',
-        rating: 4.9,
-        students: 8900,
-        gradient: 'from-blue-600 to-blue-500',
-        iconColor: 'text-blue-400',
-        route: '/learn/mern'
-    },
-
-    // Data Science
-    {
-        id: 7,
-        category: 'data',
-        title: 'Data Science with Python',
-        lessons: 35,
-        instructorInitials: 'DR',
-        instructorName: 'Dr. Rodriguez',
-        difficulty: 'Beginner',
-        color: 'purple',
-        description: 'Master data analysis, visualization, and manipulation using pandas, NumPy, and Matplotlib',
-        duration: '7 weeks',
-        rating: 4.7,
-        students: 8900,
-        gradient: 'from-purple-600 to-purple-500',
-        iconColor: 'text-purple-400',
-        route: '/learn/data-science'
-    },
-    {
-        id: 8,
-        category: 'data',
-        title: 'Data Analysis & Visualization',
-        lessons: 28,
-        instructorInitials: 'SM',
-        instructorName: 'Sarah Mitchell',
-        difficulty: 'Intermediate',
-        color: 'purple',
-        description: 'Create compelling data visualizations with Tableau, Power BI, and Python libraries',
-        duration: '6 weeks',
-        rating: 4.6,
-        students: 7600,
-        gradient: 'from-purple-600 to-purple-500',
-        iconColor: 'text-purple-400',
-        route: '/learn/data-visualization'
-    },
-    {
-        id: 9,
-        category: 'data',
-        title: 'Statistics for Data Science',
-        lessons: 32,
-        instructorInitials: 'DW',
-        instructorName: 'Dr. Wilson',
-        difficulty: 'Intermediate',
-        color: 'purple',
-        description: 'Master statistical concepts, hypothesis testing, and regression analysis for data insights',
-        duration: '6 weeks',
-        rating: 4.8,
-        students: 5400,
-        gradient: 'from-purple-600 to-purple-500',
-        iconColor: 'text-purple-400',
-        route: '/learn/statistics'
-    },
-
-    // Algorithms
-    {
-        id: 10,
-        category: 'algorithms',
-        title: 'DSA In C',
-        lessons: 35,
-        instructorInitials: 'DW',
-        instructorName: 'Dr. Wong',
-        difficulty: 'Intermediate',
-        color: 'green',
-        description: 'Master Data Structures and Algorithms using C with hands-on coding exercises',
-        duration: '7 weeks',
-        rating: 4.7,
-        students: 6200,
-        gradient: 'from-green-600 to-green-500',
-        iconColor: 'text-green-400',
-        route: '/learn/dsa-c'
-    },
-    {
-        id: 11,
-        category: 'algorithms',
-        title: 'DSA In Java',
-        lessons: 40,
-        instructorInitials: 'DR',
-        instructorName: 'Dr. Rajesh',
-        difficulty: 'Intermediate',
-        color: 'green',
-        description: 'Master Data Structures and Algorithms using Java with OOP principles',
-        duration: '8 weeks',
-        rating: 4.8,
-        students: 5800,
-        gradient: 'from-green-600 to-green-500',
-        iconColor: 'text-green-400',
-        route: '/learn/dsa-java'
-    },
-    {
-        id: 12,
-        category: 'algorithms',
-        title: 'DSA In Python',
-        lessons: 30,
-        instructorInitials: 'DG',
-        instructorName: 'Dr. Garcia',
-        difficulty: 'Beginner',
-        color: 'green',
-        description: 'Master Data Structures and Algorithms using Python with clean syntax',
-        duration: '6 weeks',
-        rating: 4.6,
-        students: 7100,
-        gradient: 'from-green-600 to-green-500',
-        iconColor: 'text-green-400',
-        route: '/learn/dsa-python'
-    },
-
-    // Mobile Development
-    {
-        id: 13,
-        category: 'mobile',
-        title: 'Android with Kotlin',
-        lessons: 35,
-        instructorInitials: 'DW',
-        instructorName: 'Dr. Watson',
-        difficulty: 'Beginner',
-        color: 'yellow',
-        description: 'Build native Android apps with Kotlin, Material Design, and modern architecture',
-        duration: '7 weeks',
-        rating: 4.5,
-        students: 4300,
-        gradient: 'from-yellow-600 to-yellow-500',
-        iconColor: 'text-yellow-400',
-        route: '/learn/android'
-    },
-    {
-        id: 14,
-        category: 'mobile',
-        title: 'iOS with Swift',
-        lessons: 32,
-        instructorInitials: 'AS',
-        instructorName: 'Anna Smith',
-        difficulty: 'Intermediate',
-        color: 'yellow',
-        description: 'Create beautiful iOS apps with Swift, SwiftUI, and Apple\'s latest frameworks',
-        duration: '6 weeks',
-        rating: 4.7,
-        students: 3800,
-        gradient: 'from-yellow-600 to-yellow-500',
-        iconColor: 'text-yellow-400',
-        route: '/learn/ios'
-    },
-    {
-        id: 15,
-        category: 'mobile',
-        title: 'React Native',
-        lessons: 28,
-        instructorInitials: 'MB',
-        instructorName: 'Mike Brown',
-        difficulty: 'Beginner',
-        color: 'yellow',
-        description: 'Build cross-platform mobile apps with React Native and JavaScript',
-        duration: '6 weeks',
-        rating: 4.4,
-        students: 5200,
-        gradient: 'from-yellow-600 to-yellow-500',
-        iconColor: 'text-yellow-400',
-        route: '/learn/react-native'
-    },
-
-    // AI/ML
-    {
-        id: 16,
-        category: 'ai',
-        title: 'Intro to ML',
-        lessons: 35,
-        instructorInitials: 'LW',
-        instructorName: 'Dr. Lisa Wong',
-        difficulty: 'Intermediate',
-        color: 'red',
-        description: 'Learn supervised and unsupervised learning with scikit-learn and real-world projects',
-        duration: '7 weeks',
-        rating: 4.8,
-        students: 6700,
-        gradient: 'from-red-600 to-red-500',
-        iconColor: 'text-red-400',
-        route: '/learn/machine-learning'
-    },
-    {
-        id: 17,
-        category: 'ai',
-        title: 'Neural Networks',
-        lessons: 40,
-        instructorInitials: 'RP',
-        instructorName: 'Dr. Raj Patel',
-        difficulty: 'Advanced',
-        color: 'red',
-        description: 'Build deep learning models with TensorFlow, Keras, and PyTorch',
-        duration: '8 weeks',
-        rating: 4.9,
-        students: 4900,
-        gradient: 'from-red-600 to-red-500',
-        iconColor: 'text-red-400',
-        route: '/learn/neural-networks'
-    },
-    {
-        id: 18,
-        category: 'ai',
-        title: 'NLP Fundamentals',
-        lessons: 30,
-        instructorInitials: 'MG',
-        instructorName: 'Dr. Maria Garcia',
-        difficulty: 'Intermediate',
-        color: 'red',
-        description: 'Process and analyze text data with modern NLP techniques and transformers',
-        duration: '6 weeks',
-        rating: 4.7,
-        students: 4100,
-        gradient: 'from-red-600 to-red-500',
-        iconColor: 'text-red-400',
-        route: '/learn/nlp'
-    },
-
-    // Security
-    {
-        id: 19,
-        category: 'security',
-        title: 'Penetration Testing',
-        lessons: 45,
-        instructorInitials: 'KW',
-        instructorName: 'Kevin White',
-        difficulty: 'Intermediate',
-        color: 'indigo',
-        description: 'Learn ethical hacking techniques and penetration testing methodologies',
-        duration: '9 weeks',
-        rating: 4.8,
-        students: 3200,
-        gradient: 'from-indigo-600 to-indigo-500',
-        iconColor: 'text-indigo-400',
-        route: '/learn/penetration-testing'
-    },
-    {
-        id: 20,
-        category: 'security',
-        title: 'Network Defense',
-        lessons: 38,
-        instructorInitials: 'SG',
-        instructorName: 'Sarah Green',
-        difficulty: 'Intermediate',
-        color: 'indigo',
-        description: 'Master network security protocols, firewalls, and intrusion detection systems',
-        duration: '8 weeks',
-        rating: 4.6,
-        students: 2800,
-        gradient: 'from-indigo-600 to-indigo-500',
-        iconColor: 'text-indigo-400',
-        route: '/learn/network-security'
-    },
-    {
-        id: 21,
-        category: 'security',
-        title: 'Applied Cryptography',
-        lessons: 32,
-        instructorInitials: 'TB',
-        instructorName: 'Tom Black',
-        difficulty: 'Advanced',
-        color: 'indigo',
-        description: 'Learn encryption algorithms, digital signatures, and secure communication protocols',
-        duration: '6 weeks',
-        rating: 4.9,
-        students: 2100,
-        gradient: 'from-indigo-600 to-indigo-500',
-        iconColor: 'text-indigo-400',
-        route: '/learn/cryptography'
-    },
-
-    // DevOps
-    {
-        id: 22,
-        category: 'devops',
-        title: 'Intro to DevOps',
-        lessons: 22,
-        instructorInitials: 'DG',
-        instructorName: 'Dr. Galesles',
-        difficulty: 'Beginner',
-        color: 'pink',
-        description: 'Learn CI/CD, containerization, and infrastructure as code fundamentals',
-        duration: '4 weeks',
-        rating: 4.5,
-        students: 5600,
-        gradient: 'from-pink-600 to-pink-500',
-        iconColor: 'text-pink-400',
-        route: '/learn/devops'
-    },
-    {
-        id: 23,
-        category: 'devops',
-        title: 'Docker & Kubernetes',
-        lessons: 35,
-        instructorInitials: 'RL',
-        instructorName: 'Rachel Lee',
-        difficulty: 'Intermediate',
-        color: 'pink',
-        description: 'Master container orchestration with Docker, Kubernetes, and cloud deployment',
-        duration: '7 weeks',
-        rating: 4.7,
-        students: 4800,
-        gradient: 'from-pink-600 to-pink-500',
-        iconColor: 'text-pink-400',
-        route: '/learn/docker-kubernetes'
-    },
-    {
-        id: 24,
-        category: 'devops',
-        title: 'AWS Solutions Architect',
-        lessons: 40,
-        instructorInitials: 'MT',
-        instructorName: 'Mark Taylor',
-        difficulty: 'Intermediate',
-        color: 'pink',
-        description: 'Design and deploy scalable applications on Amazon Web Services',
-        duration: '8 weeks',
-        rating: 4.8,
-        students: 5200,
-        gradient: 'from-pink-600 to-pink-500',
-        iconColor: 'text-pink-400',
-        route: '/learn/aws'
-    }
-];
-
-const CourseCard = ({ course }) => {
-    const { isLoggedIn } = useAuth();
-
-    const difficultyClasses = {
-        'Beginner': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-        'Intermediate': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-200/30 dark:text-yellow-400',
-        'Advanced': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-    };
-
-    const handleStartClick = (e) => {
-        if (!isLoggedIn) {
-            e.preventDefault();
-            window.location.href = '/signin';
-        }
-    };
-
-    return (
-        <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300 overflow-hidden hover:shadow-2xl relative flex flex-col h-full">
-
-            {/* MOBILE VIEW (Horizontal Compact) */}
-            <div className="md:hidden">
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${course.gradient} bg-gradient-to-b`}></div>
-                <div className="p-4 pl-5 flex items-center justify-between gap-4">
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <span className={`self-start px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${difficultyClasses[course.difficulty]}`}>
-                            {course.difficulty}
-                        </span>
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight truncate">
-                            {course.title}
-                        </h3>
-                    </div>
-                    <div className="flex-shrink-0">
-                        <Link
-                            to={course.route || '/learn'}
-                            onClick={handleStartClick}
-                            className={`w-9 h-9 rounded-full bg-gradient-to-r ${course.gradient} flex items-center justify-center text-white shadow-md active:scale-95 transition-all`}
-                        >
-                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                        </Link>
-                    </div>
-                </div>
-            </div>
-
-            {/* DESKTOP VIEW (Rich Vertical Design) */}
-            <div className="hidden md:flex flex-col h-full">
-                {/* Header with Background Gradient */}
-                <div className={`h-24 bg-gradient-to-br ${course.gradient} relative p-6 flex flex-col justify-end`}>
-                    <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md rounded-lg p-2 border border-white/20">
-                        <BookOpen className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-white/80 text-[10px] uppercase font-bold tracking-[2px] mb-1">
-                        {course.category}
-                    </span>
-                </div>
-
-                {/* Content Body */}
-                <div className="p-6 flex flex-col flex-1">
-                    <div className="flex justify-between items-start mb-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm ${difficultyClasses[course.difficulty]}`}>
-                            {course.difficulty}
-                        </span>
-                        <div className="flex items-center gap-1 text-yellow-500">
-                            <Star className="w-3.5 h-3.5 fill-current" />
-                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{course.rating}</span>
-                        </div>
-                    </div>
-
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 leading-tight group-hover:text-primary-500 transition-colors">
-                        {course.title}
-                    </h3>
-
-                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-6 flex-1">
-                        {course.description}
-                    </p>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-1 gap-y-3 mb-6 pt-6 border-t border-gray-100 dark:border-gray-700/50">
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <Clock className="w-4 h-4 opacity-70" />
-                            <span className="text-xs font-medium">{course.duration}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <BookOpen className="w-4 h-4 opacity-70" />
-                            <span className="text-xs font-medium">{course.lessons} Lessons</span>
-                        </div>
-                    </div>
-
-                    {/* Bottom Action */}
-                    <Link
-                        to={course.route || '/learn'}
-                        onClick={handleStartClick}
-                        className={`w-full py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm flex items-center justify-center gap-2 group/btn hover:gap-3 transition-all duration-300 border border-gray-700 dark:border-gray-300`}
-                    >
-                        Start Learning
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
-};
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getAllCourses } from '../api/courseApi';
 
 const Courses = () => {
-    const { isLoggedIn } = useAuth();
-    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isVisible, setIsVisible] = useState(false);
+    const [selectedTrack, setSelectedTrack] = useState(null);
+    const navigate = useNavigate();
+
+    const COURSE_CATEGORIES = [
+        { id: 'prog-langs', title: 'Programming Languages', keywords: ['programming', 'c programming', 'c++', 'java', 'python', 'c#'] },
+        { id: 'web-dev', title: 'Full Stack Web Development', keywords: ['web', 'frontend', 'backend', 'full stack'] },
+        { id: 'mobile-dev', title: 'Mobile App Development', keywords: ['mobile', 'android', 'ios', 'flutter', 'react native'] },
+        { id: 'data-science', title: 'Data Science', keywords: ['data science', 'pandas', 'numpy'] },
+        { id: 'ai-ml', title: 'AI & Machine Learning', keywords: ['machine learning', 'artificial intelligence', 'ai', 'deep learning'] },
+        { id: 'devops', title: 'DevOps', keywords: ['devops', 'docker', 'cloud', 'kubernetes'] },
+        { id: 'cyber-sec', title: 'Cyber Security', keywords: ['security', 'cyber'] },
+        { id: 'other', title: 'Other Courses', keywords: [] }
+    ];
+
+    const COURSE_ORDER = {
+        'prog-langs': ['C Programming', 'Python Programming', 'Java Programming', 'C++ Programming', 'C# Programming'],
+        'web-dev': ['Frontend Development', 'Backend Development', 'Database & Data Modeling', 'Backend & APIs for Mobile', 'Deployment & DevOps Essentials', 'Web & App Security', 'Full Stack Capstone'],
+        'mobile-dev': ['Native Android Development', 'Native iOS Development', 'Cross-Platform Mobile Dev'],
+        'data-science': ['Python for Data Science', 'Data Wrangling & Visualization', 'Data Modeling', 'Big Data Engineering'],
+        'ai-ml': ['AI Mathematics & Fundamentals', 'Core ML Algorithms', 'Deep Learning', 'Containerization', 'Production & MLOps', 'App Publishing & Maintenance'],
+        'devops': ['DevOps Fundamentals', 'Orchestration & Infrastructure', 'Observability & Reliability'],
+        'cyber-sec': ['Security Foundations', 'Defensive Security', 'Offensive Security', 'Forensics & Incident Response']
+    };
+
+    const CATEGORY_OVERRIDES = {
+        'Backend & APIs for Mobile': 'web-dev',
+        'Web & App Security': 'web-dev',
+        'Containerization': 'ai-ml',
+        'App Publishing & Maintenance': 'ai-ml',
+        'Python for Data Science': 'data-science'
+    };
+
+    const COURSE_LEVELS = {
+        'C Programming': 'Beginner',
+        'Python Programming': 'Beginner',
+        'Java Programming': 'Intermediate',
+        'C++ Programming': 'Advanced',
+        'C# Programming': 'Intermediate'
+    };
+
+    const getDifficultyColor = (level) => {
+        const l = level?.toLowerCase() || 'beginner';
+        if (l.includes('beginner')) return 'bg-green-500/20 text-green-400 border-green-500/50';
+        if (l.includes('intermediate')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
+        if (l.includes('advanced')) return 'bg-red-500/20 text-red-400 border-red-500/50';
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+    };
 
     useEffect(() => {
-        // Back to top visibility
-        const toggleVisibility = () => {
-            if (window.pageYOffset > 300) {
-                setIsVisible(true);
-            } else {
-                setIsVisible(false);
+        const fetchCourses = async () => {
+            try {
+                // Fetch ALL courses from Supabase (all 35 courses are there)
+                const supabaseCourses = await getAllCourses();
+                console.log('📦 Supabase courses:', supabaseCourses);
+
+                // Filter out any unwanted courses
+                const filteredCourses = supabaseCourses.filter(c =>
+                    !c.title?.toLowerCase().includes(' language') ||
+                    c.title?.toLowerCase().includes('programming')
+                ).map(c => ({
+                    ...c,
+                    level: COURSE_LEVELS[c.title] || c.level || 'Beginner' // Default to Beginner if not specified
+                }));
+
+                console.log('✅ Filtered courses:', filteredCourses);
+                setCourses(filteredCourses);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+                setLoading(false);
             }
         };
 
-        window.addEventListener('scroll', toggleVisibility);
-
-        return () => {
-            window.removeEventListener('scroll', toggleVisibility);
-        };
+        fetchCourses();
     }, []);
 
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
+    const getCourseIcon = (title) => {
+        const t = title?.toLowerCase() || '';
+        if (t.includes('c programming') || t.includes('c language')) return '📘';
+        if (t.includes('c++')) return '🚀';
+        if (t.includes('c#')) return '#️⃣';
+        if (t.includes('python')) return '🐍';
+        if (t.includes('java')) return '☕';
+        if (t.includes('web') || t.includes('html')) return '🌐';
+        if (t.includes('data') || t.includes('sql')) return '📊';
+        if (t.includes('ai') || t.includes('machine')) return '🧠';
+        if (t.includes('security') || t.includes('cyber')) return '🛡️';
+        if (t.includes('docker') || t.includes('devops')) return '🐳';
+        if (t.includes('android') || t.includes('ios') || t.includes('mobile')) return '📱';
+        return '📚';
+    };
+
+
+
+    const matchesCategory = (course, category) => {
+        if (category.id === 'other') return false;
+        if (CATEGORY_OVERRIDES[course.title] === category.id) return true;
+        if (CATEGORY_OVERRIDES[course.title] && CATEGORY_OVERRIDES[course.title] !== category.id) return false;
+        if (course.category && (course.category === category.title || course.category.includes(category.title))) return true;
+        const title = course.title?.toLowerCase() || '';
+        return category.keywords.some(keyword => title.includes(keyword));
+    };
+
+    const getGroupedData = () => {
+        const searchFiltered = courses.filter(course =>
+            course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            course.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        const buckets = {};
+        COURSE_CATEGORIES.forEach(cat => buckets[cat.id] = []);
+
+        searchFiltered.forEach(course => {
+            const matchingCat = COURSE_CATEGORIES.find(cat => matchesCategory(course, cat));
+            if (matchingCat) buckets[matchingCat.id].push(course);
+            else buckets['other'].push(course);
         });
+
+        Object.keys(COURSE_ORDER).forEach(catId => {
+            if (buckets[catId]) {
+                const orderList = COURSE_ORDER[catId];
+                buckets[catId].sort((a, b) => {
+                    const indexA = orderList.indexOf(a.title);
+                    const indexB = orderList.indexOf(b.title);
+                    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                    if (indexA !== -1) return -1;
+                    if (indexB !== -1) return 1;
+                    return a.title.localeCompare(b.title);
+                });
+            }
+        });
+
+        return buckets;
     };
 
-    const scrollToSection = (sectionId) => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
+    const buckets = getGroupedData();
+    console.log('🗂️ Categorized buckets:', buckets);
+
+    const getMainViewCards = () => {
+        let displayCards = [];
+        COURSE_CATEGORIES.forEach(cat => {
+            if (cat.id === 'other') return;
+            const categoryCourses = buckets[cat.id] || [];
+            console.log(`📁 Category ${cat.id}:`, categoryCourses);
+
+            if (cat.id === 'prog-langs') {
+                displayCards = [...displayCards, ...categoryCourses.map(c => ({ type: 'course', data: c }))];
+            } else {
+                displayCards.push({
+                    type: 'track',
+                    id: cat.id,
+                    title: cat.title,
+                    count: categoryCourses.length,
+                    description: `Comprehensive curriculum with ${categoryCourses.length} modules.`,
+                    courses: categoryCourses
+                });
+            }
+        });
+        console.log('🎴 Display cards:', displayCards);
+        return displayCards;
     };
 
-    // Group courses by category
-    const coursesByCategory = COURSES_DATA.reduce((acc, course) => {
-        if (!acc[course.category]) {
-            acc[course.category] = [];
-        }
-        acc[course.category].push(course);
-        return acc;
-    }, {});
+    const mainCards = getMainViewCards();
 
-    const categories = [
-        { id: 'all', name: 'All Courses', icon: 'grid', count: COURSES_DATA.length, color: 'primary' },
-        { id: 'programming', name: 'Programming', icon: 'code', count: coursesByCategory.programming?.length || 0, color: 'primary' },
-        { id: 'web', name: 'Web Dev', icon: 'layout', count: coursesByCategory.web?.length || 0, color: 'blue' },
-        { id: 'data', name: 'Data Science', icon: 'database', count: coursesByCategory.data?.length || 0, color: 'purple' },
-        { id: 'algorithms', name: 'Algorithms', icon: 'cpu', count: coursesByCategory.algorithms?.length || 0, color: 'green' },
-        { id: 'mobile', name: 'Mobile Dev', icon: 'smartphone', count: coursesByCategory.mobile?.length || 0, color: 'yellow' },
-        { id: 'ai', name: 'AI/ML', icon: 'activity', count: coursesByCategory.ai?.length || 0, color: 'red' },
-        { id: 'security', name: 'Security', icon: 'shield', count: coursesByCategory.security?.length || 0, color: 'indigo' },
-        { id: 'devops', name: 'DevOps', icon: 'server', count: coursesByCategory.devops?.length || 0, color: 'pink' },
-    ];
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center dark-gradient-secondary">
+                <div className="text-center">
+                    <div className="inline-block w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <div className="text-xl font-semibold text-gray-300">Loading courses...</div>
+                </div>
+            </div>
+        );
+    }
 
-    const categorySections = [
-        { id: 'programming', title: 'Programming Fundamentals', description: 'Core concepts using C, Python, and Java', count: 8, color: 'primary' },
-        { id: 'web', title: 'Web Development', description: 'Build modern, responsive web applications', count: 6, color: 'blue' },
-        { id: 'data', title: 'Data Science', description: 'Statistical analysis, visualization, and machine learning', count: 5, color: 'purple' },
-        { id: 'algorithms', title: 'Data Structures & Algorithms', description: 'Master the fundamentals of efficient problem solving', count: 4, color: 'green' },
-        { id: 'mobile', title: 'Mobile App Development', description: 'Build cross-platform and native mobile applications', count: 3, color: 'yellow' },
-        { id: 'ai', title: 'Artificial Intelligence & Machine Learning', description: 'Build intelligent systems and predictive models', count: 5, color: 'red' },
-        { id: 'security', title: 'Cybersecurity', description: 'Protect systems and networks from digital attacks', count: 3, color: 'indigo' },
-        { id: 'devops', title: 'DevOps & Cloud Computing', description: 'Automate workflows and deploy scalable applications', count: 4, color: 'pink' },
-    ];
+    if (selectedTrack) {
+        const trackData = COURSE_CATEGORIES.find(c => c.id === selectedTrack);
+        const trackCourses = buckets[selectedTrack] || [];
+
+        return (
+            <div className="min-h-screen dark-gradient-secondary">
+                <div className="pt-24 pb-12">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <button
+                            onClick={() => setSelectedTrack(null)}
+                            className="flex items-center text-gray-400 hover:text-white mb-8 transition-colors"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            Back to All Courses
+                        </button>
+
+                        <div className="text-center mb-12">
+                            <h1 className="text-4xl font-bold tracking-tight text-white mb-4">
+                                {trackData?.title} <span className="text-primary-500">Track</span>
+                            </h1>
+                            <p className="text-xl text-gray-300">{trackCourses.length} Modules to Master</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {trackCourses.map(course => (
+                                <div key={course.id} onClick={() => navigate(`/courses/${course.id}`)} className="group relative bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-primary-500/50 shadow-lg hover:shadow-primary-500/20 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full">
+                                    <div className="p-6 flex-1">
+                                        <div className="flex items-start gap-4 mb-4">
+                                            <div className="text-4xl md:text-5xl transform group-hover:scale-110 transition-transform duration-300">{getCourseIcon(course.title)}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors line-clamp-2">{course.title}</h3>
+                                                {course.level && <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getDifficultyColor(course.level)}`}>{course.level}</span>}
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-400 text-sm mb-4 line-clamp-3">{course.description || 'Master this module to advance your career.'}</p>
+                                    </div>
+                                    <div className="px-6 py-4 border-t border-gray-700 bg-gray-800/30">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500 flex items-center gap-1.5">
+                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" /></svg>
+                                                {course.topicsCount || '0'} Topics
+                                            </span>
+                                            <span className="flex items-center text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                                                Start Module <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen dark-gradient-secondary">
-            {/* Hero Section - Minimal */}
-            <div className="pt-24 pb-12 relative z-10">
+            <div className="pt-24 pb-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h1 className="text-4xl font-bold tracking-tight text-white mb-6">
-                        Explore Our <span className="text-primary-500">Course Catalog</span>
+                        Explore Our <span className="text-primary-500">Courses</span>
                     </h1>
-                    <p className="max-w-2xl mx-auto text-lg text-gray-400">
-                        Master computer science with our comprehensive curriculum covering all key areas.
-                    </p>
-                </div>
-            </div>
+                    <p className="max-w-2xl mx-auto text-lg text-gray-400 mb-10">Choose a programming language or an entire career track.</p>
 
-            {/* Category Filter Bar - Minimal */}
-            <div id="categories" className="py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        {/* Categories */}
-                        <div className="flex overflow-x-auto whitespace-nowrap space-x-2 pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
-                            {categories.map(category => (
-                                <button
-                                    key={category.id}
-                                    onClick={() => setSelectedCategory(category.id)}
-                                    className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${selectedCategory === category.id
-                                        ? 'bg-primary-500 text-white border-primary-500'
-                                        : 'bg-transparent text-gray-400 border-gray-700 hover:border-gray-500 hover:text-white'
-                                        }`}
-                                >
-                                    {category.name} <span className="opacity-60 text-xs ml-1">{category.count}</span>
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Search Box - Minimal Underline */}
-                        <div className="relative w-full md:w-64">
-                            <input
-                                type="text"
-                                placeholder="Search courses..."
-                                className="w-full bg-transparent border-b border-gray-700 px-0 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors md:border md:border-gray-600 md:rounded-lg md:px-4"
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <Search className="absolute right-0 top-2.5 w-4 h-4 text-gray-500 md:right-3" />
+                    <div className="max-w-xl mx-auto mb-8">
+                        <div className="relative">
+                            <input type="text" placeholder="Search courses or tracks..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-5 py-3 pr-12 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all text-white placeholder-gray-500" />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-            {/* Course Sections */}
-            <div className="py-16 bg-gray-50 dark:bg-gray-900">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {categorySections
-                        .filter(section => selectedCategory === 'all' || section.id === selectedCategory)
-                        .map(section => (
-                            <div key={section.id} id={section.id} className="mb-16 last:mb-0">
-                                {/* Section Header */}
-                                <div className="mb-8">
-                                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                                        {section.title}
-                                    </h2>
-                                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                                        {section.description}
-                                    </p>
-                                </div>
-
-                                {/* Course Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                                    {COURSES_DATA.filter(course =>
-                                        course.category === section.id && (
-                                            course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                            course.description.toLowerCase().includes(searchQuery.toLowerCase())
-                                        )
-                                    ).map(course => (
-                                        <CourseCard key={course.id} course={course} />
-                                    ))}
-                                </div>
-
-                                {/* No Results */}
-                                {COURSES_DATA.filter(course =>
-                                    course.category === section.id && (
-                                        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                        course.description.toLowerCase().includes(searchQuery.toLowerCase())
-                                    )
-                                ).length === 0 && searchQuery.length > 0 && (
-                                        <div className="mt-8 text-center p-8 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                                            <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                            <p className="text-gray-600 dark:text-gray-400">No courses found matching "{searchQuery}"</p>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+                {mainCards.length === 0 ? (
+                    <div className="text-center py-16">
+                        <div className="text-6xl mb-4">🔍</div>
+                        <h3 className="text-2xl font-bold text-white mb-2">No courses found</h3>
+                        <p className="text-gray-400">Try adjusting your search query</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {mainCards.map((item, idx) => (
+                            <div key={item.type === 'course' ? item.data.id : item.id} onClick={() => { if (item.type === 'course') navigate(`/courses/${item.data.id}`); else setSelectedTrack(item.id); }} className={`group relative bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-primary-500/50 shadow-lg hover:shadow-primary-500/20 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full ${item.type === 'track' ? 'ring-1 ring-primary-500/20' : ''}`}>
+                                <div className="p-6 flex-1">
+                                    <div className="flex items-start gap-4 mb-4">
+                                        <div className="text-4xl md:text-5xl transform group-hover:scale-110 transition-transform duration-300">
+                                            {item.type === 'course' ? getCourseIcon(item.data.title) : '🎓'}
                                         </div>
-                                    )}
-                            </div>
-                        ))}
-                </div>
-            </div>
-
-
-            {/* Final CTA Container - Matches Screenshot */}
-            <div className="py-20 dark-gradient-secondary">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-[#0ea5e9] rounded-[2.5rem] shadow-premium-lg relative overflow-hidden py-12 px-6 sm:px-10">
-                        <div className="relative">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-10 text-center md:text-left">
-                                <div className="space-y-6">
-                                    <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
-                                        Ready to build <br className="hidden sm:block" /> your career?
-                                    </h2>
-                                    <div className="space-y-2">
-                                        <p className="text-white font-bold text-xl md:text-2xl">
-                                            Access the full library, free for 7 days.
-                                        </p>
-                                        <p className="text-white/90 text-sm md:text-base font-medium">
-                                            No credit card required. Cancel anytime.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex-shrink-0 flex justify-center">
-                                    <Link
-                                        to={isLoggedIn ? "/problems" : "/signup"}
-                                        className="bg-[#10b981] hover:bg-[#0da975] text-white px-10 py-6 md:py-5 rounded-[1.5rem] text-2xl md:text-xl font-bold shadow-2xl transition-all flex flex-col sm:flex-row items-center justify-center gap-3 active:scale-95 w-full max-w-sm"
-                                    >
-                                        <span className="text-center leading-tight">
-                                            {isLoggedIn ? (
-                                                <>Continue <br className="sm:hidden" /> Solving <br className="sm:hidden" /> Problems</>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors line-clamp-2">
+                                                {item.type === 'course' ? item.data.title : item.title}
+                                            </h3>
+                                            {item.type === 'course' ? (
+                                                item.data.level && <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getDifficultyColor(item.data.level)}`}>{item.data.level}</span>
                                             ) : (
-                                                <>Start Free <br className="sm:hidden" /> Trial Now</>
+                                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-primary-500/20 text-primary-300 border-primary-500/50">{item.count} Modules</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-400 text-sm mb-4 line-clamp-3">{item.type === 'course' ? (item.data.description || 'Master this language.') : item.description}</p>
+                                </div>
+                                <div className="px-6 py-4 border-t border-gray-700 bg-gray-800/30">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
+                                            {item.type === 'course' ? (
+                                                <>
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" /></svg>
+                                                    {item.data.topicsCount || '0'} Topics
+                                                </>
+                                            ) : (
+                                                <span>Career Track</span>
                                             )}
                                         </span>
-                                        <ArrowRight className="w-6 h-6 md:w-5 md:h-5" />
-                                    </Link>
+                                        <span className="flex items-center text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                                            {item.type === 'course' ? 'Start Learning' : 'View Track'} <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

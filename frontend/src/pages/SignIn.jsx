@@ -3,12 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import * as feather from 'feather-icons';
-import { auth } from '../config/firebase.js';
-
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { supabase } from '../config/supabase';
 
 const SignIn = () => {
-  const { isLoggedIn } = useAuth(); // Auth state handled by Context now
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -47,28 +45,9 @@ const SignIn = () => {
 
   // --- Password Reset ---
   const handleForgotPassword = async (e) => {
-    e.preventDefault(); // Prevent default link behavior
-    const { email } = formData;
-    if (!email) {
-      showMessage('error', 'Please enter your email address to reset password.');
-      return;
-    }
-
-    setLoading(true);
-    setMessage({ type: null, text: '' }); // Clear previous messages
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      showMessage('success', 'Password reset email sent! Check your inbox.');
-    } catch (error) {
-      console.error('[SignIn] Password reset error:', error.code, error.message);
-      let msg = 'Failed to send reset email.';
-      if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
-      if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
-      showMessage('error', msg);
-    } finally {
-      setLoading(false);
-    }
+    e.preventDefault();
+    // Handled by ForgotPassword page usually
+    navigate('/forgot-password');
   };
 
   // --- Core Authentication Handlers ---
@@ -86,35 +65,22 @@ const SignIn = () => {
       return;
     }
 
-    console.log('[SignIn] Attempting login for:', email);
-
     try {
-      // Use Firebase Client SDK
-      console.log('Attempting Firebase Sign In for:', email);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      console.log('Firebase Sign In Successful:', user.uid);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (!user.emailVerified) {
-        console.warn('User email not verified. preventing login.');
-        await signOut(auth);
-        showMessage('error', 'Please verify your email before logging in.');
-        return;
-      }
+      if (error) throw error;
 
-      // We rely on AuthContext onAuthStateChanged to pick up the change
       showMessage('success', 'Signed in successfully!');
-      // Navigation handled by AuthContext listener or explicit here
+      // Navigation handled by AuthContext or explicit here
       setTimeout(() => navigate('/'), 1000);
 
     } catch (error) {
-      console.error('[SignIn] Login error:', error.code, error.message);
+      console.error('[SignIn] Login error:', error.message);
       let errorMsg = 'Invalid credentials';
-      if (error.code === 'auth/user-not-found') errorMsg = 'No user found with this email.';
-      if (error.code === 'auth/wrong-password') errorMsg = 'Incorrect password.';
-      if (error.code === 'auth/invalid-email') errorMsg = 'Invalid email format.';
-      if (error.code === 'auth/too-many-requests') errorMsg = 'Too many failed attempts. Try again later.';
-
+      if (error.message.includes('Invalid login credentials')) errorMsg = 'Invalid email or password.';
       showMessage('error', errorMsg);
     } finally {
       setLoading(false);
@@ -125,27 +91,23 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setMessage({ type: null, text: '' });
-    console.log('[SignIn] Starting Google Auth...');
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
 
-      console.log('[SignIn] Google Auth Success:', user.uid, user.email);
-      console.log('[SignIn] User is new?', result._tokenResponse?.isNewUser);
-
-      showMessage('success', 'Signed in with Google! Redirecting...');
-      setTimeout(() => navigate('/'), 1000); // AuthContext will also catch this state change
-
+      if (error) throw error;
+      // Redirect happens automatically with OAuth
     } catch (error) {
-      console.error('[SignIn] Google Auth Error:', error.code, error.message);
-      let errorMsg = 'Google authentication failed.';
-      if (error.code === 'auth/popup-closed-by-user') errorMsg = 'Sign-in cancelled.';
-      if (error.code === 'auth/popup-blocked') errorMsg = 'Popup blocked. Please allow popups.';
-
-      showMessage('error', errorMsg);
-    } finally {
+      console.error('[SignIn] Google Auth Error:', error.message);
+      showMessage('error', 'Google authentication failed.');
       setLoading(false);
     }
   };
@@ -231,8 +193,8 @@ const SignIn = () => {
             {message.type && (
               <div
                 className={`mb-6 p-4 rounded-lg text-sm ${message.type === 'success'
-                    ? 'bg-green-500/20 border border-green-500 text-green-100'
-                    : 'bg-red-500/20 border border-red-500 text-red-100'
+                  ? 'bg-green-500/20 border border-green-500 text-green-100'
+                  : 'bg-red-500/20 border border-red-500 text-red-100'
                   }`}
               >
                 {message.text}
@@ -331,16 +293,44 @@ const SignIn = () => {
               <div className="flex-grow border-t border-gray-600"></div>
             </div>
 
-            {/* Google Sign In Button */}
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="w-full py-3.5 bg-white text-gray-900 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
-              <span>Continue with Google</span>
-            </button>
+            {/* Social Auth Buttons */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Google Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="py-3.5 bg-white text-gray-900 rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                title="Sign in with Google"
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
+              </button>
+
+              {/* GitHub Button */}
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true);
+                  setMessage({ type: null, text: '' });
+                  try {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: 'github',
+                      options: { redirectTo: `${window.location.origin}/` },
+                    });
+                    if (error) throw error;
+                  } catch (error) {
+                    console.error('GitHub Auth Error:', error.message);
+                    showMessage('error', 'GitHub authentication failed.');
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="py-3.5 bg-[#24292e] text-white rounded-lg shadow-lg hover:shadow-xl hover:bg-[#1b1f23] transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed border border-gray-700"
+                title="Sign in with GitHub"
+              >
+                <img src="https://www.svgrepo.com/show/512317/github-142.svg" className="w-6 h-6 invert" alt="GitHub" />
+              </button>
+            </div>
 
 
 

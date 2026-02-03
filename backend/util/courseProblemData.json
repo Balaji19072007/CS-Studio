@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1001,
+        "title": "C Fun Print",
+        "language": "C",
+        "difficulty": "Easy",
+        "isHidden": true,
+        "problemStatement": "Write a C program that prints exactly 'C is fun!' to the console (without quotes).",
+        "inputFormat": "No input required.",
+        "outputFormat": "The string \"C is fun!\"",
+        "solution": {
+            "explanation": "Use the printf function to output the string.",
+            "code": "#include <stdio.h>\n\nint main() {\n    printf(\"C is fun!\");\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "input": "",
+                "expected": "C is fun!"
+            }
+        ],
+        "hints": [
+            "Check your spelling carefully!",
+            "Don't forget the semicolon."
+        ]
+    }
+]

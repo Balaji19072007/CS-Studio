@@ -126,6 +126,7 @@ const SolveProblem = () => {
 
   const [notification, showFloatingNotification] = useFloatingNotification();
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
+  const [isConsoleOpen, setIsConsoleOpen] = useState(true); // Default to open (Standard view)
 
   // timer display
   const [timeState, setTimeState] = useState(formatMs(TIME_TO_REVEAL_MINUTES * 60 * 1000));
@@ -210,6 +211,27 @@ const SolveProblem = () => {
         // Fetch problem details
         const fetched = await fetchProblemById(problemId);
 
+        // Map Supabase snake_case to Frontend expected keys
+        const mappedProblem = {
+          ...fetched,
+          problemStatement: fetched.description || fetched.problemStatement || '<p>No statement provided.</p>',
+          inputFormat: fetched.input_format || fetched.inputFormat || '<p>No input format provided.</p>',
+          outputFormat: fetched.output_format || fetched.outputFormat || '<p>No output format provided.</p>',
+          // Parse solution_template if it's a JSON string, or use as is if object/string
+          solution: fetched.solution_template
+            ? (typeof fetched.solution_template === 'string' && fetched.solution_template.startsWith('{')
+              ? JSON.parse(fetched.solution_template)
+              : fetched.solution_template)
+            : (fetched.solution || {}),
+          hints: fetched.hints || []
+        };
+        // Normalize solution code access (DB might store it nested or flat)
+        if (mappedProblem.solution && !mappedProblem.solution.code && typeof mappedProblem.solution === 'object') {
+          // If solution structure matches DB migration (JSON stringified), it might have 'code' inside.
+          // If solution_template was just the code string, handle that? 
+          // Audit said solution_template is JSON.
+        }
+
         // Fetch test cases
         let fetchedTc = [];
         try {
@@ -242,11 +264,11 @@ const SolveProblem = () => {
         }
 
         if (canceled) return;
-        setProblem(fetched);
+        setProblem(mappedProblem);
         setTestCases(fetchedTc || []);
 
         const saved = ProblemManager.getUserCode(problemId);
-        const initialCode = saved || fetched.templateCode || getDefaultTemplate(fetched.language || 'C');
+        const initialCode = saved || mappedProblem.templateCode || getDefaultTemplate(mappedProblem.language || 'C');
         setCode(initialCode);
 
         const prog = ProblemManager.getProblemProgress(problemId) || {};
@@ -254,9 +276,9 @@ const SolveProblem = () => {
         if (prog.solved) ProblemManager.markAsSolved?.(problemId);
 
         // Hint logic
-        if (Array.isArray(fetched.hints) && fetched.hints.length > 0) {
-          setHints(fetched.hints);
-        } else if (fetched.solution?.explanation) {
+        if (Array.isArray(mappedProblem.hints) && mappedProblem.hints.length > 0) {
+          setHints(mappedProblem.hints);
+        } else if (mappedProblem.solution?.explanation) {
           // Fallback to extract from solution explanation if empty
         }
 
@@ -274,6 +296,16 @@ const SolveProblem = () => {
     return () => {
       canceled = true;
       const progress = ProblemManager.getProblemProgress(problemId) || {};
+
+      // AUTO-MARK ATTEMPTED: If user spent > 5 minutes (300,000ms) and not solved
+      const timeSpent = progress.timeElapsed || 0;
+      if (isLoggedIn && !progress.solved && timeSpent > 300000) {
+        // Fire and forget status update
+        import('../api/problemApi.js').then(({ updateProblemProgress }) => {
+          updateProblemProgress(problemId, { status: 'attempted', timeSpent: 0 }).catch(console.error);
+        });
+      }
+
       if (!progress.solved && progress.timeRemaining > 0 && !progress.solved) {
         ProblemManager.setGraceStart?.(problemId, Date.now());
       }
@@ -302,6 +334,94 @@ const SolveProblem = () => {
       ProblemManager.saveUserCode?.(problemId, code);
     }
   }, [code, isLoading, problemId]);
+
+  // ---------- Content Protection (Aggressive "OTT Style") ----------
+  useEffect(() => {
+    // 1. Disable Right Click
+    const handleContextMenu = (e) => e.preventDefault();
+
+    // 2. Aggressive Key Blocking
+    const handleKeyDown = (e) => {
+      // Block Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+P, Ctrl+S, Ctrl+U
+      // Also block Shift+Window+S (Snipping Tool shortcut on some configs)
+      if (
+        (e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'u', 'p', 's'].includes(e.key.toLowerCase())
+      ) {
+        e.preventDefault();
+        showFloatingNotification(`Action blocked for security.`, 'error');
+      }
+
+      // PrintScreen: Immediate Blackout
+      if (e.key === 'PrintScreen') {
+        const appRoot = document.getElementById('root') || document.body;
+        appRoot.style.visibility = 'hidden'; // Instant hide
+
+        // Restore after a delay
+        setTimeout(() => {
+          appRoot.style.visibility = 'visible';
+          showFloatingNotification('Screenshots are disabled.', 'error');
+        }, 1000);
+      }
+    };
+
+    // 3. Disable Drag/Drop & Paste
+    const handleDragStart = (e) => e.preventDefault();
+    const handlePaste = (e) => {
+      e.preventDefault();
+      showFloatingNotification('Paste is disabled.', 'error');
+    };
+
+    // 4. "OTT Style" Focus Protection (Hides content when switching windows/snipping tool)
+    const handleBlur = () => {
+      document.body.style.opacity = '0'; // Hide everything
+    };
+
+    const handleFocus = () => {
+      document.body.style.opacity = '1'; // Show everything
+    };
+
+    // Attach Listeners
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('dragstart', handleDragStart);
+    document.addEventListener('paste', handlePaste);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+
+    // CSS Injection for User Select & Print Hiding
+    const style = document.createElement('style');
+    style.id = 'content-protection-css';
+    style.innerHTML = `
+      .no-select {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      /* Aggressive Print Hiding */
+      @media print {
+        html, body {
+           display: none !important;
+           height: 0 !important;
+           overflow: hidden !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('dragstart', handleDragStart);
+      document.removeEventListener('paste', handlePaste);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      const existingStyle = document.getElementById('content-protection-css');
+      if (existingStyle) existingStyle.remove();
+      // Ensure opacity is restored on unmount
+      document.body.style.opacity = '1';
+    };
+  }, [showFloatingNotification]);
 
   // ---------- Output handling ----------
   const handleOutputReceived = useCallback((newOutput, isError, isRunningState, isWaitingInput = false) => {
@@ -351,6 +471,7 @@ const SolveProblem = () => {
     }
 
     setIsRunning(true);
+    setIsConsoleOpen(true); // Auto-open console
     setOutput('Running...\n');
     setOutputError(false);
 
@@ -465,7 +586,8 @@ const SolveProblem = () => {
       const prog = ProblemManager.getProblemProgress(problemId) || {};
       const timeSpent = prog.timeElapsed + (prog.startTime > 0 ? (Date.now() - prog.startTime) : 0);
 
-      const result = await submitSolution(problemId, currentCode, language, timeSpent);
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const result = await submitSolution(problemId, currentCode, language, timeSpent, timezone);
 
       const isSolved = Boolean(result.isSolved);
 
@@ -487,14 +609,7 @@ const SolveProblem = () => {
           timerIntervalRef.current = null;
         }
 
-        // const scrollToId = `problem-${problemId}`;
-        // setTimeout(() => {
-        //     if (fromPath === '/') {
-        //         navigate('/');
-        //     } else {
-        //         navigate('/problems', { state: { scrollToId: scrollToId } });
-        //     }
-        // }, 1500);
+        // Auto-navigation removed as per user request
       } else {
         let statusMsg = `Submission failed: ${result.accuracy}% Accuracy.`;
         statusMsg += '\nPlease ensure your solution handles all edge cases.';
@@ -604,13 +719,17 @@ const SolveProblem = () => {
   const displayId = (problem && (problem.problemId ?? problem.id)) ?? problemId;
 
   return (
-    <div className={`h-screen ${containerBg} transition-colors duration-500 flex flex-col overflow-hidden`}>
+    <div className={`h-screen ${containerBg} transition-colors duration-500 flex flex-col overflow-hidden no-select`}>
       <NotificationPopup />
 
       {/* Mobile header (Simplified) */}
+      {/* Mobile header (Simplified) */}
       <div className="lg:hidden flex-none bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="flex items-center justify-between p-4">
-          <button onClick={() => navigate(fromPath)} className={`text-gray-500`}><Icon name="arrow-left" /></button>
+          <button onClick={() => {
+            const isSolved = ProblemManager.getProblemProgress(problemId)?.solved;
+            navigate(fromPath, { state: { solved: isSolved } });
+          }} className={`text-gray-500`}><Icon name="arrow-left" /></button>
           <span className={`font-bold ${textPrimary}`}>#{displayId} {problem.title}</span>
           <StatusBadge />
         </div>
@@ -620,7 +739,14 @@ const SolveProblem = () => {
       <div className="flex-1 flex flex-col overflow-hidden max-w-screen-2xl mx-auto w-full px-0 lg:px-8 py-0 lg:py-6">
         {/* Desktop Header */}
         <div className="hidden lg:flex justify-between items-center mb-6 text-left">
-          <button onClick={() => navigate(fromPath, fromPath === '/problems' ? { state: { scrollToId: `problem-${displayId}` } } : {})} className={`inline-flex items-center px-4 py-2 border ${borderClass} rounded-lg text-sm font-medium ${isDark ? 'text-gray-200 bg-gray-700' : 'text-gray-700 bg-white'} ${linkHover} transition-colors`}>
+          <button onClick={() => {
+            const isSolved = ProblemManager.getProblemProgress(problemId)?.solved;
+            if (fromPath === '/problems') {
+              navigate(fromPath, { state: { scrollToId: `problem-${displayId}`, solved: isSolved } });
+            } else {
+              navigate(fromPath, { state: { solved: isSolved } });
+            }
+          }} className={`inline-flex items-center px-4 py-2 border ${borderClass} rounded-lg text-sm font-medium ${isDark ? 'text-gray-200 bg-gray-700' : 'text-gray-700 bg-white'} ${linkHover} transition-colors`}>
             <Icon name="arrow-left" className="w-4 h-4 mr-2" /> {fromPath === '/' ? 'Back to Dashboard' : 'Back to Problems'}
           </button>
           {ProblemManager.getProblemProgress(problemId)?.solved && nextProblemId && (
@@ -923,47 +1049,77 @@ const SolveProblem = () => {
               </div>
 
               {/* Submit Button Area - Visible if Desktop OR (Mobile AND subTab is 'code') */}
-              <div className={`p-4 border-t ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-50'} flex justify-between gap-4 ${mobileSubTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
+              {/* Action Bar (Between Editor and Console) */}
+              <div className={`flex items-center justify-between p-2 border-t ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-50'} ${mobileSubTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
                 <button
-                  onClick={isRunning ? handleStopCode : handleRunCode}
-                  className={`flex-1 py-3 rounded-lg font-bold text-white transition shadow-lg lg:block hidden ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                  onClick={() => setIsConsoleOpen(!isConsoleOpen)}
+                  className={`flex items-center text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded transition-colors ${isConsoleOpen ? 'text-blue-500 bg-blue-500/10' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
                 >
-                  {isRunning ? 'Stop' : 'Run Code'}
+                  <Icon name="terminal" className="w-4 h-4 mr-2" />
+                  Console Output
+                  <Icon name={isConsoleOpen ? 'chevron-down' : 'chevron-up'} className="w-4 h-4 ml-2" />
                 </button>
-                <button
-                  onClick={handleSubmitCode}
-                  className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-lg transition flex justify-center items-center"
-                >
-                  <i data-feather="send" className="w-4 h-4 mr-2"></i> Submit Solution
-                </button>
-              </div>
-            </div>
 
-            {/* Output Console Container */}
-            <div className={`
-              ${mobileSubTab === 'output' ? 'flex flex-1' : 'hidden lg:flex'} 
-              lg:mt-4 lg:rounded-xl lg:shadow-xl lg:border lg:flex-none ${borderClass} 
-              flex-col overflow-hidden bg-white dark:bg-gray-800
-              mt-0 rounded-t-none border-t-0
-            `}>
-              <div className={`p-3 border-b ${borderClass} ${isDark ? 'bg-gray-900' : 'bg-gray-100'} lg:block hidden`}>
-                <h4 className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Console Output</h4>
+                <div className="flex gap-2">
+                  <button
+                    onClick={isRunning ? handleStopCode : handleRunCode}
+                    className={`px-4 py-1.5 rounded text-sm font-bold text-white transition flex items-center ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                  >
+                    {isRunning ? (
+                      <>
+                        <Icon name="square" className="w-3 h-3 mr-2 fill-current" /> Stop
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="play" className="w-3 h-3 mr-2 fill-current" /> Run Code
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleSubmitCode}
+                    className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-bold transition flex items-center"
+                  >
+                    <Icon name="send" className="w-3 h-3 mr-2" /> Submit
+                  </button>
+                </div>
               </div>
 
-              <div
-                className={`p-4 font-mono text-sm text-left ${mobileSubTab === 'output' ? 'h-full' : 'h-40'} overflow-y-auto whitespace-pre-wrap outline-none cursor-text ${isDark ? 'text-gray-300' : 'text-gray-800'} ${outputError ? 'text-red-400' : ''} ${isWaitingForInput ? 'ring-2 ring-yellow-500/50' : ''}`}
-                ref={consoleRef}
-                tabIndex={0}
-                onClick={() => consoleRef.current?.focus()}
-                style={{
-                  caretColor: 'transparent'
-                }}
-              >
-                {output.replace(/\\n/g, '\n')}
-                {isWaitingForInput && (
-                  <span className="inline-block w-2 h-5 align-middle bg-yellow-500 animate-pulse ml-1"></span>
-                )}
-              </div>
+              {/* Collapsible Output Console Container */}
+              {isConsoleOpen && (
+                <div className={`
+                    ${mobileSubTab === 'output' ? 'flex flex-1' : 'hidden lg:flex'} 
+                    lg:border-t ${borderClass} 
+                    flex-col overflow-hidden bg-white dark:bg-gray-800
+                    h-72 transition-all duration-300 ease-in-out relative group
+                  `}>
+
+                  {/* Close Button for Console */}
+                  <button
+                    onClick={() => setIsConsoleOpen(false)}
+                    className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    title="Close Console"
+                  >
+                    <Icon name="x" className="w-4 h-4" />
+                  </button>
+
+                  <div
+                    className={`p-4 font-mono text-sm text-left h-full overflow-y-auto whitespace-pre-wrap outline-none cursor-text ${isDark ? 'text-gray-300' : 'text-gray-800'} ${outputError ? 'text-red-400' : ''} ${isWaitingForInput ? 'ring-2 ring-yellow-500/50' : ''}`}
+                    ref={consoleRef}
+                    tabIndex={0}
+                    onClick={() => consoleRef.current?.focus()}
+                    style={{
+                      caretColor: 'transparent'
+                    }}
+                  >
+                    {output.replace(/\\n/g, '\n')}
+                    {isWaitingForInput && (
+                      <span className="inline-block w-2 h-5 align-middle bg-yellow-500 animate-pulse ml-1"></span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

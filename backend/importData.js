@@ -3,6 +3,14 @@ require('dotenv').config({ path: './.env' });
 const { db } = require('./config/firebase');
 const { collection, doc, setDoc, deleteDoc, getDocs, writeBatch } = require('firebase/firestore');
 const problems = require('./util/problemData.json');
+let courseProblems = [];
+try {
+    courseProblems = require('./util/courseProblemData.json');
+} catch (e) {
+    console.log('No courseProblemData.json found, skipping.');
+}
+
+const allProblems = [...problems, ...courseProblems];
 
 const importData = async () => {
     try {
@@ -11,7 +19,7 @@ const importData = async () => {
         let batch = writeBatch(db);
         let count = 0;
 
-        for (const problem of problems) {
+        for (const problem of allProblems) {
             const docRef = doc(db, 'problems', String(problem.id));
 
             const problemData = {

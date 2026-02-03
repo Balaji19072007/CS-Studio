@@ -1,56 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { statsAPI, isAuthenticated } from '../../config/api'; // Fixed import path
+import { statsAPI } from '../../config/api';
+import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 import './RatingPopup.css';
 
 const RatingPopup = () => {
+  const { isLoggedIn } = useAuth();
+  const { isDark } = useTheme(); // Use global theme context
   const [showPopup, setShowPopup] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
-  const [currentTheme, setCurrentTheme] = useState('dark');
 
-  // Detect theme changes
-  useEffect(() => {
-    const detectTheme = () => {
-      const theme = document.documentElement.getAttribute('data-theme') ||
-                    (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      setCurrentTheme(theme);
-    };
-
-    // Initial detection
-    detectTheme();
-
-    // Observe theme changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          detectTheme();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
-    const handleSystemThemeChange = (e) => {
-      if (!document.documentElement.hasAttribute('data-theme')) {
-        setCurrentTheme(e.matches ? 'light' : 'dark');
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
-  }, []);
+  // Derived theme for CSS
+  const currentTheme = isDark ? 'dark' : 'light';
 
   const startUsageTracking = async () => {
-    if (!isAuthenticated()) return;
+    if (!isLoggedIn) return;
 
     try {
       await statsAPI.startUsageTracking();
@@ -60,7 +28,7 @@ const RatingPopup = () => {
   };
 
   const stopUsageTracking = async () => {
-    if (!isAuthenticated()) return;
+    if (!isLoggedIn) return;
 
     try {
       await statsAPI.stopUsageTracking();
@@ -70,7 +38,7 @@ const RatingPopup = () => {
   };
 
   const checkRatingStatus = async () => {
-    if (!isAuthenticated()) return;
+    if (!isLoggedIn) return;
 
     try {
       const response = await statsAPI.checkRatingStatus();
@@ -89,7 +57,7 @@ const RatingPopup = () => {
   };
 
   const markRatingAsShown = async () => {
-    if (!isAuthenticated()) return;
+    if (!isLoggedIn) return;
 
     try {
       await statsAPI.markRatingShown();
@@ -99,7 +67,7 @@ const RatingPopup = () => {
   };
 
   const initializeRatingSystem = async () => {
-    if (!isAuthenticated()) return;
+    if (!isLoggedIn) return;
 
     try {
       await startUsageTracking();
@@ -109,8 +77,17 @@ const RatingPopup = () => {
     }
   };
 
+  const initializedRef = React.useRef(false);
+
+  // Initialize System Effect
   useEffect(() => {
-    if (!isAuthenticated()) return;
+    if (!isLoggedIn) {
+      initializedRef.current = false;
+      return;
+    }
+
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
     initializeRatingSystem();
 
@@ -127,7 +104,24 @@ const RatingPopup = () => {
       stopUsageTracking();
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [isLoggedIn]);
+
+  // Event Listener Effect - Separate to handle 'open-rating-popup' reliably
+  useEffect(() => {
+    const handleManualOpen = () => {
+      if (isLoggedIn) {
+        setShowPopup(true);
+      } else {
+        // Optional: Could trigger login or show simpler message, doing nothing for now as per previous logic
+      }
+    };
+
+    window.addEventListener('open-rating-popup', handleManualOpen);
+
+    return () => {
+      window.removeEventListener('open-rating-popup', handleManualOpen);
+    };
+  }, [isLoggedIn]);
 
   const handleSubmitRating = async () => {
     if (rating === 0) {
@@ -135,7 +129,7 @@ const RatingPopup = () => {
       return;
     }
 
-    if (!isAuthenticated()) {
+    if (!isLoggedIn) {
       setMessage('Please log in to submit rating');
       return;
     }
@@ -143,7 +137,7 @@ const RatingPopup = () => {
     setIsSubmitting(true);
     try {
       const response = await statsAPI.submitRating({ rating, feedback });
-      
+
       if (response.data.success) {
         setMessage('Thank you for your feedback!');
         setTimeout(() => {
@@ -165,6 +159,7 @@ const RatingPopup = () => {
     setRating(0);
     setFeedback('');
     setMessage('');
+    markRatingAsShown(); // Snooze for 5 days
   };
 
   const StarIcon = ({ filled, hovered, onClick, onMouseEnter, onMouseLeave }) => (
@@ -184,7 +179,7 @@ const RatingPopup = () => {
     </svg>
   );
 
-  if (!isAuthenticated()) {
+  if (!isLoggedIn) {
     return null;
   }
 
@@ -197,7 +192,7 @@ const RatingPopup = () => {
           <div className="header-content">
             <div className="icon-wrapper">
               <svg className="sparkle-icon" viewBox="0 0 24 24" width="20" height="20">
-                <path fill="currentColor" d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z"/>
+                <path fill="currentColor" d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
               </svg>
             </div>
             <div className="header-text">
@@ -207,11 +202,11 @@ const RatingPopup = () => {
           </div>
           <button className="close-btn" onClick={handleClosePopup}>
             <svg viewBox="0 0 24 24" width="16" height="16">
-              <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>
-        
+
         <div className="popup-body">
           <div className="rating-section">
             <label className="rating-label">How would you rate your experience?</label>
@@ -254,13 +249,13 @@ const RatingPopup = () => {
         </div>
 
         <div className="popup-footer">
-          <button 
+          <button
             className="cancel-btn"
             onClick={handleClosePopup}
           >
             Maybe Later
           </button>
-          <button 
+          <button
             className="submit-btn"
             onClick={handleSubmitRating}
             disabled={rating === 0 || isSubmitting}
@@ -268,7 +263,7 @@ const RatingPopup = () => {
             {isSubmitting ? (
               <>
                 <svg className="spinner" viewBox="0 0 24 24" width="16" height="16">
-                  <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+                  <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
                 </svg>
                 Submitting...
               </>

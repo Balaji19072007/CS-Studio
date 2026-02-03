@@ -1,117 +1,109 @@
-const { db } = require('../config/firebase');
-const {
-  collection, doc, getDoc, getDocs,
-  addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, getCountFromServer
-} = require('firebase/firestore');
+const { supabase } = require('../config/supabase');
 
 class Notification {
   constructor(data) {
     this.id = data.id || null;
-    this.user = data.user; // userId
+    this.userId = data.user_id || data.user || data.userId;
     this.title = data.title;
     this.message = data.message;
     this.type = data.type || 'system';
     this.link = data.link || '';
-    this.read = data.read || false;
+    this.isRead = data.is_read !== undefined ? data.is_read : (data.read || false);
     this.important = data.important || false;
     this.data = data.data || {};
-    this.createdAt = data.createdAt || new Date().toISOString();
+    this.createdAt = data.created_at || data.createdAt || new Date().toISOString();
   }
 
-  // Static helper to query notifications
   static async getNotifications(userId, options = {}) {
     try {
-      const notifRef = collection(db, 'notifications');
-      const constraints = [where('user', '==', userId)];
+      let query = supabase
+        .from('notifications')
+        .select('*', { count: 'exact' })
+        .eq('user_id', userId);
 
       if (options.unreadOnly) {
-        constraints.push(where('read', '==', false));
+        query = query.eq('is_read', false);
       }
 
-      // Simple pagination simulation (fetch all or limit logic)
-      // Note: Firestore limit/offset is tricky without cursors. 
-      // We'll implement basic fetching.
+      query = query.order('created_at', { ascending: false });
 
-      let q = query(notifRef, ...constraints);
-      const snapshot = await getDocs(q);
-
-      let notifications = snapshot.docs.map(d => new Notification({ id: d.id, ...d.data() }));
-
-      // Sort by createdAt desc in memory
-      notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      // Pagination in memory
-      const total = notifications.length;
       const page = options.page || 1;
       const limitVal = options.limit || 20;
       const start = (page - 1) * limitVal;
-      const paginated = notifications.slice(start, start + limitVal);
+      query = query.range(start, start + limitVal - 1);
 
-      return { notifications: paginated, total };
+      const { data, count, error } = await query;
+      if (error) throw error;
+
+      const notifications = (data || []).map(d => new Notification(d));
+      return { notifications, total: count || 0 };
 
     } catch (error) {
       console.error('getNotifications error:', error);
-      throw error;
+      return { notifications: [], total: 0 };
     }
   }
 
   static async countDocuments(criteria) {
     try {
-      const notifRef = collection(db, 'notifications');
-      const constraints = [];
-      if (criteria.user) constraints.push(where('user', '==', criteria.user));
-      if (criteria.read !== undefined) constraints.push(where('read', '==', criteria.read));
+      let query = supabase.from('notifications').select('*', { count: 'exact', head: true });
+      if (criteria.user) query = query.eq('user_id', criteria.user);
+      if (criteria.read !== undefined) query = query.eq('is_read', criteria.read);
 
-      const q = query(notifRef, ...constraints);
-      const snapshot = await getCountFromServer(q);
-      return snapshot.data().count;
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
     } catch (error) {
       console.error('countDocuments error:', error);
       return 0;
     }
   }
 
-  static async findOneAndUpdate(criteria, update, options) {
+  async save() {
     try {
-      // Find doc first
-      const notifRef = collection(db, 'notifications');
-      const constraints = [where('user', '==', criteria.user)];
-      if (criteria._id) constraints.push(where('__name__', '==', criteria._id)); // __name__ checks doc ID
+      const dbData = {
+        user_id: this.userId,
+        title: this.title,
+        message: this.message,
+        type: this.type,
+        link: this.link,
+        is_read: this.isRead,
+        important: this.important,
+        data: this.data,
+        created_at: this.createdAt
+      };
 
-      const q = query(notifRef, ...constraints);
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) return null;
-
-      const docSnap = snapshot.docs[0];
-      const docRef = doc(db, 'notifications', docSnap.id);
-
-      await updateDoc(docRef, update);
-
-      // Return updated
-      const updatedSnap = await getDoc(docRef);
-      return new Notification({ id: updatedSnap.id, ...updatedSnap.data() });
-
+      if (this.id) {
+        const { error } = await supabase
+          .from('notifications')
+          .update(dbData)
+          .eq('id', this.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from('notifications')
+          .insert([dbData])
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) this.id = data.id;
+      }
+      return this;
     } catch (error) {
-      console.error('findOneAndUpdate error:', error);
-      return null;
+      console.error('Notification.save error:', error);
+      throw error;
     }
   }
 
   static async updateMany(criteria, update) {
     try {
-      const notifRef = collection(db, 'notifications');
-      const constraints = [];
-      if (criteria.user) constraints.push(where('user', '==', criteria.user));
-      if (criteria.read !== undefined) constraints.push(where('read', '==', criteria.read));
+      let query = supabase.from('notifications').update(update);
+      if (criteria.user) query = query.eq('user_id', criteria.user);
+      if (criteria.read !== undefined) query = query.eq('is_read', criteria.read);
 
-      const q = query(notifRef, ...constraints);
-      const snapshot = await getDocs(q);
-
-      const promises = snapshot.docs.map(d => updateDoc(d.ref, update));
-      await Promise.all(promises);
-
-      return { modifiedCount: snapshot.size };
+      const { error, count } = await query;
+      if (error) throw error;
+      return { modifiedCount: count || 0 };
     } catch (error) {
       console.error('updateMany error:', error);
       return { modifiedCount: 0 };
@@ -120,18 +112,13 @@ class Notification {
 
   static async findOneAndDelete(criteria) {
     try {
-      const notifRef = collection(db, 'notifications');
-      const constraints = [where('user', '==', criteria.user)];
-      if (criteria._id) constraints.push(where('__name__', '==', criteria._id));
+      let query = supabase.from('notifications').delete().select().limit(1);
+      if (criteria.user) query = query.eq('user_id', criteria.user);
+      if (criteria._id) query = query.eq('id', criteria._id);
 
-      const q = query(notifRef, ...constraints);
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) return null;
-
-      const d = snapshot.docs[0];
-      await deleteDoc(d.ref);
-      return new Notification({ id: d.id, ...d.data() });
+      const { data, error } = await query;
+      if (error) throw error;
+      return data && data.length ? new Notification(data[0]) : null;
     } catch (error) {
       console.error('findOneAndDelete error:', error);
       return null;
@@ -140,22 +127,44 @@ class Notification {
 
   static async deleteMany(criteria) {
     try {
-      const notifRef = collection(db, 'notifications');
-      const constraints = [];
-      if (criteria.user) constraints.push(where('user', '==', criteria.user));
+      let query = supabase.from('notifications').delete();
+      if (criteria.user) query = query.eq('user_id', criteria.user);
 
-      const q = query(notifRef, ...constraints);
-      const snapshot = await getDocs(q);
-
-      const promises = snapshot.docs.map(d => deleteDoc(d.ref));
-      await Promise.all(promises);
-
-      return { deletedCount: snapshot.size };
+      const { error, count } = await query;
+      if (error) throw error;
+      return { deletedCount: count || 0 };
     } catch (error) {
       console.error('deleteMany error:', error);
       return { deletedCount: 0 };
     }
   }
+  static async insertMany(notifications) {
+    try {
+      const dbData = notifications.map(n => ({
+        user_id: n.userId || n.user,
+        title: n.title,
+        message: n.message,
+        type: n.type || 'system',
+        link: n.link || '',
+        is_read: n.isRead !== undefined ? n.is_read : (n.read || false),
+        important: n.important || false,
+        data: n.data || {},
+        created_at: n.createdAt || new Date().toISOString()
+      }));
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert(dbData)
+        .select();
+
+      if (error) throw error;
+      return (data || []).map(d => new Notification(d));
+    } catch (error) {
+      console.error('Notification.insertMany error:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Notification;
+

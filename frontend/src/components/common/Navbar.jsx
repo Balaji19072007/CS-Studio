@@ -255,15 +255,17 @@ const Navbar = () => {
         const userInitials = user.name ?
             user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
 
-        // Add cache busting to prevent browser caching of old images
+        // Use user.updatedAt for cache busting if available, otherwise just use the URL
+        // Avoid Date.now() which causes re-renders on every state change (blinking)
         const photoUrl = user.photoUrl ?
-            `${user.photoUrl}?${user.updatedAt || Date.now()}` :
+            (user.updatedAt ? `${user.photoUrl}?${user.updatedAt}` : user.photoUrl) :
             null;
 
         if (photoUrl) {
             return (
                 <div className="relative h-full w-full">
                     <img
+                        key={photoUrl} // Stable key prevents unmount/remount on unrelated state changes
                         src={photoUrl}
                         alt="Profile"
                         className="h-full w-full rounded-full object-cover block"
@@ -285,7 +287,6 @@ const Navbar = () => {
                                 fallback.classList.add('hidden');
                             }
                         }}
-                        key={`${photoUrl}-${user.updatedAt || Date.now()}`} // Add key to force re-render when URL or timestamp changes
                     />
                     <span className="avatar-fallback absolute inset-0 font-bold text-white hidden items-center justify-center w-full h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-600">
                         {userInitials}
@@ -559,7 +560,7 @@ const Navbar = () => {
                                         <button
                                             ref={profileButtonRef}
                                             onClick={toggleProfileDropdown}
-                                            className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg ring-2 ring-primary-300/50 ring-offset-2 hover:ring-offset-1 transition-all duration-300 overflow-hidden"
+                                            className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg ring-2 ring-primary-300/50 ring-offset-2 hover:ring-offset-1 focus:outline-none transition-all duration-300 overflow-hidden"
                                         >
                                             {renderAvatar()}
                                         </button>
@@ -568,76 +569,95 @@ const Navbar = () => {
                                         {isDropdownOpen && (
                                             <div
                                                 ref={dropdownRef}
-                                                className="absolute right-0 top-12 mt-2 w-56 rounded-2xl shadow-xl divide-y z-50 border transition-all duration-200 ease-in-out"
-                                                style={{
-                                                    backgroundColor: isDark ? '#1f2937' : 'white',
-                                                    borderColor: isDark ? '#374151' : '#e5e7eb',
-                                                    color: isDark ? 'white' : '#1f2937'
-                                                }}
+                                                className={`absolute right-0 top-14 mt-1 w-64 rounded-2xl shadow-2xl ring-1 ring-black/5 z-50 transform opacity-100 scale-100 transition-all duration-200 origin-top-right overflow-hidden ${isDark
+                                                        ? 'bg-gray-900/95 border border-gray-700/50 backdrop-blur-xl'
+                                                        : 'bg-white/95 border border-gray-100 backdrop-blur-xl'
+                                                    }`}
                                             >
                                                 {user && (
                                                     <>
-                                                        <div className="flex items-center gap-3 px-4 py-3 rounded-t-2xl" style={{ backgroundColor: isDark ? 'rgba(55, 65, 81, 0.5)' : '#f9fafb' }}>
-                                                            {/* Theme Toggle Icon in Header - Mobile Only via lg:hidden */}
+                                                        {/* Header */}
+                                                        <div className={`px-5 py-4 border-b ${isDark ? 'border-gray-700/50' : 'border-gray-100'}`}>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ${isDark ? 'bg-gray-800' : 'bg-gray-100' // Placeholder if image fails
+                                                                    }`}>
+                                                                    {renderAvatar()}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                                                        {user.name}
+                                                                    </p>
+                                                                    <p className={`text-xs truncate font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                        {user.email}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Menu Items */}
+                                                        <div className="p-2 space-y-1">
+                                                            {/* Mobile Theme Toggle (lg:hidden) */}
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleThemeToggle();
                                                                 }}
-                                                                className={`lg:hidden p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-gray-700 text-yellow-500' : 'hover:bg-gray-200 text-gray-500'}`}
-                                                                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                                                className={`lg:hidden w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group ${isDark
+                                                                        ? 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                                                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                                                    }`}
                                                             >
-                                                                <i data-feather={isDark ? 'sun' : 'moon'} className="w-5 h-5"></i>
+                                                                <div className={`mr-3 p-1.5 rounded-lg transition-colors ${isDark ? 'bg-gray-800 text-yellow-400 group-hover:bg-gray-700' : 'bg-gray-100 text-yellow-600 group-hover:bg-gray-200'
+                                                                    }`}>
+                                                                    <i data-feather={isDark ? 'sun' : 'moon'} className="w-4 h-4"></i>
+                                                                </div>
+                                                                {isDark ? 'Light Mode' : 'Dark Mode'}
                                                             </button>
 
-                                                            <div>
-                                                                <p className="text-sm font-medium">{user.name}</p>
-                                                                <p className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>{user.email}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="py-1">
-                                                            <Link
-                                                                to="/my-courses"
-                                                                className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
-                                                                style={{
-                                                                    color: isDark ? '#d1d5db' : '#374151',
-                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
-                                                                }}
-                                                                onClick={handleDropdownItemClick}
-                                                            >
-                                                                <i data-feather="book-open" className="w-4 h-4 mr-2"></i> My Courses
-                                                            </Link>
                                                             <Link
                                                                 to="/my-progress"
-                                                                className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
-                                                                style={{
-                                                                    color: isDark ? '#d1d5db' : '#374151',
-                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
-                                                                }}
+                                                                className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group ${isDark
+                                                                        ? 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                                                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                                                    }`}
                                                                 onClick={handleDropdownItemClick}
                                                             >
-                                                                <i data-feather="bar-chart-2" className="w-4 h-4 mr-2"></i> My Progress
+                                                                <div className={`mr-3 p-1.5 rounded-lg transition-colors ${isDark ? 'bg-gray-800 text-blue-400 group-hover:bg-gray-700' : 'bg-blue-50 text-blue-600 group-hover:bg-blue-100'
+                                                                    }`}>
+                                                                    <i data-feather="bar-chart-2" className="w-4 h-4"></i>
+                                                                </div>
+                                                                My Progress
                                                             </Link>
+
                                                             <Link
                                                                 to="/settings"
-                                                                className="flex px-4 py-2 text-sm items-center transition-colors duration-200 hover:bg-opacity-50"
-                                                                style={{
-                                                                    color: isDark ? '#d1d5db' : '#374151',
-                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
-                                                                }}
+                                                                className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group ${isDark
+                                                                        ? 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                                                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                                                    }`}
                                                                 onClick={handleDropdownItemClick}
                                                             >
-                                                                <i data-feather="settings" className="w-4 h-4 mr-2"></i> Settings
+                                                                <div className={`mr-3 p-1.5 rounded-lg transition-colors ${isDark ? 'bg-gray-800 text-purple-400 group-hover:bg-gray-700' : 'bg-purple-50 text-purple-600 group-hover:bg-purple-100'
+                                                                    }`}>
+                                                                    <i data-feather="settings" className="w-4 h-4"></i>
+                                                                </div>
+                                                                Settings
                                                             </Link>
+
+                                                            <div className={`my-1 border-t ${isDark ? 'border-gray-700/50' : 'border-gray-100'}`}></div>
+
                                                             <button
                                                                 onClick={handleLogout}
-                                                                className="w-full text-left flex items-center px-4 py-2 text-sm transition-colors duration-200 rounded-b-2xl hover:bg-opacity-50"
-                                                                style={{
-                                                                    color: isDark ? '#f87171' : '#dc2626',
-                                                                    backgroundColor: isDark ? 'transparent' : 'transparent'
-                                                                }}
+                                                                className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group ${isDark
+                                                                        ? 'text-red-400 hover:text-red-300 hover:bg-red-500/10'
+                                                                        : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                                                                    }`}
                                                             >
-                                                                <i data-feather="log-out" className="w-4 h-4 mr-2"></i> Sign Out
+                                                                <div className={`mr-3 p-1.5 rounded-lg transition-colors ${isDark ? 'bg-red-500/10 text-red-400 group-hover:bg-red-500/20' : 'bg-red-50 text-red-600 group-hover:bg-red-100'
+                                                                    }`}>
+                                                                    <i data-feather="log-out" className="w-4 h-4"></i>
+                                                                </div>
+                                                                Sign Out
                                                             </button>
                                                         </div>
                                                     </>
@@ -767,24 +787,14 @@ const Navbar = () => {
                                     {/* Quick Actions */}
                                     {isLoggedIn && (
                                         <div className={`p-4 border-b ${mobileBorderClass}`}>
-                                            <div className="grid grid-cols-2 gap-2">
+                                            <div className="grid grid-cols-1 gap-2">
                                                 <Link
                                                     to="/my-progress"
                                                     className={`flex flex-col items-center p-3 rounded-lg transition-colors duration-200 group ${mobileCardBgClass} ${mobileHoverBgClass}`}
                                                     onClick={toggleMobileMenu}
                                                 >
                                                     <i data-feather="bar-chart-2" className="w-5 h-5 text-primary-500 mb-1 group-hover:scale-110 transition-transform"></i>
-                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
-                                                        }`}>My Progress</span>
-                                                </Link>
-                                                <Link
-                                                    to="/my-courses"
-                                                    className={`flex flex-col items-center p-3 rounded-lg transition-colors duration-200 group ${mobileCardBgClass} ${mobileHoverBgClass}`}
-                                                    onClick={toggleMobileMenu}
-                                                >
-                                                    <i data-feather="book-open" className="w-5 h-5 text-primary-500 mb-1 group-hover:scale-110 transition-transform"></i>
-                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'
-                                                        }`}>My Courses</span>
+                                                    <span className={`text-xs group-hover:scale-105 transition-transform ${isDark ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'}`}>My Progress</span>
                                                 </Link>
                                             </div>
                                         </div>

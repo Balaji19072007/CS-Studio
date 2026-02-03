@@ -944,11 +944,11 @@
     },
     "testCases": [
       {
-        "input": "(String: \"ABC\")",
+        "input": "ABC",
         "expected": "Permutations of ABC:\nABC\nACB\nBAC\nBCA\nCBA\nCAB\n"
       },
       {
-        "input": "(String: \"AB\")",
+        "input": "AB",
         "expected": "Permutations of AB:\nAB\nBA\n"
       }
     ],
@@ -16101,6 +16101,29 @@
       {
         "input": "26 73",
         "expected": "23"
+      }
+    ]
+  },
+  {
+    "id": 101,
+    "title": "Hello World",
+    "language": "C",
+    "difficulty": "Easy",
+    "problemStatement": "Write a C program that prints 'Hello, World!' to the console.",
+    "inputFormat": "No input required.",
+    "outputFormat": "The string 'Hello, World!'.",
+    "solution": {
+      "explanation": "This is the classic first program. It uses printf to output text to the standard output.",
+      "code": "#include <stdio.h>\\n\\nint main() {\\n    printf(\"Hello, World!\");\\n    return 0;\\n}"
+    },
+    "hints": [
+      "Use printf function.",
+      "Don't forget the semicolon."
+    ],
+    "testCases": [
+      {
+        "input": "",
+        "expected": "Hello, World!"
       }
     ]
   }

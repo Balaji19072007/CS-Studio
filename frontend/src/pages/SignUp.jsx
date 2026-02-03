@@ -1,10 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import * as feather from 'feather-icons';
-import { auth } from '../config/firebase.js';
-
-import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, sendEmailVerification, signOut } from 'firebase/auth';
+import { supabase } from '../config/supabase';
 
 const SignUp = () => {
   const { isLoggedIn } = useAuth();
@@ -82,34 +81,32 @@ const SignUp = () => {
     }
 
     try {
-      // Create user in Firebase
-      console.log('[SignUp] Creating user for:', email);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('[SignUp] User created:', userCredential.user.uid);
-
-      // Update Profile (Display Name)
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName} ${lastName}`.trim()
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            // full_name: `${firstName} ${lastName}`.trim()
+          }
+        }
       });
 
-      // Send Email Verification
-      await sendEmailVerification(userCredential.user);
-      console.log('[SignUp] Verification email sent. Signing out to enforce verification.');
+      if (error) throw error;
 
-      // Force logout so they can't access potential protected routes
-      await signOut(auth);
-
-      showMessage('success', 'Verification email sent! Please verify your email before logging in.');
-
-      // Navigate to SignIn so they can log in AFTER verification
-      setTimeout(() => navigate('/signin'), 3000);
+      if (data.user && !data.session) {
+        showMessage('success', 'Registration successful! Please check your email for verification link.');
+      } else {
+        showMessage('success', 'Account created successfully!');
+        setTimeout(() => navigate('/'), 2000);
+      }
 
     } catch (error) {
-      console.error('[SignUp] Error:', error.code, error.message);
+      console.error('[SignUp] Error:', error.message);
       let errorMsg = 'Failed to create account.';
-      if (error.code === 'auth/email-already-in-use') errorMsg = 'Email is already in use.';
-      if (error.code === 'auth/invalid-email') errorMsg = 'Invalid email address.';
-      if (error.code === 'auth/weak-password') errorMsg = 'Password is too weak.';
+      if (error.message.includes('already registered')) errorMsg = 'Email is already in use.';
+      if (error.message.includes('Password should be')) errorMsg = error.message;
 
       showMessage('error', errorMsg);
     } finally {
@@ -121,27 +118,23 @@ const SignUp = () => {
   const handleGoogleSignUp = async () => {
     setLoading(true);
     setMessage({ type: null, text: '' });
-    console.log('[SignUp] Starting Google Auth...');
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
 
-      console.log('[SignUp] Google Auth Success:', user.uid, user.email);
-      console.log('[SignUp] User is new?', result._tokenResponse?.isNewUser);
-
-      showMessage('success', 'Signed up with Google! Redirecting...');
-      setTimeout(() => navigate('/'), 1000);
+      if (error) throw error;
 
     } catch (error) {
-      console.error('[SignUp] Google Auth Error:', error.code, error.message);
-      let errorMsg = 'Google authentication failed.';
-      if (error.code === 'auth/popup-closed-by-user') errorMsg = 'Sign-up cancelled.';
-      if (error.code === 'auth/popup-blocked') errorMsg = 'Popup blocked. Please allow popups.';
-
-      showMessage('error', errorMsg);
-    } finally {
+      console.error('[SignUp] Google Auth Error:', error.message);
+      showMessage('error', 'Google authentication failed.');
       setLoading(false);
     }
   };
@@ -370,16 +363,44 @@ const SignUp = () => {
               <div className="flex-grow border-t border-gray-600"></div>
             </div>
 
-            {/* Google Sign Up Button */}
-            <button
-              type="button"
-              onClick={handleGoogleSignUp}
-              disabled={loading}
-              className="w-full py-3.5 bg-white text-gray-900 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
-              <span>Continue with Google</span>
-            </button>
+            {/* Social Auth Buttons */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Google Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignUp}
+                disabled={loading}
+                className="py-3.5 bg-white text-gray-900 rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                title="Sign up with Google"
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
+              </button>
+
+              {/* GitHub Button */}
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true);
+                  setMessage({ type: null, text: '' });
+                  try {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: 'github',
+                      options: { redirectTo: `${window.location.origin}/` },
+                    });
+                    if (error) throw error;
+                  } catch (error) {
+                    console.error('GitHub Auth Error:', error.message);
+                    showMessage('error', 'GitHub authentication failed.');
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="py-3.5 bg-[#24292e] text-white rounded-lg shadow-lg hover:shadow-xl hover:bg-[#1b1f23] transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed border border-gray-700"
+                title="Sign up with GitHub"
+              >
+                <img src="https://www.svgrepo.com/show/512317/github-142.svg" className="w-6 h-6 invert" alt="GitHub" />
+              </button>
+            </div>
 
 
             {/* Sign In Link */}

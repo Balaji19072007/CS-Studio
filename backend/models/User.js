@@ -1,49 +1,40 @@
-const { db } = require('../config/firebase');
-const {
-    collection, doc, getDoc, getDocs,
-    setDoc, updateDoc, addDoc, query, where, getCountFromServer, limit
-} = require('firebase/firestore');
+const { supabase } = require('../config/supabase');
 
 class User {
     constructor(data) {
         this.id = data.id || null;
-        this.firstName = data.firstName;
-        this.lastName = data.lastName;
+        this.firstName = data.first_name || data.firstName;
+        this.lastName = data.last_name || data.lastName;
         this.username = data.username;
         this.email = data.email;
-        this.password = data.password;
-        this.photoUrl = data.photoUrl;
+        this.photoUrl = data.photo_url || data.photoUrl;
         this.bio = data.bio || '';
-        this.totalPoints = data.totalPoints || 0;
-        this.problemsSolved = data.problemsSolved || 0;
-        this.currentStreak = data.currentStreak || 0;
-        this.lastStreakUpdate = data.lastStreakUpdate || data.createdAt || new Date().toISOString();
+        this.totalPoints = data.total_points !== undefined ? data.total_points : (data.totalPoints || 0);
+        this.problemsSolved = data.problems_solved !== undefined ? data.problems_solved : (data.problemsSolved || 0);
+        this.currentStreak = data.current_streak !== undefined ? data.current_streak : (data.currentStreak || 0);
+        this.lastStreakUpdate = data.last_streak_update || data.lastStreakUpdate || new Date().toISOString();
         this.role = data.role || 'user';
-        this.createdAt = data.createdAt || new Date().toISOString();
-        this.updatedAt = data.updatedAt || new Date().toISOString();
-        this.averageAccuracy = data.averageAccuracy || 0;
+        this.averageAccuracy = data.average_accuracy !== undefined ? data.average_accuracy : (data.averageAccuracy || 0);
+        this.createdAt = data.created_at || data.createdAt || new Date().toISOString();
+        this.updatedAt = data.updated_at || data.updatedAt || new Date().toISOString();
     }
-
-    // --- Static Methods ---
 
     static async findOne(criteria) {
         try {
-            const usersRef = collection(db, 'users');
-            let q;
+            let query = supabase.from('users').select('*');
 
             if (criteria.email) {
-                q = query(usersRef, where('email', '==', criteria.email), limit(1));
+                query = query.eq('email', criteria.email);
             } else if (criteria.username) {
-                q = query(usersRef, where('username', '==', criteria.username), limit(1));
+                query = query.eq('username', criteria.username);
             } else {
                 return null;
             }
 
-            const snapshot = await getDocs(q);
-            if (snapshot.empty) return null;
+            const { data, error } = await query.single();
 
-            const d = snapshot.docs[0];
-            return new User({ id: d.id, ...d.data() });
+            if (error || !data) return null;
+            return new User(data);
         } catch (error) {
             console.error('User.findOne error:', error);
             throw error;
@@ -53,10 +44,14 @@ class User {
     static async findById(id) {
         try {
             if (!id) return null;
-            const docRef = doc(db, 'users', id);
-            const d = await getDoc(docRef);
-            if (!d.exists()) return null;
-            return new User({ id: d.id, ...d.data() });
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !data) return null;
+            return new User(data);
         } catch (error) {
             console.error('User.findById error:', error);
             throw error;
@@ -65,15 +60,15 @@ class User {
 
     static async getTopUsers(limitCount = 100) {
         try {
-            const usersRef = collection(db, 'users');
-            // Simple sort by totalPoints
-            const q = query(usersRef, where('totalPoints', '>', 0));
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .gt('total_points', 0)
+                .order('total_points', { ascending: false })
+                .limit(limitCount);
 
-            const snapshot = await getDocs(q);
-            let users = snapshot.docs.map(d => new User({ id: d.id, ...d.data() }));
-
-            users.sort((a, b) => b.totalPoints - a.totalPoints);
-            return users.slice(0, limitCount);
+            if (error) throw error;
+            return data.map(d => new User(d));
         } catch (error) {
             console.error('User.getTopUsers error:', error);
             return [];
@@ -82,15 +77,15 @@ class User {
 
     static async count(criteria = {}) {
         try {
-            const usersRef = collection(db, 'users');
-            let q = usersRef;
+            let query = supabase.from('users').select('*', { count: 'exact', head: true });
 
             if (criteria.hasSolvedProblems) {
-                q = query(usersRef, where('problemsSolved', '>', 0));
+                query = query.gt('problems_solved', 0);
             }
 
-            const snapshot = await getCountFromServer(q);
-            return snapshot.data().count;
+            const { count, error } = await query;
+            if (error) throw error;
+            return count;
         } catch (error) {
             console.error('User.count error:', error);
             return 0;
@@ -101,43 +96,45 @@ class User {
         return this.count(criteria);
     }
 
-    static async findByIdAndUpdate(id, update, options = {}) {
-        try {
-            if (!id) return null;
-            const docRef = doc(db, 'users', id);
-
-            // Filter undefined
-            Object.keys(update).forEach(key => update[key] === undefined && delete update[key]);
-
-            await updateDoc(docRef, update);
-
-            // If new: true is requested, return updated doc
-            if (options && options.new) {
-                const d = await getDoc(docRef);
-                return new User({ id: d.id, ...d.data() });
-            }
-            return null;
-        } catch (error) {
-            console.error('User.findByIdAndUpdate error:', error);
-            return null;
-        }
-    }
-
-
     async save() {
-        const data = { ...this };
-        delete data.id;
-        data.updatedAt = new Date().toISOString();
-        Object.keys(data).forEach(key => data[key] === undefined && delete data[key]);
-
         try {
+            const dbData = {
+                first_name: this.firstName,
+                last_name: this.lastName,
+                username: this.username,
+                email: this.email,
+                photo_url: this.photoUrl,
+                bio: this.bio,
+                total_points: this.totalPoints,
+                problems_solved: this.problemsSolved,
+                current_streak: this.currentStreak,
+                last_streak_update: this.lastStreakUpdate,
+                role: this.role,
+                average_accuracy: this.averageAccuracy,
+                updated_at: new Date().toISOString()
+            };
+
+            // Remove undefined
+            Object.keys(dbData).forEach(key => dbData[key] === undefined && delete dbData[key]);
+
             if (this.id) {
-                const docRef = doc(db, 'users', this.id);
-                await updateDoc(docRef, data);
+                const { error } = await supabase
+                    .from('users')
+                    .update(dbData)
+                    .eq('id', this.id);
+                if (error) throw error;
             } else {
-                const usersRef = collection(db, 'users');
-                const res = await addDoc(usersRef, data);
-                this.id = res.id;
+                // Should theoretically be created by trigger, but for robustness:
+                // Note: Inserts into public.users usually require specific permissions or handled by Auth
+                // We assume this is mostly for updates or admin scripts.
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([dbData])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (data) this.id = data.id;
             }
             return this;
         } catch (error) {

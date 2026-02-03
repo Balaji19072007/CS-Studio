@@ -1,0 +1,136 @@
+DB AUDIT REPORT
+✅ Connected to DB
+
+--- 1. TABLE STRUCTURE ---
+
+Table: users (15 columns)
+   - id (uuid)
+   - email (text)
+   - username (text)
+   - first_name (text)
+   - last_name (text)
+   - photo_url (text)
+   - bio (text)
+   - role (text)
+   - total_points (integer)
+   - problems_solved (integer)
+   - current_streak (integer)
+   - last_streak_update (timestamp with time zone)
+   - average_accuracy (double precision)
+   - created_at (timestamp with time zone)
+   - updated_at (timestamp with time zone)
+
+Table: courses (11 columns)
+   - id (text)
+   - title (text)
+   - description (text)
+   - icon (text)
+   - category (text)
+   - difficulty (text)
+   - duration (text)
+   - is_premium (boolean)
+   - cover_image (text)
+   - created_at (timestamp with time zone)
+   - updated_at (timestamp with time zone)
+
+Table: course_phases (5 columns)
+   - id (text)
+   - course_id (text)
+   - title (text)
+   - order (integer)
+   - created_at (timestamp with time zone)
+
+Table: course_topics (14 columns)
+   - id (text)
+   - course_id (text)
+   - phase_id (text)
+   - title (text)
+   - type (text)
+   - content (text)
+   - video_url (text)
+   - questions (jsonb)
+   - diagram (text)
+   - seo_title (text)
+   - seo_description (text)
+   - seo_keywords (ARRAY)
+   - order (integer)
+   - created_at (timestamp with time zone)
+
+Table: problems (15 columns)
+   - id (integer)
+   - problem_id (integer)
+   - title (text)
+   - language (text)
+   - difficulty (text)
+   - category (text)
+   - description (text)
+   - input_format (text)
+   - output_format (text)
+   - examples (jsonb)
+   - test_cases (jsonb)
+   - solution_template (text)
+   - hints (ARRAY)
+   - is_course_problem (boolean)
+   - created_at (timestamp with time zone)
+
+Table: progress (10 columns)
+   - id (uuid)
+   - user_id (uuid)
+   - problem_id (integer)
+   - status (text)
+   - best_accuracy (double precision)
+   - time_spent (integer)
+   - last_submission (timestamp with time zone)
+   - solved_at (timestamp with time zone)
+   - created_at (timestamp with time zone)
+   - updated_at (timestamp with time zone)
+
+Table: subscriptions (7 columns)
+   - user_id (uuid)
+   - plan (text)
+   - active (boolean)
+   - started_at (timestamp with time zone)
+   - expires_at (timestamp with time zone)
+   - created_at (timestamp with time zone)
+   - updated_at (timestamp with time zone)
+
+--- 2. RLS POLICIES ---
+   [users] Users can update their own profile (UPDATE)
+   [users] Public profiles are viewable by everyone (SELECT)
+   [progress] Users can insert/update own progress (ALL)
+   [progress] Users can view own progress (SELECT)
+   [subscriptions] Users can view own subscription (SELECT)
+
+--- RLS ENABLED STATUS ---
+   course_phases: ✅ Enabled
+   course_topics: ✅ Enabled
+   courses: ✅ Enabled
+   problems: ✅ Enabled
+   progress: ✅ Enabled
+   subscriptions: ✅ Enabled
+   users: ✅ Enabled
+
+--- 3. INDEXES ---
+   users: users_pkey
+   users: users_email_key
+   users: users_username_key
+   courses: courses_pkey
+   course_phases: course_phases_pkey
+   course_topics: course_topics_pkey
+   progress: progress_pkey
+   progress: progress_user_id_problem_id_key
+   problems: problems_pkey
+   problems: problems_problem_id_key
+   subscriptions: subscriptions_pkey
+
+--- 4. DATA COUNTS ---
+   users: 1
+   courses: 35
+   course_phases: 18
+   course_topics: 295
+   problems: 556
+   progress: 26
+   subscriptions: 0
+
+--- 5. ORPHAN CHECK ---
+   Orphan Topics (invalid phase_id): 0

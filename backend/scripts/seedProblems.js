@@ -10,7 +10,17 @@ const seedProblems = async () => {
 
         // Read JSON file
         const problemDataPath = path.join(__dirname, '../util/problemData.json');
-        const problemData = JSON.parse(fs.readFileSync(problemDataPath, 'utf8'));
+        const courseProblemDataPath = path.join(__dirname, '../util/courseProblemData.json');
+
+        const problemData1 = JSON.parse(fs.readFileSync(problemDataPath, 'utf8'));
+        let problemData2 = [];
+        try {
+            problemData2 = JSON.parse(fs.readFileSync(courseProblemDataPath, 'utf8'));
+        } catch (e) {
+            console.warn('Warning: could not read courseProblemData.json', e.message);
+        }
+
+        const problemData = [...problemData1, ...problemData2];
 
         console.log(`Found ${problemData.length} problems to seed.`);
 

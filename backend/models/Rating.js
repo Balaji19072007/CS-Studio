@@ -1,30 +1,25 @@
-const { db } = require('../config/firebase');
-const {
-  collection, doc, getDoc, getDocs,
-  addDoc, query, where, getCountFromServer
-} = require('firebase/firestore');
+const { supabase } = require('../config/supabase');
 
 class Rating {
   constructor(data) {
     this.id = data.id || null;
-    this.userId = data.userId;
+    this.userId = data.user_id || data.userId;
     this.rating = data.rating;
     this.feedback = data.feedback || '';
-    this.timestamp = data.timestamp || new Date().toISOString();
+    this.createdAt = data.created_at || data.createdAt || new Date().toISOString();
   }
 
   static async findOne(criteria) {
     try {
-      const ratingsRef = collection(db, 'ratings');
-      const constraints = [];
-      if (criteria.userId) constraints.push(where('userId', '==', criteria.userId));
+      let query = supabase.from('ratings').select('*');
+      if (criteria.userId) {
+        query = query.eq('user_id', criteria.userId);
+      }
 
-      const q = query(ratingsRef, ...constraints);
-      const snapshot = await getDocs(q);
+      const { data, error } = await query.limit(1).single();
+      if (error || !data) return null;
 
-      if (snapshot.empty) return null;
-      const d = snapshot.docs[0];
-      return new Rating({ id: d.id, ...d.data() });
+      return new Rating(data);
     } catch (error) {
       console.error('Rating.findOne error:', error);
       return null;
@@ -32,13 +27,12 @@ class Rating {
   }
 
   static async aggregate(pipeline) {
-    // Mocking aggregate for simple average
     // Pipeline usually: [ { $group: { _id: null, averageRating: { $avg: "$rating" }, totalRatings: { $sum: 1 } } } ]
     try {
-      const ratingsRef = collection(db, 'ratings');
-      const snapshot = await getDocs(ratingsRef);
-      const ratings = snapshot.docs.map(d => d.data().rating);
+      const { data, error } = await supabase.from('ratings').select('rating');
+      if (error || !data) return [];
 
+      const ratings = data.map(d => d.rating);
       if (ratings.length === 0) return [];
 
       const totalRatings = ratings.length;
@@ -54,15 +48,28 @@ class Rating {
 
   async save() {
     try {
-      const ratingsRef = collection(db, 'ratings');
-      const data = {
-        userId: this.userId,
+      const dbData = {
+        user_id: this.userId,
         rating: this.rating,
         feedback: this.feedback,
-        timestamp: this.timestamp
+        created_at: this.createdAt
       };
-      const res = await addDoc(ratingsRef, data);
-      this.id = res.id;
+
+      if (this.id) {
+        const { error } = await supabase
+          .from('ratings')
+          .update(dbData)
+          .eq('id', this.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from('ratings')
+          .insert([dbData])
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) this.id = data.id;
+      }
       return this;
     } catch (error) {
       console.error('Rating.save error:', error);

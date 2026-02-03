@@ -28,7 +28,18 @@ const Code = () => {
     };
 
     const initialLanguage = getLanguageFromParam(langParam);
-    const initialCode = sourceParam ? decodeURIComponent(sourceParam) : undefined;
+
+    // Safe decode with fallback for malformed URIs
+    let initialCode;
+    if (sourceParam) {
+        try {
+            initialCode = decodeURIComponent(sourceParam);
+        } catch (error) {
+            console.warn('Failed to decode source param, using raw value:', error);
+            // If decoding fails, try using the raw source
+            initialCode = sourceParam;
+        }
+    }
 
     useEffect(() => {
         feather.replace();

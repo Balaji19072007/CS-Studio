@@ -1,52 +1,49 @@
-const { db } = require('../config/firebase');
-const {
-    collection, doc, getDoc, getDocs,
-    setDoc, updateDoc, addDoc, query, where
-} = require('firebase/firestore');
+const { supabase } = require('../config/supabase');
 
 class Problem {
     constructor(data) {
         this.id = data.id || null;
-        this.problemId = data.problemId;
         this.title = data.title;
         this.language = data.language;
         this.difficulty = data.difficulty;
-        this.problemStatement = data.problemStatement;
-        this.inputFormat = data.inputFormat;
-        this.outputFormat = data.outputFormat;
+        this.problemStatement = data.problem_statement || data.problemStatement;
+        this.inputFormat = data.input_format || data.inputFormat;
+        this.outputFormat = data.output_format || data.outputFormat;
         this.examples = data.examples || [];
         this.solution = data.solution || {};
         this.hints = data.hints || [];
-        this.testCases = data.testCases || [];
+        this.testCases = data.test_cases || data.testCases || [];
         this.category = data.category || 'Algorithms';
+        this.isCourseProblem = data.is_course_problem || false;
     }
 
     static async find(criteria = {}) {
         try {
-            const problemsRef = collection(db, 'problems');
-            let q = problemsRef;
+            let query = supabase.from('problems').select('*');
 
-            // Building query filters if needed
-            const constraints = [];
-            if (criteria.problemId) constraints.push(where('problemId', '==', parseInt(criteria.problemId)));
-            // Add other filters as needed
+            if (criteria.id) query = query.eq('id', criteria.id);
+            if (criteria.problemId) query = query.eq('id', criteria.problemId); // problemId == id in new schema
+            if (criteria.difficulty) query = query.eq('difficulty', criteria.difficulty);
+            if (criteria.category) query = query.eq('category', criteria.category);
 
-            if (constraints.length > 0) {
-                q = query(problemsRef, ...constraints);
-            }
+            const { data, error } = await query;
+            if (error) throw error;
 
-            const snapshot = await getDocs(q);
-            return snapshot.docs.map(d => new Problem({ id: d.id, ...d.data() }));
+            return (data || []).map(d => new Problem(d));
         } catch (error) {
             console.error('Problem.find error:', error);
-            throw error;
+            return [];
         }
     }
 
     static async findOne(criteria) {
-        // Basic implementation using find
-        const results = await this.find(criteria);
-        return results.length > 0 ? results[0] : null;
+        try {
+            const results = await this.find(criteria);
+            return results.length > 0 ? results[0] : null;
+        } catch (error) {
+            console.error('Problem.findOne error:', error);
+            return null;
+        }
     }
 }
 

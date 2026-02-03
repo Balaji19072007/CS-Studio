@@ -19,9 +19,10 @@ import {
 } from 'lucide-react';
 import { updateProfile } from '../api/authApi.js';
 import { useSimpleImageCropper } from '../hooks/useSimpleImageCropper.js';
+import { ProfileSkeleton } from '../components/common/SkeletonLoader';
 
 const Settings = () => {
-    const { user, updateUserProfile, isLoggedIn, logout } = useAuth();
+    const { user, updateUser: updateUserProfile, isLoggedIn, logout } = useAuth();
     const navigate = useNavigate();
 
     // Simple image cropper hook
@@ -330,14 +331,7 @@ const Settings = () => {
     };
 
     if (!user) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                    <Loader className="w-8 h-8 animate-spin text-primary-500 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-                </div>
-            </div>
-        );
+        return <ProfileSkeleton />;
     }
 
     return (
@@ -518,6 +512,23 @@ const Settings = () => {
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+
+                    {/* Support & Feedback Section */}
+                    <div className="mt-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden border border-gray-200/50 dark:border-gray-700/50 p-6 lg:p-8">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Support & Feedback</h2>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <button
+                                type="button"
+                                onClick={() => window.dispatchEvent(new Event('open-rating-popup'))}
+                                className="flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl font-bold shadow-lg hover:shadow-orange-500/30 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                                Rate CS Studio
+                            </button>
                         </div>
                     </div>
                 </div>

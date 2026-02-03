@@ -7,10 +7,18 @@ import socketService from '../../services/socketService.js';
 
 // --- CONFIGURATION ---
 const MONACO_LANGUAGE_MAP = {
-  'C': 'c', 'C++': 'cpp', 'Java': 'java', 'Python': 'python', 'JavaScript': 'javascript',
+  'C': 'c', 'c': 'c',
+  'C++': 'cpp', 'cpp': 'cpp',
+  'Java': 'java', 'java': 'java',
+  'Python': 'python', 'python': 'python',
+  'JavaScript': 'javascript', 'javascript': 'javascript'
 };
 const EXECUTION_LANGUAGE_MAP = {
-  'C': 'c', 'C++': 'cpp', 'Java': 'java', 'Python': 'python', 'JavaScript': 'javascript'
+  'C': 'c', 'c': 'c',
+  'C++': 'cpp', 'cpp': 'cpp',
+  'Java': 'java', 'java': 'java',
+  'Python': 'python', 'python': 'python',
+  'JavaScript': 'javascript', 'javascript': 'javascript'
 };
 
 const DEFAULT_CODE = {
@@ -220,7 +228,12 @@ const CodeEditorForSolvePage = forwardRef(({
               horizontal: 'visible',
               useShadows: false,
               alwaysConsumeMouseWheel: false,
-            }
+            },
+            autoClosingBrackets: 'always',
+            autoClosingQuotes: 'always',
+            autoSurround: 'languageDefined',
+            formatOnType: true,
+            formatOnPaste: true,
           }}
         />
       </div>

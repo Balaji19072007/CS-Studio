@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
-    Activity,
-    CheckCircle,
-    Flame,
-    Check,
-    Play,
-    PlayCircle,
-    ArrowRight,
-    BarChart2,
-    BookOpen,
-    Clock,
-    Target,
-    Compass,
-    ChevronRight
+    Trophy, Flame, Target, BookOpen, Clock, ArrowRight,
+    Activity, Star, Zap, ChevronRight, PlayCircle, BarChart2, Compass, CheckCircle, Check, Play
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { fetchUserRank } from '../api/leaderboardApi.js';
 import { fetchDailyProblem, fetchRecommendedProblems } from '../api/problemApi.js';
 import TopUserStats from '../components/TopUserStats.jsx';
+import { DashboardSkeleton } from '../components/common/SkeletonLoader';
 
 // Inline SVG Activity Graph Component
 const ActivityGraph = ({ history }) => {
@@ -27,8 +17,14 @@ const ActivityGraph = ({ history }) => {
     const last7Days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today);
         d.setDate(today.getDate() - (6 - i));
+
+        // Use Local Time for date string to match data processing logic
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
         return {
-            date: d.toISOString().split('T')[0],
+            date: `${year}-${month}-${day}`,
             dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
             count: 0
         };
@@ -157,23 +153,37 @@ const UserHomePage = () => {
     // Mock Data for "Current Course" - DISABLED to prevent confusion
     const currentCourse = null;
 
+    const location = useLocation();
+
     useEffect(() => {
         const loadData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-                const cacheKey = `dashboard_data_v2_${user.uid || user.id}`;
+                const headers = token ? { 'x-auth-token': token } : {};
+                const cacheKey = `dashboard_data_v4_${user.uid || user.id}`;
 
-                const shouldInvalidate = sessionStorage.getItem('invalidate_dashboard_cache');
+                let shouldInvalidate = sessionStorage.getItem('invalidate_dashboard_cache');
+
+                // FORCE INVALIDATION if returning from a solved problem
+                if (location.state?.solved) {
+                    console.log('🚀 Returned from successful solution, invalidating cache!');
+                    shouldInvalidate = 'true';
+                    // Clear the state so it doesn't loop (optional, but good practice if we pushed history)
+                    // But here we just use it as a trigger.
+                }
+
                 if (shouldInvalidate) {
+                    console.log('♻️ Invalidating Dashboard Cache');
                     sessionStorage.removeItem(cacheKey);
                     sessionStorage.removeItem('invalidate_dashboard_cache');
                 }
 
                 const cachedData = sessionStorage.getItem(cacheKey);
+                // Only use cache if NOT invalidating
                 if (cachedData && !shouldInvalidate) {
                     const data = JSON.parse(cachedData);
                     const now = new Date().getTime();
+                    // 5 minute cache validity
                     if (now - data.timestamp < 5 * 60 * 1000) {
                         setRankData(data.rankData);
                         setUserStats(data.userStats);
@@ -197,11 +207,15 @@ const UserHomePage = () => {
                     const pStatsRes = await fetch('/api/progress/user-stats', { headers });
                     if (pStatsRes.ok) {
                         sData = await pStatsRes.json();
+                        console.log('📊 Stats API Response:', sData);
                         if (sData.success) {
                             setUserStats(sData.progressStats);
                             setDifficultyStats(sData.difficultyBreakdown);
                             setUserStats(prev => ({ ...prev, ...sData.userStats }));
+                            console.log('✅ Stats loaded:', { userStats: sData.userStats, difficultyStats: sData.difficultyBreakdown });
                         }
+                    } else {
+                        console.warn('⚠️ Stats API failed:', pStatsRes.status);
                     }
                 }
 
@@ -210,6 +224,12 @@ const UserHomePage = () => {
                     fetchRecommendedProblems().catch(e => []),
                     token ? fetch('/api/progress/history', { headers }) : Promise.resolve(null)
                 ]);
+
+                // Manually force 'solved' on daily problem if we just solved it, 
+                // just in case API is lagging (Eventual Consistency)
+                if (location.state?.solved && daily && daily.problemId) {
+                    daily.solved = true;
+                }
 
                 setDailyProblem(daily);
                 setRecommendedProblems(recommended);
@@ -220,7 +240,10 @@ const UserHomePage = () => {
                     if (hData.success) {
                         hDataList = hData.history;
                         setUserHistory(hDataList);
+                        console.log('📈 History loaded:', hDataList.length, 'items');
                     }
+                } else {
+                    console.log('ℹ️ No history data available');
                 }
 
                 sessionStorage.setItem(cacheKey, JSON.stringify({
@@ -243,7 +266,7 @@ const UserHomePage = () => {
         if (user) {
             loadData();
         }
-    }, [user]);
+    }, [user, location.key, location.state]); // Add location dependencies to trigger re-run on navigation
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -253,6 +276,10 @@ const UserHomePage = () => {
     };
 
     if (!user) return null;
+
+    if (loading) {
+        return <DashboardSkeleton />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-[#0f111a] pt-6 sm:pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
@@ -564,8 +591,8 @@ const UserHomePage = () => {
                                     </Link>
                                 </div>
                                 <div className="space-y-2 sm:space-y-3">
-                                    {recommendedProblems.map(problem => (
-                                        <Link key={problem.problemId} to={`/solve?problemId=${problem.problemId}`} state={{ from: '/' }} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl sm:rounded-2xl transition-all group">
+                                    {recommendedProblems.map((problem, index) => (
+                                        <Link key={problem.problemId || index} to={`/solve?problemId=${problem.problemId}`} state={{ from: '/' }} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl sm:rounded-2xl transition-all group">
                                             <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
                                                 <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shadow-inner ${problem.difficulty === 'Easy' ? 'bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-500' :
                                                     problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-500' :

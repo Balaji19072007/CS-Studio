@@ -1,0 +1,188 @@
+COURSE: Deep Learning (0CMqUZRQv9kfAuIiL7b2)
+  Phases Count: 0
+------------------
+COURSE: Forensics & Incident Response (380ZD6z5HdPl80Htuigu)
+  Phases Count: 0
+------------------
+COURSE: Containerization (3fkEgM8d2JXEzVEdosRW)
+  Phases Count: 0
+------------------
+COURSE: Observability & Reliability (4UKoudUhzJvRdfpHmbGI)
+  Phases Count: 0
+------------------
+COURSE: Big Data Engineering (50Pf4iGEO9NkuF49qe46)
+  Phases Count: 0
+------------------
+COURSE: Native Android Development (5Bo3MBKDFQf5ISY1GcTL)
+  Phases Count: 0
+------------------
+COURSE: Frontend Development (74w6FokhRLqsMVvDF7Lp)
+  Phases Count: 0
+------------------
+COURSE: DevOps Fundamentals (9ZzBe3uBbBsR6DMi2cZF)
+  Phases Count: 0
+------------------
+COURSE: Cross-Platform Mobile Dev (F6uwaArrHhmV6xUowPwr)
+  Phases Count: 0
+------------------
+COURSE: Python Language (JMiUkpeJwRnF3HBYqh7s)
+  Phases Count: 0
+------------------
+COURSE: Native iOS Development (JYt5Q6KmhymxzxF8oCwx)
+  Phases Count: 0
+------------------
+COURSE: Database & Data Modeling (LQG31TdAYmmfuwCJc7NP)
+  Phases Count: 0
+------------------
+COURSE: Java Language (NjLCQzKChaGMosp4fiEF)
+  Phases Count: 0
+------------------
+COURSE: Production & MLOps (NwqxHNFTIQ5PzOVzvYu8)
+  Phases Count: 0
+------------------
+COURSE: Defensive Security (RT7sIjJrkHU6ac9xf8Fe)
+  Phases Count: 0
+------------------
+COURSE: Web & App Security (RWu9EBIQjBnRGNf9lo3i)
+  Phases Count: 0
+------------------
+COURSE: Backend & APIs for Mobile (TwCh581kXWSkYNQwDlle)
+  Phases Count: 0
+------------------
+COURSE: Backend Development (ZScrl2OIJ0XYyTjplgbG)
+  Phases Count: 0
+------------------
+COURSE: C Programming (c-programming)
+  Phases Count: 16
+    PHASE: Introduction & Basics (phase-1)
+    PHASE: Structures & Enums (phase-10)
+    PHASE: Memory Management (phase-11)
+    PHASE: Files Handling (phase-12)
+    PHASE: Error Handling & Debugging (phase-13)
+    PHASE: Advanced C Concepts (phase-14)
+    PHASE: Practice & Mastery (phase-15)
+    PHASE: Career & Reference (phase-16)
+    PHASE: Variables & Data Handling (phase-2)
+    PHASE: Operators & Expressions (phase-3)
+    PHASE: Control Flow (phase-4)
+    PHASE: Loops (phase-5)
+    PHASE: Functions (phase-6)
+    PHASE: Arrays & Strings (phase-7)
+    PHASE: Input & Memory Basics (phase-8)
+    PHASE: Pointers (Core C Concept) (phase-9)
+------------------
+COURSE: Full Stack Capstone (cJ2QkF3bu4X2dxnnX446)
+  Phases Count: 0
+------------------
+COURSE: C++ Programming (cpp-programming)
+  Phases Count: 18
+    PHASE: Introduction & Basics (phase-1)
+    PHASE: Structures & Enums (phase-10)
+    PHASE: Object-Oriented Programming (Core C++) (phase-11)
+    PHASE: Files & Date (phase-12)
+    PHASE: Errors & Exceptions (phase-13)
+    PHASE: STL & Data Structures (phase-14)
+    PHASE: Namespaces (phase-15)
+    PHASE: Practice & Projects (phase-16)
+    PHASE: Reference Section (phase-17)
+    PHASE: Assessment & Career (phase-18)
+    PHASE: Variables & Data Types (phase-2)
+    PHASE: Operators & Expressions (phase-3)
+    PHASE: Strings & Input (phase-4)
+    PHASE: Control Flow (phase-5)
+    PHASE: Loops (phase-6)
+    PHASE: Arrays (phase-7)
+    PHASE: Functions (phase-8)
+    PHASE: References, Pointers & Memory (phase-9)
+------------------
+COURSE: C# Programming (csharp-programming)
+  Phases Count: 14
+    PHASE: Introduction & Basics (phase-1)
+    PHASE: Object-Oriented Programming (Core C#) (phase-10)
+    PHASE: Files & Exceptions (phase-11)
+    PHASE: How-To Programs (Practice) (phase-12)
+    PHASE: Examples & Practice (phase-13)
+    PHASE: Career & Learning Path (phase-14)
+    PHASE: Variables & Constants (phase-2)
+    PHASE: Data Types & Input (phase-3)
+    PHASE: Operators & Expressions (phase-4)
+    PHASE: Strings (phase-5)
+    PHASE: Control Flow (phase-6)
+    PHASE: Loops (phase-7)
+    PHASE: Arrays (phase-8)
+    PHASE: Methods (phase-9)
+------------------
+COURSE: Data Modeling (iI2JUq53ESa5XnIxr4zf)
+  Phases Count: 0
+------------------
+COURSE: Java Programming (java-programming)
+  Phases Count: 17
+    PHASE: Introduction & Basics (phase-1)
+    PHASE: Enums & Dates (phase-10)
+    PHASE: User Input & Errors (phase-11)
+    PHASE: File Handling & I/O (phase-12)
+    PHASE: Collections & Data Structures (phase-13)
+    PHASE: Advanced Java (phase-14)
+    PHASE: How-To Programs (Practice Section) (phase-15)
+    PHASE: Reference Section (phase-16)
+    PHASE: Practice & Career (phase-17)
+    PHASE: Variables & Data Handling (phase-2)
+    PHASE: Operators & Expressions (phase-3)
+    PHASE: Strings & Text (phase-4)
+    PHASE: Control Flow (phase-5)
+    PHASE: Loops (phase-6)
+    PHASE: Arrays (phase-7)
+    PHASE: Methods & Recursion (phase-8)
+    PHASE: Object-Oriented Programming (Core Java) (phase-9)
+------------------
+COURSE: Security Foundations (kFjMjnjOA8tF8Z8Zd1iQ)
+  Phases Count: 0
+------------------
+COURSE: Deployment & DevOps Essentials (kckQjpwBXuK4QzsDs9S8)
+  Phases Count: 0
+------------------
+COURSE: C Language (nLoz9CEqEaM8fnA7dD97)
+  Phases Count: 0
+------------------
+COURSE: Orchestration & Infrastructure (nbkpw5Dxof8yCUPwkd1p)
+  Phases Count: 0
+------------------
+COURSE: Python Programming (python-programming)
+  Phases Count: 18
+    PHASE: Introduction & Basics (phase-1)
+    PHASE: File Handling & Exceptions (phase-10)
+    PHASE: Built-in Utilities (phase-11)
+    PHASE: Object-Oriented Programming (phase-12)
+    PHASE: Advanced Iteration & Internals (phase-13)
+    PHASE: Data Science & Visualization (Optional Track) (phase-14)
+    PHASE: Machine Learning (Optional Track) (phase-15)
+    PHASE: Data Structures & Algorithms (phase-16)
+    PHASE: Databases (phase-17)
+    PHASE: Practice & Career (phase-18)
+    PHASE: Variables & Data Handling (phase-2)
+    PHASE: Strings & Text Processing (phase-3)
+    PHASE: Operators & Expressions (phase-4)
+    PHASE: Control Flow (phase-5)
+    PHASE: Loops (phase-6)
+    PHASE: Core Data Structures (phase-7)
+    PHASE: Functions (phase-8)
+    PHASE: Modules & Packages (phase-9)
+------------------
+COURSE: Python for Data Science (qkLmXPvWRIoEsnlOvFmI)
+  Phases Count: 0
+------------------
+COURSE: Offensive Security (tdAny7fxnnmG3xf5iYAG)
+  Phases Count: 0
+------------------
+COURSE: Data Wrangling & Visualization (teyrBEUZW668GIU10iWX)
+  Phases Count: 0
+------------------
+COURSE: AI Mathematics & Fundamentals (y6vwijyHFFAyq2E3VaCC)
+  Phases Count: 0
+------------------
+COURSE: Core ML Algorithms (yoqW2fye4VTm1JXi7VGt)
+  Phases Count: 0
+------------------
+COURSE: App Publishing & Maintenance (zjlh25aln2R2YiMtPoAA)
+  Phases Count: 0
+------------------

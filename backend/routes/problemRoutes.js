@@ -9,20 +9,29 @@ const jwt = require('jsonwebtoken'); // NEW: Import jwt for manual verification
 // @route   GET /api/problems
 // Use optional auth to populate req.user if token exists
 router.get('/', async (req, res, next) => {
-    // Optional Auth Logic
+    // Optional Auth Logic using Supabase
     const token = req.header('x-auth-token') ||
         req.header('Authorization')?.replace('Bearer ', '') ||
         req.query.token;
 
     if (token) {
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (decoded.user) {
-                req.user = decoded.user;
+            const { supabase } = require('../config/supabase');
+            const { data: { user }, error } = await supabase.auth.getUser(token);
+
+            if (user && !error) {
+                req.user = {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role
+                };
+            } else {
+                // Token invalid - proceed as guest
+                console.log('Optional auth failed (Supabase error, proceeding as guest):', error?.message);
+                req.user = null;
             }
         } catch (err) {
-            // Token invalid/expired - proceed as guest
-            console.log('Optional auth failed for problems list (proceeding as guest):', err.message);
+            console.log('Optional auth failed (proceeding as guest):', err.message);
             req.user = null;
         }
     } else {

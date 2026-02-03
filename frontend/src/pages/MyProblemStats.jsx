@@ -16,7 +16,7 @@ const MyProblemStats = () => {
                 const token = localStorage.getItem('token');
                 const response = await fetch('/api/progress/history', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'x-auth-token': token
                     }
                 });
 

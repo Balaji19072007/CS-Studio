@@ -1,704 +1,520 @@
 // controllers/problemController.js
-const Problem = require('../models/Problem');
-const User = require('../models/User');
-const Progress = require('../models/Progress');
-const fs = require('fs').promises;
-const path = require('path');
-const { runCodeTest } = require('../util/codeRunner');
+const { supabase } = require('../config/supabase');
+const { runCodeTest } = require('../util/codeRunner'); // Keep existing code runner
 const TestEvaluationService = require('../util/testEvaluationService');
 
 // @route   GET /api/problems
-// @desc    Get all problems with filters (for problems.html list)
-// @access  Public
-// @route   GET /api/problems
-// @desc    Get all problems with filters (for problems.html list)
-// @access  Public
 exports.getProblems = async (req, res) => {
     try {
-        console.log('⚡ getProblems called. User:', req.user ? req.user.id : 'Guest');
-        let problems = await Problem.find();
+        const userId = req.user ? req.user.id : null;
 
-        // Manual Sort
-        problems.sort((a, b) => a.problemId - b.problemId);
+        // 1. Fetch Problems
+        const { data: problems, error } = await supabase
+            .from('problems')
+            .select('id, title, language, difficulty, category, is_course_problem')
+            .eq('is_course_problem', false)
+            .order('id', { ascending: true });
 
-        // Fetch user progress if authenticated
+        if (error) throw error;
+
+        // 2. Fetch User Progress if logged in
         let userProgressMap = {};
-        if (req.user && req.user.id) {
-            console.log(`🔎 Fetching progress for user ${req.user.id}`);
-            const progressDocs = await Progress.find({ userId: req.user.id });
-            console.log(`Found ${progressDocs.length} progress records for user.`);
-            progressDocs.forEach(p => {
-                userProgressMap[p.problemId] = p.status;
-            });
+        if (userId) {
+            const { data: progress } = await supabase
+                .from('progress')
+                .select('problem_id, status')
+                .eq('user_id', userId);
+
+            if (progress) {
+                progress.forEach(p => userProgressMap[p.problem_id] = p.status);
+            }
         }
 
-        // Project and inject status
+        // 3. Map status
         const projected = problems.map(p => ({
             id: p.id,
-            problemId: p.problemId,
+            problemId: p.id,
             title: p.title,
             language: p.language,
             difficulty: p.difficulty,
             category: p.category,
-            status: userProgressMap[p.problemId] || 'todo'
+            status: userProgressMap[p.id] || 'todo'
         }));
 
         res.json(projected);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error fetching problems');
-    }
-};
-
-// @route   GET /api/problems/daily
-// @desc    Get the daily challenge problem
-// @access  Public
-exports.getDailyProblem = async (req, res) => {
-    try {
-        const problems = await Problem.find();
-        const count = problems.length;
-
-        if (count === 0) return res.status(404).json({ msg: 'No problems found' });
-
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-        const dailyIndex = dayOfYear % count;
-
-        const problem = problems[dailyIndex];
-
-        // Check if user is logged in and has already solved this problem
-        let isSolved = false;
-        if (req.user) {
-            const userId = req.user.id;
-            console.log(`🔍 [Daily Debug] User ID: ${userId}, Daily Problem ID: ${problem.problemId}`);
-
-            const progress = await Progress.findOne({
-                userId,
-                problemId: problem.problemId
-            });
-
-            // Check if solved
-            if (progress && progress.status === 'solved') {
-                isSolved = true;
-            }
-        }
-
-        // Return problem (including solved status)
-        res.json({
-            id: problem.id,
-            problemId: problem.problemId,
-            title: problem.title,
-            language: problem.language,
-            difficulty: problem.difficulty,
-            category: problem.category,
-            solved: isSolved // Frontend can use this to show "Completed" state
-        });
-    } catch (err) {
-        console.error('Error fetching daily problem:', err.message);
-        res.status(500).send('Server Error');
-    }
-};
-
-// @route   GET /api/problems/recommended
-// @desc    Get recommended problems for the user (unsolved)
-// @access  Private
-exports.getRecommendedProblems = async (req, res) => {
-    try {
-        const userId = req.user.id;
-
-        // Find solved problem IDs
-        // Note: Progress.find returns array of Progress instances
-        const solvedProgress = await Progress.find({ userId, status: 'solved' });
-        const solvedIds = solvedProgress.map(p => p.problemId);
-
-        // Find all problems
-        const allProblems = await Problem.find();
-
-        // Filter out solved
-        const recommended = allProblems
-            .filter(p => !solvedIds.includes(p.problemId))
-            .slice(0, 3) // limit 3
-            .map(p => ({
-                id: p.id,
-                problemId: p.problemId,
-                title: p.title,
-                language: p.language,
-                difficulty: p.difficulty,
-                category: p.category
-            }));
-
-        // If user solved everything (or result empty), return random 3
-        if (recommended.length === 0) {
-            const random = allProblems.slice(0, 3).map(p => ({
-                id: p.id,
-                problemId: p.problemId,
-                title: p.title,
-                language: p.language,
-                difficulty: p.difficulty,
-                category: p.category
-            }));
-            return res.json(random);
-        }
-
-        res.json(recommended);
-    } catch (err) {
-        console.error('Error fetching recommended problems:', err.message);
-        res.status(500).send('Server Error');
+        console.error('getProblems error:', err.message);
+        res.status(500).json({ msg: 'Server Error fetching problems' });
     }
 };
 
 // @route   GET /api/problems/:id
-// @desc    Get single problem by ID (for solve-XX.html)
-// @access  Public
 exports.getProblemById = async (req, res) => {
     try {
-        const problem = await Problem.findOne({ problemId: req.params.id });
+        const problemId = parseInt(req.params.id);
+        const userId = req.user ? req.user.id : null;
 
-        if (!problem) {
+        const { data: problem, error } = await supabase
+            .from('problems')
+            .select('*')
+            .eq('id', problemId)
+            .single();
+
+        if (error || !problem) {
             return res.status(404).json({ msg: 'Problem not found' });
         }
 
-        res.json(problem);
-    } catch (err) {
-        console.error(err.message);
-        if (err.kind === 'Number') {
-            return res.status(400).json({ msg: 'Invalid Problem ID format' });
-        }
-        res.status(500).send('Server Error fetching single problem');
-    }
-};
+        let isSolved = false;
+        if (userId) {
+            const { data: progress } = await supabase
+                .from('progress')
+                .select('status')
+                .eq('user_id', userId)
+                .eq('problem_id', problemId)
+                .single();
 
-// @route   GET /api/problems/:id/test-cases
-// @desc    Get all test cases for a specific problem from problemData.json
-// @access  Public
-exports.getProblemTestCases = async (req, res) => {
-    try {
-        const problemId = parseInt(req.params.id);
-
-        const problemDataPath = path.join(__dirname, '../util/problemData.json');
-        const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
-        const problemData = JSON.parse(problemDataContent);
-
-        const problem = problemData.find(p => p.id === problemId);
-
-        if (!problem) {
-            return res.status(404).json({
-                success: false,
-                message: 'Problem not found in problem data'
-            });
-        }
-
-        if (!problem.testCases || problem.testCases.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No test cases found for this problem'
-            });
+            if (progress && progress.status === 'solved') isSolved = true;
         }
 
         res.json({
-            success: true,
-            testCases: problem.testCases
+            ...problem,
+            problemId: problem.id,
+            solved: isSolved,
+            isSolved: isSolved
         });
 
-    } catch (error) {
-        console.error('Error fetching problem test cases:', error);
-
-        if (error.code === 'ENOENT') {
-            return res.status(500).json({
-                success: false,
-                message: 'Problem data file not found'
-            });
-        }
-
-        if (error instanceof SyntaxError) {
-            return res.status(500).json({
-                success: false,
-                message: 'Invalid problem data file format'
-            });
-        }
-
-        res.status(500).json({
-            success: false,
-            message: 'Server error while fetching test cases'
-        });
+    } catch (err) {
+        console.error('getProblemById error:', err.message);
+        res.status(500).json({ msg: 'Server Error' });
     }
 };
 
 // @route   POST /api/problems/:id/run-tests
-// @desc    Execute user code against visible and hidden test cases
-// @access  Private (requires authMiddleware)
 exports.runTestCases = async (req, res) => {
     const { code, language } = req.body;
     const problemId = parseInt(req.params.id);
-    const userId = req.user.id;
-
-    if (!code || !language) {
-        return res.status(400).json({ msg: 'Code and language are required' });
-    }
 
     try {
-        console.log('🔧 Running test cases for problem:', problemId, 'Language:', language);
+        // Fetch test cases from DB
+        const { data: problem, error } = await supabase
+            .from('problems')
+            .select('test_cases')
+            .eq('id', problemId)
+            .single();
 
-        // 1. Get all test cases for the problem from JSON
-        const problemDataPath = path.join(__dirname, '../util/problemData.json');
-        console.log('📁 Looking for problem data at:', problemDataPath);
-
-        const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
-        const allProblems = JSON.parse(problemDataContent);
-        const problemFromJSON = allProblems.find(p => p.id === problemId);
-
-        if (!problemFromJSON) {
-            console.error('❌ Problem not found in problemData.json for ID:', problemId);
-            return res.status(404).json({ success: false, message: 'Problem not found' });
+        if (error || !problem || !problem.test_cases) {
+            return res.status(404).json({ success: false, message: 'Test cases not found' });
         }
 
-        if (!problemFromJSON.testCases || problemFromJSON.testCases.length === 0) {
-            console.error('❌ No test cases found for problem:', problemId);
-            return res.status(404).json({ success: false, message: 'No test cases found for this problem' });
-        }
-
-        console.log('✅ Found problem with', problemFromJSON.testCases.length, 'test cases');
-
-
-        // 2. Prepare test results
+        // Run Tests
         const evaluationService = new TestEvaluationService();
+        const results = [];
         let passedCount = 0;
-        const results = []; // Collect detailed results
 
-        console.log('🧪 Running tests...');
-
-        // 3. Run code against each test case sequentially
-        for (const [index, test] of problemFromJSON.testCases.entries()) {
+        for (const test of problem.test_cases) {
             try {
-                console.log(`   Test ${index + 1}: Running...`);
                 const result = await runCodeTest(language, code, test.input);
-
-                // Use proper test evaluation service for comparison
                 const cleanedOutput = evaluationService.cleanOutput(result.stdout);
                 const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
 
-                // CRITICAL FIX: Determine failure if there is compilation/runtime error (result.stderr)
-                // CRITICAL FIX: If the output matches, the test PASSES.
-                // We ignore exit codes (e.g., occasional non-zero exits on Windows) if the answer is correct.
-                // passed: comparison.passed checks content.
-                const hasError = result.exitCode !== 0; // For logging purposes
-
-                // CRITICAL FIX: If we have stderr but the output MATCHES, it might be a warning.
-                // However, usually runtime errors (non-zero exit) should be failures unless output is perfect.
-                // We prioritize the comparison.passed.
-
-                const isPassed = comparison.passed;
-
-                if (isPassed) {
-                    passedCount++;
-                    console.log(`   Test ${index + 1}: ✅ PASSED`);
-                } else {
-                    console.log(`   Test ${index + 1}: ❌ FAILED`, {
-                        // hasError,
-                        exitCode: result.exitCode,
-                        // expected: test.expected,
-                        // output: cleanedOutput,
-                        matchType: comparison.matchType,
-                        // difference: comparison.difference
-                    });
-                }
+                if (comparison.passed) passedCount++;
 
                 results.push({
                     input: test.input,
                     expected: test.expected,
                     output: cleanedOutput,
                     error: result.stderr,
-                    passed: isPassed
+                    passed: comparison.passed
                 });
-
-            } catch (testError) {
-                console.error(`   Test ${index + 1}: 💥 ERROR:`, testError.message);
-                results.push({
-                    input: test.input,
-                    expected: test.expected,
-                    output: '',
-                    error: testError.message,
-                    passed: false
-                });
+            } catch (e) {
+                results.push({ input: test.input, passed: false, error: e.message });
             }
         }
 
-        const totalTests = problemFromJSON.testCases.length;
+        const totalTests = problem.test_cases.length;
         const accuracy = totalTests > 0 ? (passedCount / totalTests) * 100 : 0;
 
-        console.log(`📊 Test Results: ${passedCount}/${totalTests} passed (${Math.floor(accuracy)}% accuracy)`);
+        // Update Progress (Attempted)
+        if (req.user) {
+            // Fetch existing first to check status
+            const { data: currentProg } = await supabase
+                .from('progress')
+                .select('status')
+                .eq('user_id', req.user.id)
+                .eq('problem_id', problemId)
+                .single();
 
-        // 4. Update user's progress using the Progress model methods
-        try {
-            const progress = await Progress.getUserProgress(userId, problemId);
+            const shouldUpdateStatus = !currentProg || currentProg.status !== 'solved';
 
-            progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
-            progress.status = 'attempted';
-            progress.lastSubmission = new Date();
+            const updateData = {
+                user_id: req.user.id,
+                problem_id: problemId,
+                last_submission: new Date()
+            };
 
-            await progress.save();
+            if (shouldUpdateStatus) {
+                updateData.status = 'attempted';
+            }
 
-            // Update user stats for attempted problem
-            await Progress.updateUserStats(userId, accuracy, false);
-            console.log('✅ Progress updated for user:', userId);
-        } catch (progressError) {
-            console.error('⚠️ Progress update failed:', progressError.message);
-            // Don't fail the entire request if progress update fails
+            await supabase.from('progress').upsert(updateData, { onConflict: 'user_id, problem_id' });
         }
 
-        console.log('✅ [runTestCases] Sending response to client...');
         res.json({
             success: true,
             passed: accuracy === 100,
             accuracy: Math.floor(accuracy),
-            results: results // Return detailed results
+            results
         });
-        console.log('✅ [runTestCases] Response sent successfully!');
 
     } catch (err) {
-        console.error('💥 Catastrophic error running test cases:', err.message);
-        console.error('Stack trace:', err.stack);
-        res.status(500).json({
-            success: false,
-            msg: 'Server error during test execution',
-            error: err.message
-        });
+        console.error('Run tests error:', err.message);
+        res.status(500).json({ success: false, msg: 'Error running tests' });
     }
 };
 
 // @route   POST /api/problems/:id/submit
-// @desc    Submit final solution, run against all tests, update progress/stats
-// @access  Private (requires authMiddleware)
 exports.submitProblem = async (req, res) => {
-    const { code, language } = req.body;
+    const { code, language, timeSpent } = req.body;
     const problemId = parseInt(req.params.id);
     const userId = req.user.id;
 
-    if (!code || !language) {
-        return res.status(400).json({ msg: 'Code and language are required' });
-    }
-
     try {
-        console.log('🚀 Submitting solution for problem:', problemId, 'Language:', language);
+        const { data: problem } = await supabase
+            .from('problems')
+            .select('test_cases')
+            .eq('id', problemId)
+            .single();
 
-        // 1. Run all tests to determine final accuracy 
-        const problemDataPath = path.join(__dirname, '../util/problemData.json');
-        const problemDataContent = await fs.readFile(problemDataPath, 'utf8');
-        const allProblems = JSON.parse(problemDataContent);
-        const problemFromJSON = allProblems.find(p => p.id === problemId);
+        if (!problem) return res.status(404).json({ message: 'Problem not found' });
 
-        if (!problemFromJSON || !problemFromJSON.testCases || problemFromJSON.testCases.length === 0) {
-            return res.status(404).json({ success: false, message: 'Problem test cases not found for submission validation' });
-        }
-
-        let passedCount = 0;
-        const totalTests = problemFromJSON.testCases.length;
+        // Run all tests
         const evaluationService = new TestEvaluationService();
+        let passedCount = 0;
+        let firstFailure = null;
 
-        // This process runs against all hidden and visible test cases
-        for (const test of problemFromJSON.testCases) {
-            try {
-                const result = await runCodeTest(language, code, test.input);
-                const cleanedOutput = evaluationService.cleanOutput(result.stdout);
-                const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
-
-                // If comparison passed, count it. Ignore exit codes.
-                if (comparison.passed) {
-                    passedCount++;
-                }
-            } catch (testError) {
-                console.error(`   Submission Test Error:`, testError.message);
-                // Treat as failed test, continue to next
-            }
+        for (const test of problem.test_cases) {
+            const result = await runCodeTest(language, code, test.input);
+            const cleanedOutput = evaluationService.cleanOutput(result.stdout);
+            const comparison = evaluationService.compareOutputs(cleanedOutput, test.expected, language);
+            if (comparison.passed) passedCount++;
+            else if (!firstFailure) firstFailure = { input: test.input, expected: test.expected, actual: cleanedOutput };
         }
 
+        const totalTests = problem.test_cases.length;
         const accuracy = (passedCount / totalTests) * 100;
         const isSolved = accuracy === 100;
 
-        console.log(`📊 Submission Results: ${passedCount}/${totalTests} passed (${accuracy}% accuracy), Solved: ${isSolved}`);
+        // Fetch existing progress to preserve 'solved' state and 'solved_at'
+        const { data: existingProgress, error: fetchError } = await supabase
+            .from('progress')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('problem_id', problemId)
+            .single();
 
-        // 2. Update Progress using Progress model methods
-        let progress;
-        try {
-            progress = await Progress.getUserProgress(userId, problemId);
-            const wasPreviouslySolved = progress.status === 'solved';
+        if (fetchError && fetchError.code !== 'PGRST116') { // Ignore "Row not found" error
+            console.error('Error fetching progress:', fetchError);
+        }
 
-            progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
-            if (isSolved) {
-                progress.status = 'solved';
-                // Set solvedAt only if this is the FIRST time solving
-                if (!wasPreviouslySolved && !progress.solvedAt) {
-                    progress.solvedAt = new Date().toISOString();
-                    console.log('🎉 Problem solved for the first time! Setting solvedAt:', progress.solvedAt);
+        let newStatus = isSolved ? 'solved' : 'attempted';
+        if (existingProgress && existingProgress.status === 'solved') newStatus = 'solved'; // Don't downgrade
+
+        // Critical Fix: Preserve original solved_at date
+        // If it was already solved (has solved_at), KEEP IT.
+        // If it is newly solved, set to NOW.
+        // If not solved, set to NULL (unless it was previously solved, handled by line below).
+        let solvedAt = isSolved ? new Date() : null;
+
+        if (existingProgress) {
+            if (existingProgress.solved_at) {
+                // If we already have a solved date, NEVER overwrite it, regardless of current outcome 
+                // (assuming we don't want to revoke it if they fail later, which line 208 ensures status is kept solved)
+                solvedAt = existingProgress.solved_at;
+            } else if (existingProgress.status === 'solved' && !existingProgress.solved_at) {
+                // Edge case: Status is solved but date missing? Fix it now.
+                solvedAt = new Date();
+            }
+        }
+
+        // Update Progress
+        const { error: upsertError } = await supabase.from('progress').upsert({
+            user_id: userId,
+            problem_id: problemId,
+            status: newStatus,
+            best_accuracy: Math.max(existingProgress?.best_accuracy || 0, accuracy),
+            time_spent: (existingProgress?.time_spent || 0) + (parseInt(timeSpent) || 0),
+            last_submission: new Date(),
+            solved_at: solvedAt
+        }, { onConflict: 'user_id, problem_id' });
+
+        if (upsertError) {
+            console.error('Progress Upsert Error:', upsertError);
+            throw new Error(`Failed to save progress: ${upsertError.message}`);
+        }
+
+        // Update User Stats (Simplified)
+        if (isSolved && (!existingProgress || existingProgress.status !== 'solved')) {
+            // Increment problems_solved and total_points via RPC or direct update
+            // Using RPC is safer for concurrency but direct update is fine for now
+            // We need to fetch user first
+            const { data: user, error: fetchUserError } = await supabase.from('users').select('problems_solved, total_points').eq('id', userId).single();
+
+            if (!fetchUserError && user) {
+                const { error: updateUserError } = await supabase.from('users').update({
+                    problems_solved: (user.problems_solved || 0) + 1,
+                    total_points: (user.total_points || 0) + 100
+                }).eq('id', userId);
+
+                if (updateUserError) {
+                    console.error('User Stats Update Error:', updateUserError); // Non-blocking but log it
                 }
-            } else if (progress.status !== 'solved') {
-                progress.status = 'attempted';
             }
-
-            // Validate timeSpent is a positive number
-            const timeSpent = req.body.timeSpent;
-            if (timeSpent && !isNaN(timeSpent) && timeSpent > 0) {
-                progress.timeSpent = parseInt(timeSpent);
-            }
-
-            progress.lastSubmission = new Date().toISOString();
-            await progress.save();
-            console.log('✅ Progress saved successfully');
-        } catch (progErr) {
-            console.error('❌ Error saving progress:', progErr);
-            throw new Error(`Progress update failed: ${progErr.message}`);
         }
 
-        // 3. Update User Stats using Progress model method
-        let userStatsUpdateError = null;
-        try {
-            if (isSolved) {
-                await Progress.updateUserStats(userId, accuracy, true);
-                console.log('🎯 Problem SOLVED - User stats updated');
-                pointsAwarded = 100;
-            } else {
-                await Progress.updateUserStats(userId, accuracy, false);
-                console.log('📝 Problem ATTEMPTED - User stats updated');
-            }
-        } catch (statsErr) {
-            console.error('❌ Error updating user stats (ignoring to allow submission):', statsErr.message);
-            userStatsUpdateError = statsErr.message;
-        }
-
-        // 4. Get updated user data for response
-        let updatedUser = null;
-        try {
-            updatedUser = await User.findById(userId);
-        } catch (fetchErr) {
-            console.error('❌ Error fetching updated user:', fetchErr.message);
-        }
-
-        if (updatedUser) {
-            console.log('✅ Final User Stats:', {
-                username: updatedUser.username,
-                problemsSolved: updatedUser.problemsSolved,
-                totalPoints: updatedUser.totalPoints,
-                averageAccuracy: updatedUser.averageAccuracy
-            });
-        }
-
-        res.json({
-            success: true,
-            isSolved: isSolved,
-            accuracy: Math.floor(accuracy),
-            totalTests,
-            passedCount,
-            message: isSolved ?
-                (progress.status === 'solved' ? 'Problem already solved. Great job!' : 'Solution accepted! Problem solved!')
-                : 'Solution failed some test cases. Keep trying!',
-            pointsAwarded: pointsAwarded,
-            newStatus: progress.status,
-            userStats: updatedUser ? {
-                problemsSolved: updatedUser.problemsSolved,
-                totalPoints: updatedUser.totalPoints,
-                averageAccuracy: updatedUser.averageAccuracy,
-                currentStreak: updatedUser.currentStreak
-            } : null,
-            warning: userStatsUpdateError ? 'Submission accepted, but user stats could not be updated due to server configuration.' : null
-        });
-
-    } catch (err) {
-        console.error('💥 Catastrophic error submitting problem:', err.message);
-        console.error('Stack trace:', err.stack);
-
-        // Log detailed error info
-        if (err.errors) console.error('Validation Errors:', err.errors);
-
-        res.status(500).json({
-            success: false,
-            msg: 'Server error during submission',
-            error: err.message,
-            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-        });
-    }
-};
-
-// @route   POST /api/problems/:id/progress
-// @desc    Update user progress for a problem (called from frontend)
-// @access  Private
-exports.updateProgress = async (req, res) => {
-    try {
-        const { problemId } = req.params;
-        const { accuracy, isSolved } = req.body;
-        const userId = req.user.id;
-
-        const progress = await Progress.getUserProgress(userId, parseInt(problemId));
-
-        progress.bestAccuracy = Math.max(progress.bestAccuracy, accuracy);
+        // --- STREAK UPDATE LOGIC ---
+        // We run this regardless of whether it's the *first* solve, because a user might solve a repeat problem to keep streak?
+        // Usually streaks are for *any* activity. But let's assume solving any problem counts.
         if (isSolved) {
-            progress.status = 'solved';
-        } else if (progress.status !== 'solved') {
-            progress.status = 'attempted';
-        }
+            const { data: streakUser, error: streakFetchError } = await supabase
+                .from('users')
+                .select('current_streak, last_streak_update')
+                .eq('id', userId)
+                .single();
 
-        progress.lastSubmission = new Date();
-        await progress.save();
+            if (!streakFetchError && streakUser) {
+                // Use User's Timezone or default to UTC
+                const userTimezone = req.body.timezone || 'UTC';
+                const now = new Date();
 
-        // Update user stats using Progress model
-        await Progress.updateUserStats(userId, accuracy, isSolved);
+                // Helper to get date string in specific timezone
+                const getDateInTimezone = (date, timeZone) => {
+                    return new Intl.DateTimeFormat('en-CA', { // YYYY-MM-DD format
+                        timeZone: timeZone,
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }).format(date);
+                };
 
-        const updatedUser = await User.findById(userId);
+                const todayStr = getDateInTimezone(now, userTimezone);
 
-        res.json({
-            success: true,
-            progress: {
-                problemId: progress.problemId,
-                status: progress.status,
-                bestAccuracy: progress.bestAccuracy,
-                lastSubmission: progress.lastSubmission
-            },
-            userStats: {
-                problemsSolved: updatedUser.problemsSolved,
-                totalPoints: updatedUser.totalPoints,
-                averageAccuracy: updatedUser.averageAccuracy,
-                currentStreak: updatedUser.currentStreak
-            }
-        });
+                let lastStr = null;
+                if (streakUser.last_streak_update) {
+                    const lastUpdateDate = new Date(streakUser.last_streak_update);
+                    lastStr = getDateInTimezone(lastUpdateDate, userTimezone);
+                }
 
-    } catch (err) {
-        console.error('Progress update error:', err.message);
-        res.status(500).json({
-            success: false,
-            msg: 'Server Error updating progress',
-            error: err.message
-        });
-    }
-};
+                // Create Yesterday Date in User's Timezone
+                // Note: Simply subtracting 24h from 'now' might fail around DST changes, 
+                // but checking the "Calendar Date" is safer.
+                // We need the string for "Yesterday" in that timezone.
+                // Construct a date object representing "Yesterday" relative to "Now" in that timezone
+                // A safe way: Get "Today" stats, subtract 1 day.
 
-// @route   GET /api/problems/:id/progress
-// @desc    Get user progress for a specific problem
-// @access  Private
-exports.getProblemProgress = async (req, res) => {
-    try {
-        const problemId = parseInt(req.params.id);
-        const userId = req.user.id;
+                // 1. Get current time in target timezone
+                // We'll trust the string comparison mostly. 
+                // To find if it was "Yesterday", we can check if the date strings are consecutive.
 
-        const progress = await Progress.getUserProgress(userId, problemId);
+                // Simple approach: usage of simple Date diffing might be buggy with TZ.
+                // Let's rely on string parsing/creation.
+                const yesterday = new Date(now);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = getDateInTimezone(yesterday, userTimezone);
 
-        res.json({
-            success: true,
-            progress: {
-                problemId: progress.problemId,
-                status: progress.status,
-                bestAccuracy: progress.bestAccuracy,
-                lastSubmission: progress.lastSubmission,
-                timer: {
-                    timeRemaining: progress.getTimeRemaining(),
-                    isRunning: progress.timer.isRunning,
-                    hasExpired: progress.hasTimerExpired()
+                // If last update was TODAY, do nothing.
+                if (lastStr !== todayStr) {
+                    let newStreak = 1;
+
+                    if (lastStr === yesterdayStr) {
+                        // Consecutive day
+                        newStreak = (streakUser.current_streak || 0) + 1;
+                    } else {
+                        // Reset to 1 (gap > 1 day or first time)
+                        newStreak = 1;
+                    }
+
+                    // Update DB with CURRENT SERVER TIME (UTC standard), but logic was based on local day
+                    const { error: streakUpdateError } = await supabase
+                        .from('users')
+                        .update({
+                            current_streak: newStreak,
+                            last_streak_update: now.toISOString()
+                        })
+                        .eq('id', userId);
+
+                    if (streakUpdateError) console.error('Streak Update Error:', streakUpdateError);
                 }
             }
-        });
-
-    } catch (err) {
-        console.error('Get progress error:', err.message);
-        res.status(500).json({
-            success: false,
-            msg: 'Server Error getting progress',
-            error: err.message
-        });
-    }
-};
-
-// @route   POST /api/problems/:id/start-timer
-// @desc    Start 10-minute timer for a problem
-// @access  Private
-exports.startProblemTimer = async (req, res) => {
-    try {
-        const problemId = parseInt(req.params.id);
-        const userId = req.user.id;
-
-        const progress = await Progress.getUserProgress(userId, problemId);
-
-        await progress.startTimer();
+        }
 
         res.json({
             success: true,
-            message: 'Timer started (10 minutes)',
-            timer: {
-                startTime: progress.timer.startTime,
-                duration: progress.timer.duration,
-                timeRemaining: progress.getTimeRemaining(),
-                isRunning: progress.timer.isRunning
-            }
+            isSolved,
+            accuracy: Math.floor(accuracy),
+            passedCount,
+            totalTests,
+            message: isSolved ? 'Solution accepted!' : 'Keep trying!',
+            failureDetails: firstFailure
         });
 
     } catch (err) {
-        console.error('Start timer error:', err.message);
-        res.status(500).json({
-            success: false,
-            msg: 'Server Error starting timer',
-            error: err.message
-        });
+        console.error('Submit error:', err.message);
+        res.status(500).json({ success: false, msg: 'Server Error' });
     }
 };
 
-// @route   POST /api/problems/:id/stop-timer
-// @desc    Stop timer for a problem
-// @access  Private
-exports.stopProblemTimer = async (req, res) => {
+// @route   GET /api/problems/daily
+exports.getDailyProblem = async (req, res) => {
     try {
-        const problemId = parseInt(req.params.id);
-        const userId = req.user.id;
+        // 1. Fetch all IDs - Sorted to ensure stability
+        const { data: ids, error: idsError } = await supabase.from('problems').select('id').order('id', { ascending: true });
 
-        const progress = await Progress.getUserProgress(userId, problemId);
+        if (idsError) throw idsError;
+        if (!ids || ids.length === 0) return res.status(404).json({ msg: 'No problems found' });
 
-        await progress.stopTimer();
+        // 2. Handle Timezone & Date
+        let userTimezone = req.query.timezone || 'UTC';
+        try {
+            userTimezone = decodeURIComponent(userTimezone);
+            // Validation check
+            new Intl.DateTimeFormat(undefined, { timeZone: userTimezone });
+        } catch (tzError) {
+            console.warn(`Invalid timezone '${userTimezone}', falling back to UTC.`);
+            userTimezone = 'UTC';
+        }
+
+        // Get "Today" string in User's Timezone (e.g. "2024-02-03")
+        const now = new Date();
+        const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: userTimezone,
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+        const todayStr = dateFormatter.format(now);
+
+        // 3. Fetch User Progress (to skip already solved problems)
+        let solvedMap = {}; // { problem_id: { status, solved_at_str } }
+        const userId = req.user ? req.user.id : null;
+
+        if (userId) {
+            const { data: progress } = await supabase
+                .from('progress')
+                .select('problem_id, status, solved_at')
+                .eq('user_id', userId);
+
+            if (progress) {
+                progress.forEach(p => {
+                    let solvedDay = null;
+                    if (p.solved_at) {
+                        // Format solved_at to the USER's timezone to check if it was "Today"
+                        solvedDay = dateFormatter.format(new Date(p.solved_at));
+                    }
+                    solvedMap[p.problem_id] = { status: p.status, solvedDay };
+                });
+            }
+        }
+
+        // 4. Stable Selection Logic (Linear Probing)
+        // We want a personalized daily problem that:
+        // - Is NOT solved (prior to today).
+        // - Is STABLE for the day (if I refresh, I get the same one).
+        // - Is STABLE if I solve it (it shows as "Completed" for the rest of the day).
+
+        // Seed: Date + UserID (or 'guest')
+        // This ensures every user gets a stable start index for the day.
+        const seedStr = todayStr + (userId || 'guest');
+
+        // Simple String Hash
+        let hash = 0;
+        for (let i = 0; i < seedStr.length; i++) {
+            hash = ((hash << 5) - hash) + seedStr.charCodeAt(i);
+            hash |= 0; // Convert to 32bit integer
+        }
+        const startIdx = Math.abs(hash) % ids.length;
+
+        let selectedId = null;
+
+        // Iterate through problems starting at hash index
+        for (let i = 0; i < ids.length; i++) {
+            const idx = (startIdx + i) % ids.length;
+            const pid = ids[idx].id;
+            const prog = solvedMap[pid];
+
+            // Condition to select this problem:
+            // 1. No progress (Unsolved) OR
+            // 2. Progress is NOT 'solved' (Attempted) OR
+            // 3. Solved TODAY (We want to show the "Completed" state for today's challenge)
+
+            const isSolved = prog && prog.status === 'solved';
+            const isSolvedToday = isSolved && prog.solvedDay === todayStr;
+
+            if (!isSolved || isSolvedToday) {
+                selectedId = pid;
+                break;
+            }
+            // If isSolved AND NOT isSolvedToday -> It was solved in the past. Skip it.
+        }
+
+        // Fallback: If user has solved ALL problems in the past (Wow!), just pick the specific daily one (startIdx).
+        if (!selectedId) {
+            selectedId = ids[startIdx].id;
+        }
+
+        console.log(`📅 Daily Challenge: User=${userId || 'Guest'} Date=${todayStr} SelectedID=${selectedId}`);
+
+        // 5. Fetch Problem Details
+        const { data: problem, error: probError } = await supabase.from('problems').select('*').eq('id', selectedId).single();
+
+        if (probError) throw probError;
+        if (!problem) throw new Error(`Problem ${selectedId} not found`);
+
+        const isUserSolved = solvedMap[selectedId]?.status === 'solved';
 
         res.json({
-            success: true,
-            message: 'Timer stopped',
-            timer: {
-                timeRemaining: progress.timer.timeRemaining,
-                isRunning: progress.timer.isRunning
-            }
+            ...problem,
+            problemId: problem.id,
+            solved: isUserSolved, // Frontend uses this to render "Completed" UI
+            debug: { todayStr, userTimezone, selectedId }
         });
 
     } catch (err) {
-        console.error('Stop timer error:', err.message);
-        res.status(500).json({
-            success: false,
-            msg: 'Server Error stopping timer',
-            error: err.message
-        });
+        console.error('Daily Challenge Error:', err.message);
+        res.status(500).json({ msg: 'Error fetching daily problem', error: err.message });
     }
 };
 
-// @route   GET /api/problems/:id/timer
-// @desc    Get current timer status for a problem
-// @access  Private
-exports.getProblemTimer = async (req, res) => {
+exports.getRecommendedProblems = async (req, res) => {
+    // Basic implementation: Random 3 unsolved
     try {
-        const problemId = parseInt(req.params.id);
         const userId = req.user.id;
+        const { data: solved } = await supabase.from('progress').select('problem_id').eq('user_id', userId).eq('status', 'solved');
+        const solvedIds = solved ? solved.map(s => s.problem_id) : [];
 
-        const progress = await Progress.getUserProgress(userId, problemId);
+        // Not 'in' solvedIds
+        let query = supabase.from('problems').select('*').limit(3);
+        if (solvedIds.length > 0) {
+            query = query.not('id', 'in', `(${solvedIds.join(',')})`);
+        }
 
-        const timeRemaining = progress.getTimeRemaining();
-        const hasExpired = progress.hasTimerExpired();
-
-        res.json({
-            success: true,
-            timer: {
-                timeRemaining,
-                isRunning: progress.timer.isRunning,
-                hasExpired,
-                startTime: progress.timer.startTime,
-                duration: progress.timer.duration
-            }
-        });
+        const { data: recommended } = await query;
+        res.json(recommended || []);
 
     } catch (err) {
-        console.error('Get timer error:', err.message);
-        res.status(500).json({
-            success: false,
-            msg: 'Server Error getting timer',
-            error: err.message
-        });
+        res.status(500).json([]);
     }
+};
+
+// Implement other timer endpoints if needed (Update progress essentially)
+exports.getProblemTimer = (req, res) => res.json({ success: true, timer: { isRunning: false, timeRemaining: 600 } });
+exports.startProblemTimer = (req, res) => res.json({ success: true });
+exports.stopProblemTimer = (req, res) => res.json({ success: true });
+exports.updateProgress = (req, res) => res.json({ success: true }); // Handled by submit mostly
+exports.getProblemTestCases = async (req, res) => {
+    // Just fetch test cases
+    const { data } = await supabase.from('problems').select('test_cases').eq('id', req.params.id).single();
+    res.json({ success: true, testCases: data?.test_cases || [] });
+};
+exports.getProblemProgress = async (req, res) => {
+    // Fetch progress
+    const { data } = await supabase.from('progress').select('*').eq('user_id', req.user.id).eq('problem_id', req.params.id).single();
+    res.json({ success: true, progress: data || {} });
 };

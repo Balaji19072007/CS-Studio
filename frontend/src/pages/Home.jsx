@@ -7,7 +7,26 @@ import UserHomePage from './UserHomePage.jsx';
 import Loader from '../components/common/Loader.jsx';
 
 // Use relative URLs since CORS is now enabled
+// Use relative URLs since CORS is now enabled
 const API_BASE_URL = ''; // Empty for relative URLs
+
+const FEATURE_DATA = [
+    { title: "Interactive Visuals", icon: "eye", description: "See algorithms come to life with step-by-step animations." },
+    { title: "Instant Feedback", icon: "check-circle", description: "Get real-time validation and error explanations." },
+    { title: "Progress Tracking", icon: "bar-chart", description: "Monitor your growth with detailed statistics." }
+];
+
+const PATHS_DATA = [
+    { title: "C Programming", icon: "cpu", subtitle: "System & Embedded", description: "Master the foundation of modern computing." },
+    { title: "Python Mastery", icon: "code", subtitle: "Data & AI", description: "Learn the most popular language for Data Science." },
+    { title: "Java Enterprise", icon: "coffee", subtitle: "Backend Systems", description: "Build robust, scalable enterprise applications." }
+];
+
+const TESTIMONIALS_DATA = [
+    { name: "Sarah J.", title: "Software Engineer", quote: "The visuals made understanding recursion so much easier!", initials: "SJ" },
+    { name: "Mike T.", title: "CS Student", quote: "Finally passed my DS&A course thanks to these animations.", initials: "MT" },
+    { name: "Alex R.", title: "Self Taught", quote: "Best platform for visual learners. Highly recommended.", initials: "AR" }
+];
 
 // --- Helper Components for Visual Appeal ---
 
@@ -192,7 +211,7 @@ const RatingPrompt = () => {
 
                 const response = await fetch('/api/stats/rating-eligibility', {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'x-auth-token': token,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -235,7 +254,7 @@ const RatingPrompt = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'x-auth-token': token
                 },
                 body: JSON.stringify({ rating })
             });
@@ -315,6 +334,49 @@ const Home = () => {
     // --- CONDITIONAL RENDERING FOR LOGGED IN USERS ---
     // Prevent flash of public content while auth is loading
     const { isLoggedIn, loading } = useAuth();
+    const [userStats, setUserStats] = useState({
+        totalUsers: 12500,
+        satisfactionRate: 99
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await fetch('/api/stats/user-stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserStats(prev => ({ ...prev, ...data }));
+                }
+            } catch (error) {
+                console.error('Failed to fetch user stats:', error);
+            }
+        };
+        fetchStats();
+    }, []);
+
+
+    const [isVisible, setIsVisible] = useState(false);
+
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    };
+
+    useEffect(() => {
+        const toggleVisibility = () => {
+            if (window.pageYOffset > 300) {
+                setIsVisible(true);
+            } else {
+                setIsVisible(false);
+            }
+        };
+
+        window.addEventListener("scroll", toggleVisibility);
+
+        return () => window.removeEventListener("scroll", toggleVisibility);
+    }, []);
 
     if (loading) {
         return (
@@ -349,7 +411,7 @@ const Home = () => {
 
                             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto lg:mx-0">
                                 <Link
-                                    to={handleStartLearning()}
+                                    to="/signup"
                                     className="dark-btn flex items-center justify-center px-6 py-3.5 text-base font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
                                 >
                                     Start Free Trial
@@ -426,7 +488,7 @@ const Home = () => {
                             </div>
 
                             <div className="text-center space-y-2">
-                                <div className="text-3xl sm:text-4xl font-bold text-white">250+</div>
+                                <div className="text-3xl sm:text-4xl font-bold text-white">500+</div>
                                 <div className="text-sm sm:text-base text-gray-400">Problems</div>
                             </div>
 

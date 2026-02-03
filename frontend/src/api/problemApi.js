@@ -1,6 +1,6 @@
 import socketService from '../services/socketService';
 
-const API_BASE_URL = 'http://localhost:5000/api/problems';
+const API_BASE_URL = '/api/problems';
 
 /**
  * Utility function to handle API response parsing and error checking.
@@ -21,7 +21,8 @@ export const fetchDailyProblem = async () => {
     const headers = {};
     if (token) headers['x-auth-token'] = token;
 
-    const response = await fetch(`${API_BASE_URL}/daily?version=${Date.now()}`, {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const response = await fetch(`${API_BASE_URL}/daily?version=${Date.now()}&timezone=${encodeURIComponent(timezone)}`, {
         method: 'GET',
         headers
     });
@@ -107,7 +108,7 @@ export const fetchProblemTestCases = async (id) => {
 /**
  * Submit a solution for evaluation
  */
-export const submitSolution = async (id, code, language) => {
+export const submitSolution = async (id, code, language, timeSpent, timezone) => {
     const token = localStorage.getItem('token');
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['x-auth-token'] = token;
@@ -115,7 +116,7 @@ export const submitSolution = async (id, code, language) => {
     const response = await fetch(`${API_BASE_URL}/${id}/submit`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ code, language })
+        body: JSON.stringify({ code, language, timeSpent, timezone })
     });
     return handleResponse(response);
 };
@@ -164,4 +165,21 @@ export const sendInputToProgram = (input) => {
  */
 export const stopCodeExecution = () => {
     socketService.stopExecution();
+};
+
+/**
+ * Update user progress for a specific problem (e.g. mark attempting)
+ */
+export const updateProblemProgress = async (id, payload) => {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['x-auth-token'] = token;
+
+    // payload: { status: 'attempted', timeSpent: 123 }
+    const response = await fetch(`${API_BASE_URL}/${id}/progress`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+    });
+    return handleResponse(response);
 };

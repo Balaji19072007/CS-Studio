@@ -7,6 +7,7 @@ import { ProblemManager } from '../utils/problemManager.js';
 import ProblemCard from '../components/problems/ProblemCard.jsx';
 import Loader from '../components/common/Loader.jsx';
 import SearchBar from '../components/common/SearchBar.jsx';
+import { ProblemsSkeleton } from '../components/common/SkeletonLoader';
 import { useAuth } from '../hooks/useAuth.jsx';
 
 
@@ -82,10 +83,18 @@ const Problems = () => {
         const updateProgress = () => {
             if (isMounted) {
                 setProgress(ProblemManager.getGlobalProgress());
-                setAllProblems(prev => prev.map(p => ({
-                    ...p,
-                    status: getStatus(p)
-                })));
+                setAllProblems(prev => prev.map(p => {
+                    const localStatus = getStatus(p);
+                    // Merge backend status (p.status) effectively with local status
+                    // If either says solved, it's solved.
+                    const isSolved = p.status === 'solved' || localStatus === 'solved';
+                    const isAttempted = p.status === 'attempted' || localStatus === 'attempted';
+
+                    return {
+                        ...p,
+                        status: isSolved ? 'solved' : (isAttempted ? 'attempted' : 'todo')
+                    };
+                }));
             }
         };
 
@@ -181,6 +190,8 @@ const Problems = () => {
         feather.replace();
     }, [filters]); // Re-run when filters change to ensure icons load if DOM updates
 
+    if (isLoading) return <ProblemsSkeleton />;
+
     return (
         <div className="min-h-screen dark-gradient-secondary">
             {/* Hero Section - Minimal */}
@@ -259,9 +270,7 @@ const Problems = () => {
                 </div>
 
                 {/* Problem List */}
-                {isLoading ? (
-                    <div className="mt-10"><Loader message="Loading problems..." size="lg" /></div>
-                ) : error ? (
+                {error ? (
                     <div className="text-center text-red-400 mt-10 p-8 bg-gray-800 rounded-xl border border-red-900/50">{error}</div>
                 ) : filteredProblems.length === 0 ? (
                     <div className="text-center py-20">

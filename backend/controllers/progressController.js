@@ -72,7 +72,7 @@ exports.updateProgress = async (req, res) => {
 };
 
 // @route   GET /api/progress/history
-// @desc    Get full problem history for user with problem details
+// @desc    Get full problem history for user with problem details (REGULAR PROBLEMS ONLY)
 // @access  Private
 exports.getHistory = async (req, res) => {
     try {
@@ -81,27 +81,38 @@ exports.getHistory = async (req, res) => {
         // Fetch all progress for this user
         let history = await Progress.find({ userId });
 
+        // Filter out course problems (ID >= 1001)
+        history = history.filter(h => h.problemId < 1001);
+
         // Sort in memory (descending date)
         history.sort((a, b) => new Date(b.lastSubmission) - new Date(a.lastSubmission));
 
-        // Fetch all problems to map details (Optimization: fetch minimal fields if possible, but find() returns all for now)
-        const allProblems = await Problem.find();
+        // Fetch all problems to map details (Using JSON source)
+        const { loadAllProblems } = require('../util/problemUtils');
+        const allProblems = await loadAllProblems();
 
         const problemMap = {};
         allProblems.forEach(p => {
-            problemMap[p.problemId] = p;
+            problemMap[p.id] = p; // JSON uses 'id'
         });
 
-        const enrichedHistory = history.map(h => ({
-            problemId: h.problemId,
-            title: problemMap[h.problemId]?.title || 'Unknown Problem',
-            difficulty: problemMap[h.problemId]?.difficulty || 'Medium',
-            status: h.status,
-            bestAccuracy: h.bestAccuracy,
-            timeTaken: h.timeSpent !== undefined ? h.timeSpent : 0,
-            lastSubmission: h.lastSubmission,
-            solvedAt: h.solvedAt  // NEW: Include solvedAt for date display
-        }));
+        const enrichedHistory = history.map(h => {
+            // Auto-correct status: If accuracy is 100%, consider it solved
+            // This fixes legacy/bugged records showing "Attempted" with 100% score
+            const isActuallySolved = h.bestAccuracy === 100;
+            const finalStatus = isActuallySolved ? 'solved' : h.status;
+
+            return {
+                problemId: h.problemId,
+                title: problemMap[h.problemId]?.title || 'Unknown Problem',
+                difficulty: problemMap[h.problemId]?.difficulty || 'Medium',
+                status: finalStatus,
+                bestAccuracy: h.bestAccuracy,
+                timeTaken: h.timeSpent !== undefined ? h.timeSpent : 0,
+                lastSubmission: h.lastSubmission,
+                solvedAt: isActuallySolved ? (h.solvedAt || h.lastSubmission) : h.solvedAt
+            };
+        });
 
         res.json({
             success: true,
@@ -115,7 +126,7 @@ exports.getHistory = async (req, res) => {
 };
 
 // @route   GET /api/progress/user-stats
-// @desc    Get current user's progress statistics (Summary + Difficulty Breakdown)
+// @desc    Get current user's progress statistics (Summary + Difficulty Breakdown) - REGULAR PROBLEMS ONLY
 // @access  Private
 exports.getUserStats = async (req, res) => {
     try {
@@ -125,6 +136,15 @@ exports.getUserStats = async (req, res) => {
         const user = await User.findById(userId);
         if (!user) console.warn('⚠️ User not found in DB for stats:', userId);
 
+        if (user) {
+            // Validate Streak
+            try {
+                await Progress.checkStreak(userId, user);
+            } catch (error) {
+                console.error('Stats streak check failed:', error);
+            }
+        }
+
         const userStats = user ? {
             problemsSolved: user.problemsSolved,
             totalPoints: user.totalPoints,
@@ -132,9 +152,10 @@ exports.getUserStats = async (req, res) => {
             averageAccuracy: user.averageAccuracy
         } : {};
 
-        // Basic Counts from Progress
-        const userProgress = await Progress.find({ userId });
-        console.log(`Found ${userProgress.length} progress records for stats.`);
+        // Basic Counts from Progress - EXCLUDE COURSE PROBLEMS (ID >= 1001)
+        const allUserProgress = await Progress.find({ userId });
+        const userProgress = allUserProgress.filter(p => p.problemId < 1001);
+        console.log(`Found ${userProgress.length} regular problem progress records for stats (excluded ${allUserProgress.length - userProgress.length} course problems).`);
 
         const stats = {
             solved: userProgress.filter(p => p.status === 'solved').length,
@@ -148,8 +169,12 @@ exports.getUserStats = async (req, res) => {
             .filter(p => p.status === 'solved')
             .map(p => p.problemId);
 
-        // 2. Fetch all problems to count difficulties
-        const allProblems = await Problem.find();
+        // 2. Fetch all problems to count difficulties (Using JSON source instead of DB)
+        const { loadAllProblems } = require('../util/problemUtils');
+        const allProblems = await loadAllProblems();
+
+        // Filter to only regular problems
+        const regularProblems = allProblems.filter(p => p.problemType === 'regular' || p.id < 1001);
 
         // Difficulty stats for solved
         const difficultyBreakdown = {
@@ -157,18 +182,18 @@ exports.getUserStats = async (req, res) => {
         };
 
         solvedIds.forEach(pid => {
-            const prob = allProblems.find(p => p.problemId === pid);
+            const prob = regularProblems.find(p => p.id === pid); // JSON uses 'id'
             if (prob && difficultyBreakdown[prob.difficulty] !== undefined) {
                 difficultyBreakdown[prob.difficulty]++;
             }
         });
 
-        // Total Problems Count by Difficulty
+        // Total Problems Count by Difficulty (REGULAR ONLY)
         const totalBreakdown = {
-            Easy: 0, Medium: 0, Hard: 0, Total: allProblems.length
+            Easy: 0, Medium: 0, Hard: 0, Total: regularProblems.length
         };
 
-        allProblems.forEach(p => {
+        regularProblems.forEach(p => {
             if (totalBreakdown[p.difficulty] !== undefined) {
                 totalBreakdown[p.difficulty]++;
             }

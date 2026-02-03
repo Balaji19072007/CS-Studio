@@ -1,20 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import * as feather from 'feather-icons';
-import { auth } from '../config/firebase.js';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { supabase } from '../config/supabase';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth.jsx';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState({ type: null, text: '' });
     const [loading, setLoading] = useState(false);
-    const { isLoggedIn } = useAuth();
-    const navigate = useNavigate();
-
-    // Redirect logic removed to prevent potential loops/issues
-    // If a user is logged in, they can still request a password reset if they want.
 
     useEffect(() => {
         feather.replace();
@@ -36,17 +30,17 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            const actionCodeSettings = {
-                url: `${window.location.origin}/#/auth/action`,
-                handleCodeInApp: true,
-            };
-            await sendPasswordResetEmail(auth, email, actionCodeSettings);
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/#/reset-password`,
+            });
+
+            if (error) throw error;
+
             showMessage('success', 'Password reset email sent! Please check your inbox (and spam folder).');
         } catch (error) {
-            console.error('Password reset error:', error);
+            console.error('Password reset error:', error.message);
             let msg = 'Failed to send reset email.';
-            if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
-            if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
+            if (error.message.includes('rate limit')) msg = 'Too many requests. Please try again later.';
             showMessage('error', msg);
         } finally {
             setLoading(false);

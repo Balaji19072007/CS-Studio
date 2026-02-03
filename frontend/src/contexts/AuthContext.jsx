@@ -1,124 +1,107 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../config/firebase.js';
+import { supabase } from '../config/supabase';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  // Initialize from localStorage if available
+  const storedUser = localStorage.getItem('userData');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!storedUser);
+  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Firebase Auth Listener
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      // Prevent race conditions where this runs multiple times
-      if (firebaseUser) {
-        console.log('Firebase User Detected:', firebaseUser.email, 'Verified:', firebaseUser.emailVerified);
-
-        // Enforce Email Verification
-        if (!firebaseUser.emailVerified) {
-          console.warn('User email not verified. Signing out.');
-          await signOut(auth);
-          setUser(null);
-          setIsAuthenticated(false);
-          localStorage.removeItem('userData');
-          localStorage.removeItem('token');
-          setLoading(false);
-          return;
-        }
-
-        try {
-          // Sync with backend to get MongoDB ID and JWT
-          const response = await fetch('http://localhost:5000/api/auth/google', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: firebaseUser.email,
-              uid: firebaseUser.uid,
-              firstName: firebaseUser.displayName?.split(' ')[0] || 'User',
-              lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
-              photoUrl: firebaseUser.photoURL
-            }),
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            // Consolidate data: Firebase auth + Backend Data
-            const userData = {
-              ...data, // Contains userId (MongoDB _id), role, etc.
-              uid: firebaseUser.uid, // Keep Firebase UID as well
-              role: data.role || 'student', // Ensure role exists
-            };
-
-            setUser(userData);
-            setIsAuthenticated(true);
-
-            // Store Backend JWT for API calls
-            localStorage.setItem('userData', JSON.stringify(userData));
-            localStorage.setItem('token', data.token);
-            console.log('Backend Sync Success. Token saved.');
-          } else {
-            console.error('Backend Sync Failed:', response.statusText);
-            // Fallback: Use Firebase data only (Dashboard might be empty)
-            const userData = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-              photoURL: firebaseUser.photoURL,
-              role: 'student', // Default role for fallback
-            };
-            setUser(userData);
-            setIsAuthenticated(true);
-            localStorage.setItem('userData', JSON.stringify(userData));
-          }
-
-        } catch (error) {
-          console.error('Error syncing with backend:', error);
-          const userData = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-            role: 'student', // Default role on error
-          };
-          setUser(userData);
-          setIsAuthenticated(true);
-        }
-
-      } else {
-        // User is signed out
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('userData');
-        localStorage.removeItem('token');
-      }
-      setLoading(false);
+    // 1. Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session);
     });
 
-    // Cleanup subscription
-    return () => unsubscribe();
+    // 2. Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (token, userData) => {
-    // Legacy support or manual state update if needed, 
-    // but onAuthStateChanged handles the main logic.
-    // This might be called after custom backend auth to set extra user details
-    if (userData) {
-      setUser(userData);
-      localStorage.setItem('userData', JSON.stringify(userData));
+  const handleSession = async (session) => {
+    if (!session?.user) {
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
+      setLoading(false);
+      return;
     }
+
+    const token = session.access_token;
+
+    // Fetch detailed profile from backend using the Supabase JWT
+    try {
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const profile = await response.json();
+        const userData = {
+          ...profile,
+          token: token,
+          userId: profile.id,
+          // Map Supabase snake_case to camelCase for frontend components
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          photoUrl: profile.photo_url || session.user.user_metadata?.avatar_url,
+          totalPoints: profile.total_points,
+          problemsSolved: profile.problems_solved,
+          currentStreak: profile.current_streak,
+          // Fallbooks
+          name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || session.user.email,
+          role: profile.role || 'student'
+        };
+
+        setUser(userData);
+        setIsAuthenticated(true);
+        localStorage.setItem('userData', JSON.stringify(userData));
+        localStorage.setItem('token', token);
+      } else {
+        console.error('Failed to fetch profile', response.statusText);
+        // Fallback to basic session info
+        const userData = {
+          id: session.user.id,
+          userId: session.user.id,
+          email: session.user.email,
+          photoUrl: session.user.user_metadata?.avatar_url,
+          token: token,
+          role: 'student'
+        };
+        setUser(userData);
+        setIsAuthenticated(true);
+        localStorage.setItem('userData', JSON.stringify(userData));
+        localStorage.setItem('token', token);
+      }
+
+    } catch (err) {
+      console.error('Auth Profile Fetch Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = (token, userData) => {
+    // Usually handled by Supabase Auth UI, but if manual login needed:
     setIsAuthenticated(true);
+    if (userData) setUser(userData);
   };
 
   const logout = async () => {
     try {
-      await signOut(auth);
-      // State updates handled by onAuthStateChanged
+      await supabase.auth.signOut();
       navigate('/');
     } catch (error) {
       console.error('Error during logout:', error);
@@ -126,14 +109,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
-    // Update local state for immediate UI feedback
     setUser(prev => ({ ...prev, ...userData }));
-  };
-
-  const updateUserProfile = async (userData) => {
-    // Placeholder - in a real app you might update Firebase profile here
-    updateUser(userData);
-    return userData;
   };
 
   const value = {
@@ -144,13 +120,12 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUser,
-    updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use the auth context
+// Custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
